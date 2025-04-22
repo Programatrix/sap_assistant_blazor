@@ -1,0 +1,49 @@
+﻿@page "/login"
+@using SAPAssistant.Models
+@using SAPAssistant.Security
+@using SAPAssistant.Service
+@layout MainLayout
+
+@inject AuthService AuthService
+@inject CustomAuthStateProvider AuthProvider
+@inject NavigationManager Navigation
+
+<h3 style="text-align:center; color:white;">Iniciar Sesión</h3>
+
+@if (!string.IsNullOrWhiteSpace(ErrorMessage))
+{
+    <div style="color: #ff6b6b; text-align:center; margin-bottom: 1rem;">@ErrorMessage</div>
+}
+
+<EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div style="margin-bottom: 1rem;">
+        <InputText @bind-Value="loginModel.Username" placeholder="Usuario" class="input" />
+    </div>
+    <div style="margin-bottom: 1rem;">
+        <InputText @bind-Value="loginModel.Password" placeholder="Contraseña" type="password" class="input" />
+    </div>
+    <button type="submit" class="login-btn">Entrar</button>
+</EditForm>
+
+@code {
+    private LoginRequest loginModel = new();
+    private string ErrorMessage = string.Empty;
+
+    private async Task HandleLogin()
+    {
+        var success = await AuthService.LoginAsync(loginModel);
+
+        if (success)
+        {
+            await AuthProvider.MarkUserAsAuthenticated(loginModel.Username);
+            Navigation.NavigateTo("/assistant", forceLoad: true);
+        }
+        else
+        {
+            ErrorMessage = "Usuario o contraseña incorrectos.";
+        }
+    }
+}

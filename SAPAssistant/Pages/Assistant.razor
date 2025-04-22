@@ -3,8 +3,8 @@
 
 <div class="chat-wrapper">
     <div class="chat-box">
-        <!-- Área de mensajes -->
-        <div class="messages">
+        <!-- Área de mensajes con scroll -->
+        <div class="messages" @ref="MessagesRef" @onscroll="OnScrollChanged">
             @foreach (var msg in ChatHistory)
             {
                 <div class="message @(msg.IsUser ? "user" : "bot")">
@@ -13,10 +13,21 @@
             }
         </div>
 
-        <!-- Input fijo abajo -->
+        @if (ShowScrollToBottom)
+        {
+            <button class="scroll-to-bottom" @onclick="ScrollToBottom">⬇️</button>
+        }
+
+        <!-- Área de entrada -->
         <div class="input-area">
             <form @onsubmit="HandleSubmit">
-                <input @bind="UserInput" @bind:event="oninput" placeholder="Escribe tu mensaje..." />
+                <textarea @bind="UserInput"
+                          @oninput="ResizeTextarea"
+                          @ref="TextAreaRef"
+                          rows="1"
+                          class="auto-expand"
+                          placeholder="Escribe tu mensaje...">
+                </textarea>
                 <button type="submit">Enviar</button>
             </form>
         </div>
@@ -25,25 +36,45 @@
 
 @code {
     private string UserInput = string.Empty;
+    private ElementReference TextAreaRef;
+    private ElementReference MessagesRef;
 
     private List<ChatMessage> ChatHistory = new();
+    private bool ShowScrollToBottom = false;
+
+    [Inject] private IJSRuntime JS { get; set; } = default!;
 
     private async Task HandleSubmit()
     {
         if (!string.IsNullOrWhiteSpace(UserInput))
         {
-            await SendMessage();
+            ChatHistory.Add(new ChatMessage { IsUser = true, Content = UserInput });
+
+            UserInput = string.Empty;
+
+            await Task.Delay(300); // Simula una respuesta
+            ChatHistory.Add(new ChatMessage { IsUser = false, Content = $"Respuesta a: {UserInput}" });
+
+            await ScrollToBottom();
         }
     }
 
-    private async Task SendMessage()
+    private async Task ResizeTextarea()
     {
-        ChatHistory.Add(new ChatMessage { IsUser = true, Content = UserInput });
+        await JS.InvokeVoidAsync("chatEnhancer.autoResize", TextAreaRef);
+    }
 
-        await Task.Delay(400); // Simulación de respuesta
-        ChatHistory.Add(new ChatMessage { IsUser = false, Content = $"Respuesta a: {UserInput}" });
+    private async Task ScrollToBottom()
+    {
+        await JS.InvokeVoidAsync("chatEnhancer.scrollToBottom", MessagesRef);
+        ShowScrollToBottom = false;
+    }
 
-        UserInput = string.Empty;
+    private async Task OnScrollChanged()
+    {
+        var isBottom = await JS.InvokeAsync<bool>("chatEnhancer.isScrolledToBottom", MessagesRef);
+        ShowScrollToBottom = !isBottom;
+        StateHasChanged();
     }
 
     public class ChatMessage

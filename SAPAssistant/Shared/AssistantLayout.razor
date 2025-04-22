@@ -1,43 +1,50 @@
 ﻿@inherits LayoutComponentBase
+@attribute [Authorize]
 
-<div class="layout-container dark-mode" @onmousedown="HandleGlobalClick">
-    <!-- Menú lateral -->
-    <aside class="sidebar">
-        <div class="logo">🤖</div>
-        <nav class="nav">
-            <a class="nav-item" href="/assistant">Asistente</a>
-            <a class="nav-item" href="#">Historial</a>
-            <a class="nav-item" href="#">Favoritos</a>
-        </nav>
-    </aside>
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
 
-    <!-- Contenido principal -->
-    <div class="main-area">
-        <header class="topbar">
-            <div class="title">Synkro Assistant</div>
-            <div class="user-profile">
-                <button class="avatar" @onclick="ToggleMenu" @onclick:stopPropagation="true">JK</button>
-                @if (IsMenuOpen)
-                {
-                    <div class="user-menu" @onmousedown:stopPropagation="true">
-                        <ul>
-                            <li>⚙ Configuración</li>
-                            <li>🚪 Cerrar sesión</li>
-                        </ul>
-                    </div>
-                }
-            </div>
-        </header>
+@if (isLoading)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <div class="layout-container dark-mode" @onmousedown="HandleGlobalClick">
+        <!-- Menú lateral -->
+        <div class="sidebar">
+            <NavMenu />
+        </div>
 
-        <!-- Contenido con scroll aislado -->
-        <main class="page-content">
-            @Body
-        </main>
+        <!-- Contenido principal -->
+        <div class="main-area">
+            <header class="topbar">
+                <div class="title">Synkro Assistant</div>
+                <div class="user-profile">
+                    <button class="avatar" @onclick="ToggleMenu" @onclick:stopPropagation="true">JK</button>
+                    @if (IsMenuOpen)
+                    {
+                        <div class="user-menu" @onmousedown:stopPropagation="true">
+                            <ul>
+                                <li>⚙ Configuración</li>
+                                <li>🚪 Cerrar sesión</li>
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </header>
+
+            <!-- Contenido con scroll aislado -->
+            <main class="page-content">
+                @Body
+            </main>
+        </div>
     </div>
-</div>
+}
 
 @code {
     private bool IsMenuOpen = false;
+    private bool isLoading = true;
 
     private void ToggleMenu() => IsMenuOpen = !IsMenuOpen;
 
@@ -47,6 +54,21 @@
         {
             IsMenuOpen = false;
             StateHasChanged();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity?.IsAuthenticated ?? true)
+        {
+            Navigation.NavigateTo("/login", true);
+        }
+        else
+        {
+            isLoading = false;
         }
     }
 }

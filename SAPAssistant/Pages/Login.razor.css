@@ -1,0 +1,34 @@
+﻿.login-wrapper {
+    max-width: 400px;
+    margin: 100px auto;
+    background-color: #2a2a2a;
+    padding: 2rem;
+    border-radius: 12px;
+    color: white;
+    text-align: center;
+}
+
+.input {
+    display: block;
+    width: 100%;
+    margin-bottom: 1rem;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background-color: #40414f;
+    color: white;
+}
+
+button {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.error {
+    color: #ff6b6b;
+    margin-bottom: 1rem;
+}
