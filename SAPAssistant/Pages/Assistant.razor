@@ -13,7 +13,7 @@
             }
         </div>
 
-        <!-- Caja de entrada estilo ChatGPT -->
+        <!-- Input fijo abajo -->
         <div class="input-area">
             <form @onsubmit="HandleSubmit">
                 <input @bind="UserInput" @bind:event="oninput" placeholder="Escribe tu mensaje..." />
@@ -40,8 +40,7 @@
     {
         ChatHistory.Add(new ChatMessage { IsUser = true, Content = UserInput });
 
-        // Simulación de respuesta
-        await Task.Delay(400);
+        await Task.Delay(400); // Simulación de respuesta
         ChatHistory.Add(new ChatMessage { IsUser = false, Content = $"Respuesta a: {UserInput}" });
 
         UserInput = string.Empty;
