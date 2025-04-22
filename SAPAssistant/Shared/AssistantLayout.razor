@@ -1,0 +1,52 @@
+﻿@inherits LayoutComponentBase
+
+<div class="layout-container dark-mode" @onmousedown="HandleGlobalClick">
+    <!-- Menú lateral -->
+    <aside class="sidebar">
+        <div class="logo">🤖</div>
+        <nav class="nav">
+            <a class="nav-item" href="/assistant">Asistente</a>
+            <a class="nav-item" href="#">Historial</a>
+            <a class="nav-item" href="#">Favoritos</a>
+        </nav>
+    </aside>
+
+    <!-- Contenido principal -->
+    <div class="main-area">
+        <header class="topbar">
+            <div class="title">Synkro Assistant</div>
+            <div class="user-profile">
+                <button class="avatar" @onclick="ToggleMenu" @onclick:stopPropagation="true">JK</button>
+                @if (IsMenuOpen)
+                {
+                    <div class="user-menu" @onmousedown:stopPropagation="true">
+                        <ul>
+                            <li>⚙ Configuración</li>
+                            <li>🚪 Cerrar sesión</li>
+                        </ul>
+                    </div>
+                }
+            </div>
+        </header>
+
+        <!-- Cuerpo de la página -->
+        <main class="page-content">
+            @Body
+        </main>
+    </div>
+</div>
+
+@code {
+    private bool IsMenuOpen = false;
+
+    private void ToggleMenu() => IsMenuOpen = !IsMenuOpen;
+
+    private void HandleGlobalClick(MouseEventArgs e)
+    {
+        if (IsMenuOpen)
+        {
+            IsMenuOpen = false;
+            StateHasChanged();
+        }
+    }
+}

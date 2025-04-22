@@ -1,0 +1,55 @@
+﻿@page "/assistant"
+@layout AssistantLayout
+
+<div class="chat-wrapper">
+    <div class="chat-box">
+        <!-- Área de mensajes -->
+        <div class="messages">
+            @foreach (var msg in ChatHistory)
+            {
+                <div class="message @(msg.IsUser ? "user" : "bot")">
+                    @msg.Content
+                </div>
+            }
+        </div>
+
+        <!-- Caja de entrada estilo ChatGPT -->
+        <div class="input-area">
+            <form @onsubmit="HandleSubmit">
+                <input @bind="UserInput" @bind:event="oninput" placeholder="Escribe tu mensaje..." />
+                <button type="submit">Enviar</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string UserInput = string.Empty;
+
+    private List<ChatMessage> ChatHistory = new();
+
+    private async Task HandleSubmit()
+    {
+        if (!string.IsNullOrWhiteSpace(UserInput))
+        {
+            await SendMessage();
+        }
+    }
+
+    private async Task SendMessage()
+    {
+        ChatHistory.Add(new ChatMessage { IsUser = true, Content = UserInput });
+
+        // Simulación de respuesta
+        await Task.Delay(400);
+        ChatHistory.Add(new ChatMessage { IsUser = false, Content = $"Respuesta a: {UserInput}" });
+
+        UserInput = string.Empty;
+    }
+
+    public class ChatMessage
+    {
+        public bool IsUser { get; set; }
+        public string Content { get; set; } = "";
+    }
+}

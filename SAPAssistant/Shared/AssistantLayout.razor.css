@@ -1,0 +1,117 @@
+﻿.layout-container {
+    display: flex;
+    height: 100vh;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #1e1e1e;
+    color: #e5e7eb;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 240px;
+    background-color: #2a2b32;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0;
+}
+
+.logo {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+}
+
+.nav {
+    width: 100%;
+}
+
+.nav-item {
+    display: block;
+    padding: 1rem;
+    color: #e5e7eb;
+    text-decoration: none;
+    text-align: center;
+}
+
+    .nav-item:hover {
+        background-color: #374151;
+    }
+
+/* Parte central */
+.main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #1e1e1e;
+}
+
+/* Topbar */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #1e1e1e;
+    border-bottom: 1px solid #2c2c2c;
+    color: white;
+}
+
+.title {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* Avatar usuario */
+.user-profile {
+    position: relative;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background-color: #0d6efd;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.user-menu {
+    position: absolute;
+    right: 0;
+    top: 50px;
+    background: #2a2b32;
+    color: #e5e7eb;
+    border: 1px solid #4b5563;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+}
+
+    .user-menu ul {
+        margin: 0;
+        padding: 0.5rem;
+        list-style: none;
+    }
+
+    .user-menu li {
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+        .user-menu li:hover {
+            background-color: #374151;
+        }
+
+/* Contenido */
+.page-content {
+    flex: 1;
+    padding: 0;
+    background-color: #1e1e1e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
