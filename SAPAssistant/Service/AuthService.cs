@@ -1,5 +1,9 @@
 ﻿using SAPAssistant.Models;
 using SAPAssistant.Security;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Threading.Tasks;
 
 namespace SAPAssistant.Service
 {
@@ -16,20 +20,28 @@ namespace SAPAssistant.Service
 
         public async Task<bool> LoginAsync(LoginRequest request)
         {
-            // Simulación (reemplazalo por tu llamada real)
-            if (request.Username == "admin" && request.Password == "1234")
-            {
-                await _authProvider.MarkUserAsAuthenticated(request.Username); // ✅ MARCA AUTENTICADO
-                return true;
-            }
+            var response = await _http.PostAsJsonAsync("/login", request);
+            if (!response.IsSuccessStatusCode) return false;
 
-            return false;
+            var user = await response.Content.ReadFromJsonAsync<LoginResponse>();
+            if (user is null) return false;
+
+            await _authProvider.MarkUserAsAuthenticated(user.Username, user.Token);
+            return true;
         }
 
         public async Task LogoutAsync()
         {
-            await _authProvider.MarkUserAsLoggedOut(); // 👈 Implementaremos este método en el provider
+            await _authProvider.MarkUserAsLoggedOut();
+        }
+
+        public async Task AddAuthHeaderAsync()
+        {
+            var token = await _authProvider.GetTokenAsync();
+            if (!string.IsNullOrEmpty(token))
+            {
+                _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
         }
     }
-
 }

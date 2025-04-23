@@ -6,7 +6,7 @@
         <button class="btn-close" @onclick="Close" aria-label="Cerrar">✕</button>
 
         <div class="settings-content">
-            <!-- Tabs laterales -->
+            <!-- Panel lateral de pestañas -->
             <div class="tabs">
                 @foreach (var tab in Tabs)
                 {
@@ -17,7 +17,7 @@
                 }
             </div>
 
-            <!-- Contenido de pestañas -->
+            <!-- Contenido dinámico -->
             <div class="tab-panel">
                 @if (ActiveTab == "General")
                 {
@@ -37,14 +37,14 @@
                 else if (ActiveTab == "Conexiones")
                 {
                     <h3>Mis conexiones</h3>
-
-                    <table class="settings-table">
+                    <table class="conn-table">
                         <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>Host</th>
                                 <th>Puerto</th>
-                                <th></th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -55,18 +55,33 @@
                                     <td>@conn.Host</td>
                                     <td>@conn.Port</td>
                                     <td>
-                                        <button class="btn btn-sm btn-primary" @onclick="@(() => Edit(conn.ConnectionId))">
-                                            Editar
-                                        </button>
+                                        @if (conn.IsActive)
+                                        {
+                                            <span><span class="checkmark">✔</span> Activa</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="estado-inactivo">—</span>
+                                        }
+                                    </td>
+                                    <td class="acciones">
+                                        <button class="edit-button" @onclick="() => EditarConexion(conn.ConnectionId)">Editar</button>
+                                        @if (!conn.IsActive)
+                                        {
+                                            <button class="icon-button" title="Usar esta conexión" @onclick="() => SetActive(conn.ConnectionId)">
+                                                <span class="material-icons">check_circle</span>
+                                            </button>
+                                        }
                                     </td>
                                 </tr>
                             }
                         </tbody>
                     </table>
 
-                    <div class="new-connection">
-                        <button class="btn btn-primary" @onclick="CreateNewConnection">
-                            ➕ Nueva conexión
+                    <div class="new-conn-container">
+                        <button class="new-conn-btn" @onclick="NuevaConexion">
+                            <span class="material-icons">add</span>
+                            Nueva conexión
                         </button>
                     </div>
                 }
@@ -79,31 +94,39 @@
     [Parameter] public EventCallback OnClose { get; set; }
 
     private List<string> Tabs = new() { "General", "Apariencia", "Preferencias", "Conexiones" };
-    private string ActiveTab = "General";
+    private string ActiveTab = "Conexiones";
 
-    private void SelectTab(string tab) => ActiveTab = tab;
-    private async Task Close() => await OnClose.InvokeAsync();
-
-    private void Edit(string connectionId)
+    private List<ConnectionItem> Connections = new()
     {
-        Navigation.NavigateTo($"/connection/edit/{connectionId}");
-    }
-
-    private void CreateNewConnection()
-    {
-        Navigation.NavigateTo("/connection/edit/new");
-    }
-
-    private List<ConnectionData> Connections = new()
-    {
-        new() { ConnectionId = "conn_1", Host = "192.168.1.1", Port = "30013" },
-        new() { ConnectionId = "conn_2", Host = "10.0.0.2", Port = "30015" }
+        new ConnectionItem { ConnectionId = "conn_1", Host = "192.168.1.1", Port = "30013", IsActive = true },
+        new ConnectionItem { ConnectionId = "conn_2", Host = "10.0.0.2", Port = "30015", IsActive = false }
     };
 
-    public class ConnectionData
+    private void SelectTab(string tab) => ActiveTab = tab;
+
+    private async Task Close() => await OnClose.InvokeAsync();
+
+    private void SetActive(string connectionId)
+    {
+        foreach (var conn in Connections)
+            conn.IsActive = conn.ConnectionId == connectionId;
+    }
+
+    private void EditarConexion(string id)
+    {
+        Navigation.NavigateTo($"/EdithSettings?id={id}");
+    }
+
+    private void NuevaConexion()
+    {
+        Navigation.NavigateTo("/EdithSettings");
+    }
+
+    private class ConnectionItem
     {
         public string ConnectionId { get; set; } = "";
         public string Host { get; set; } = "";
         public string Port { get; set; } = "";
+        public bool IsActive { get; set; }
     }
 }

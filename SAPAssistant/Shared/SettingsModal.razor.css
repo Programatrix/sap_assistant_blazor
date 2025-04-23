@@ -11,27 +11,27 @@
 .settings-modal {
     background: #2a2a2a;
     color: white;
-    width: 700px;
+    width: 800px;
     border-radius: 12px;
     padding: 1.5rem;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
-    gap: 1rem;
     position: relative;
 }
 
 .settings-content {
     display: flex;
-    min-height: 300px;
+    min-height: 400px;
 }
 
 .tabs {
-    width: 160px;
+    width: 180px;
     border-right: 1px solid #444;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    padding-right: 1rem;
 }
 
 .tab-item {
@@ -56,7 +56,6 @@
     overflow-y: auto;
 }
 
-/* Botón de cerrar (❌) */
 .btn-close {
     position: absolute;
     top: 12px;
@@ -74,62 +73,103 @@
         color: white;
     }
 
-/* ----------------- NUEVO: Tabla de conexiones ----------------- */
-.settings-table {
+/* Tabla de conexiones */
+.conn-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 1rem;
     font-size: 14px;
-    background-color: #1e1e2e;
-    border-radius: 12px;
-    overflow: hidden;
 }
 
-    .settings-table thead {
-        background-color: #2a2a3a;
-        color: #ccc;
-    }
-
-    .settings-table th,
-    .settings-table td {
+    .conn-table th, .conn-table td {
         padding: 0.75rem 1rem;
         text-align: left;
-        border-bottom: 1px solid #333;
+        border-bottom: 1px solid #444;
     }
 
-    .settings-table tr:hover {
-        background-color: #2f2f40;
+    .conn-table th {
+        background-color: #333;
+        font-weight: 600;
     }
 
-    .settings-table td:last-child {
-        text-align: right;
+    .conn-table td {
+        background-color: #2a2a2a;
     }
 
-/* ----------------- Botón estilo moderno ----------------- */
-.btn {
+    .conn-table tr:hover {
+        background-color: #383838;
+    }
+
+.estado-inactivo {
+    color: #888;
     font-size: 13px;
-    padding: 8px 14px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
 }
 
-.btn-primary {
+.checkmark {
+    color: #4ade80;
+    margin-right: 6px;
+}
+
+.acciones {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.edit-button {
+    background-color: #4b5563;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 13px;
+}
+
+    .edit-button:hover {
+        background-color: #6b7280;
+    }
+
+.icon-button {
+    background: transparent;
+    border: none;
+    color: #4ade80;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px;
+}
+
+    .icon-button:hover {
+        color: #86efac;
+    }
+
+.material-icons {
+    vertical-align: middle;
+    font-size: 20px;
+}
+
+/* Nueva conexión */
+.new-conn-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.new-conn-btn {
     background-color: #3b82f6;
     color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.6rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
-    .btn-primary:hover {
+    .new-conn-btn:hover {
         background-color: #2563eb;
     }
-
-.btn-sm {
-    font-size: 13px;
-    padding: 6px 12px;
-}
-
-.new-connection {
-    margin-top: 1rem;
-    text-align: right;
-}
