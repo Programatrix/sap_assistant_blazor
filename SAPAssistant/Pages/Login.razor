@@ -3,24 +3,18 @@
 @using SAPAssistant.Service
 @layout PublicLayout
 
-<!-- Envolvemos el formulario con las clases adecuadas -->
-<div class="page-login-wrapper">
-    <EditForm Model="loginModel" OnValidSubmit="HandleLogin" class="login-box">
-        <h1>Iniciar Sesión</h1>
+<div class="login-wrapper">
+    <h1 class="login-title">Iniciar Sesión</h1>
+
+    <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
         <DataAnnotationsValidator />
         <ValidationSummary />
 
-        <div class="input-group">
-            <label for="username">Usuario</label>
-            <InputText id="username" class="input" @bind-Value="loginModel.Username" placeholder="Usuario" />
+        <div class="form-container">
+            <InputText class="input" @bind-Value="loginModel.Username" placeholder="Usuario" />
+            <InputText type="password" class="input" @bind-Value="loginModel.Password" placeholder="Contraseña" />
+            <button type="submit" class="login-btn">Entrar</button>
         </div>
-
-        <div class="input-group">
-            <label for="password">Contraseña</label>
-            <InputText id="password" type="password" class="input" @bind-Value="loginModel.Password" placeholder="Contraseña" />
-        </div>
-
-        <button type="submit">Entrar</button>
     </EditForm>
 </div>
 
@@ -38,3 +32,4 @@
         }
     }
 }
+

@@ -24,15 +24,11 @@ namespace SAPAssistant.Service
             }
 
             return false;
+        }
 
-            // Si usás una API real:
-            // var response = await _http.PostAsJsonAsync("https://tu-api.com/api/login", request);
-            // if (response.IsSuccessStatusCode)
-            // {
-            //     await _authProvider.MarkUserAsAuthenticated(request.Username);
-            //     return true;
-            // }
-            // return false;
+        public async Task LogoutAsync()
+        {
+            await _authProvider.MarkUserAsLoggedOut(); // 👈 Implementaremos este método en el provider
         }
     }
 

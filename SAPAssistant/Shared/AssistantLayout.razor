@@ -1,6 +1,6 @@
-﻿@inherits LayoutComponentBase
+﻿@using SAPAssistant.Security
+@inherits LayoutComponentBase
 @attribute [Authorize]
-
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
 
@@ -26,8 +26,8 @@ else
                     {
                         <div class="user-menu" @onmousedown:stopPropagation="true">
                             <ul>
-                                <li>⚙ Configuración</li>
-                                <li>🚪 Cerrar sesión</li>
+                                <li @onclick="OpenSettings">⚙ Configuración</li>
+                                <li @onclick="Logout">🚪 Cerrar sesión</li>
                             </ul>
                         </div>
                     }
@@ -42,9 +42,17 @@ else
     </div>
 }
 
+@if (ShowSettings)
+{
+    <SettingsModal OnClose="CloseSettings" />
+}
+
 @code {
     private bool IsMenuOpen = false;
     private bool isLoading = true;
+    private bool ShowSettings = false;
+
+    [Inject] private CustomAuthStateProvider AuthProvider { get; set; } = default!;
 
     private void ToggleMenu() => IsMenuOpen = !IsMenuOpen;
 
@@ -55,6 +63,15 @@ else
             IsMenuOpen = false;
             StateHasChanged();
         }
+    }
+
+    private void OpenSettings() => ShowSettings = true;
+    private void CloseSettings() => ShowSettings = false;
+
+    private async Task Logout()
+    {
+        await AuthProvider.MarkUserAsLoggedOut();
+        Navigation.NavigateTo("/login", true);
     }
 
     protected override async Task OnInitializedAsync()
