@@ -1,9 +1,12 @@
-﻿<div class="settings-overlay" @onclick="Close">
+﻿@using Microsoft.AspNetCore.Components
+@inject NavigationManager Navigation
+
+<div class="settings-overlay" @onclick="Close">
     <div class="settings-modal" @onclick:stopPropagation="true">
         <button class="btn-close" @onclick="Close" aria-label="Cerrar">✕</button>
 
         <div class="settings-content">
-            <!-- Panel lateral de pestañas -->
+            <!-- Tabs laterales -->
             <div class="tabs">
                 @foreach (var tab in Tabs)
                 {
@@ -14,7 +17,7 @@
                 }
             </div>
 
-            <!-- Contenido dinámico -->
+            <!-- Contenido de pestañas -->
             <div class="tab-panel">
                 @if (ActiveTab == "General")
                 {
@@ -31,6 +34,42 @@
                     <h3>Preferencias</h3>
                     <p>Autocompletado, sugerencias, formato, etc.</p>
                 }
+                else if (ActiveTab == "Conexiones")
+                {
+                    <h3>Mis conexiones</h3>
+
+                    <table class="settings-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Host</th>
+                                <th>Puerto</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var conn in Connections)
+                            {
+                                <tr>
+                                    <td>@conn.ConnectionId</td>
+                                    <td>@conn.Host</td>
+                                    <td>@conn.Port</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" @onclick="@(() => Edit(conn.ConnectionId))">
+                                            Editar
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <div class="new-connection">
+                        <button class="btn btn-primary" @onclick="CreateNewConnection">
+                            ➕ Nueva conexión
+                        </button>
+                    </div>
+                }
             </div>
         </div>
     </div>
@@ -39,9 +78,32 @@
 @code {
     [Parameter] public EventCallback OnClose { get; set; }
 
-    private List<string> Tabs = new() { "General", "Apariencia", "Preferencias" };
+    private List<string> Tabs = new() { "General", "Apariencia", "Preferencias", "Conexiones" };
     private string ActiveTab = "General";
 
     private void SelectTab(string tab) => ActiveTab = tab;
     private async Task Close() => await OnClose.InvokeAsync();
+
+    private void Edit(string connectionId)
+    {
+        Navigation.NavigateTo($"/connection/edit/{connectionId}");
+    }
+
+    private void CreateNewConnection()
+    {
+        Navigation.NavigateTo("/connection/edit/new");
+    }
+
+    private List<ConnectionData> Connections = new()
+    {
+        new() { ConnectionId = "conn_1", Host = "192.168.1.1", Port = "30013" },
+        new() { ConnectionId = "conn_2", Host = "10.0.0.2", Port = "30015" }
+    };
+
+    public class ConnectionData
+    {
+        public string ConnectionId { get; set; } = "";
+        public string Host { get; set; } = "";
+        public string Port { get; set; } = "";
+    }
 }

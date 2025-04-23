@@ -1,0 +1,100 @@
+﻿@page "/connection/edit/{ConnectionId?}"
+@layout PublicLayout
+
+@using Microsoft.AspNetCore.Components
+
+<div class="connection-form-wrapper">
+    <h2>@(IsEditMode ? "Editar Conexión" : "Nueva Conexión")</h2>
+
+    <EditForm Model="@connectionData" OnValidSubmit="HandleSave">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>ID de la conexión</label>
+                <InputText class="form-input" @bind-Value="connectionData.ConnectionId" disabled="@IsEditMode" />
+            </div>
+
+            <div class="form-group">
+                <label>Usuario</label>
+                <InputText class="form-input" @bind-Value="connectionData.Username" />
+            </div>
+
+            <div class="form-group">
+                <label>Host</label>
+                <InputText class="form-input" @bind-Value="connectionData.Host" />
+            </div>
+
+            <div class="form-group">
+                <label>Contraseña</label>
+                <InputText type="password" class="form-input" @bind-Value="connectionData.Password" />
+            </div>
+
+            <div class="form-group">
+                <label>Puerto</label>
+                <InputText class="form-input" @bind-Value="connectionData.Port" />
+            </div>
+
+            <div class="form-group">
+                <label>Esquema (Schema)</label>
+                <InputText class="form-input" @bind-Value="connectionData.Schema" />
+            </div>
+
+            <div class="form-group">
+                <label>Base de Datos</label>
+                <InputText class="form-input" @bind-Value="connectionData.Database" />
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button class="save-button" type="submit">Guardar Cambios</button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter] public string? ConnectionId { get; set; }
+
+    private ConnectionData connectionData = new();
+    private bool IsEditMode => !string.IsNullOrWhiteSpace(ConnectionId);
+
+    protected override void OnInitialized()
+    {
+        if (IsEditMode)
+        {
+            // Cargar datos fake simulados
+            connectionData = FakeDatabase.FirstOrDefault(c => c.ConnectionId == ConnectionId) ?? new();
+        }
+    }
+
+    private void HandleSave()
+    {
+        // Aquí guardarías la conexión (ya sea actualizando o agregando)
+        if (!IsEditMode)
+        {
+            connectionData.ConnectionId = Guid.NewGuid().ToString("N").Substring(0, 8); // Genera un ID fake
+            FakeDatabase.Add(connectionData);
+        }
+
+        // Redirigir después de guardar
+        NavigationManager.NavigateTo("/"); // O lista de conexiones
+    }
+
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+
+    // Fake local database
+    private static List<ConnectionData> FakeDatabase = new()
+    {
+        new() { ConnectionId = "conn_1", Host = "192.168.1.1", Port = "30013", Username = "admin", Schema = "SBOCOMMON", Database = "SBODEMO" }
+    };
+
+    public class ConnectionData
+    {
+        public string ConnectionId { get; set; } = string.Empty;
+        public string Host { get; set; } = string.Empty;
+        public string Port { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string Schema { get; set; } = string.Empty;
+        public string Database { get; set; } = string.Empty;
+    }
+}
+

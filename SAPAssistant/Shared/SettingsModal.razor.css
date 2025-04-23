@@ -56,7 +56,7 @@
     overflow-y: auto;
 }
 
-/* Botón de cerrar (❌) arriba a la derecha */
+/* Botón de cerrar (❌) */
 .btn-close {
     position: absolute;
     top: 12px;
@@ -73,3 +73,63 @@
     .btn-close:hover {
         color: white;
     }
+
+/* ----------------- NUEVO: Tabla de conexiones ----------------- */
+.settings-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 14px;
+    background-color: #1e1e2e;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+    .settings-table thead {
+        background-color: #2a2a3a;
+        color: #ccc;
+    }
+
+    .settings-table th,
+    .settings-table td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid #333;
+    }
+
+    .settings-table tr:hover {
+        background-color: #2f2f40;
+    }
+
+    .settings-table td:last-child {
+        text-align: right;
+    }
+
+/* ----------------- Botón estilo moderno ----------------- */
+.btn {
+    font-size: 13px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-primary {
+    background-color: #3b82f6;
+    color: white;
+}
+
+    .btn-primary:hover {
+        background-color: #2563eb;
+    }
+
+.btn-sm {
+    font-size: 13px;
+    padding: 6px 12px;
+}
+
+.new-connection {
+    margin-top: 1rem;
+    text-align: right;
+}
