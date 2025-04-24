@@ -1,5 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using SAPAssistant.Models
+@using SAPAssistant.Service
 @inject NavigationManager Navigation
+@inject ConnectionService ConnectionService
+@inject ProtectedSessionStorage SessionStorage
 
 <div class="settings-overlay" @onclick="Close">
     <div class="settings-modal" @onclick:stopPropagation="true">
@@ -65,7 +70,7 @@
                                         }
                                     </td>
                                     <td class="acciones">
-                                        <button class="edit-button" @onclick="() => EditarConexion(conn.ConnectionId)">Editar</button>
+                                        <button class="edit-button" @onclick="() => EditarConexion(conn)">Editar</button>
                                         @if (!conn.IsActive)
                                         {
                                             <button class="icon-button" title="Usar esta conexión" @onclick="() => SetActive(conn.ConnectionId)">
@@ -96,37 +101,39 @@
     private List<string> Tabs = new() { "General", "Apariencia", "Preferencias", "Conexiones" };
     private string ActiveTab = "Conexiones";
 
-    private List<ConnectionItem> Connections = new()
+    private List<ConnectionDTO> Connections = new();
+
+    protected override async Task OnInitializedAsync()
     {
-        new ConnectionItem { ConnectionId = "conn_1", Host = "192.168.1.1", Port = "30013", IsActive = true },
-        new ConnectionItem { ConnectionId = "conn_2", Host = "10.0.0.2", Port = "30015", IsActive = false }
-    };
+        Connections = await ConnectionService.GetConnectionsAsync();
+
+        var activeResult = await SessionStorage.GetAsync<string>("active_connection_id");
+        var activeId = activeResult.Success ? activeResult.Value : null;
+
+        foreach (var conn in Connections)
+            conn.IsActive = conn.ConnectionId == activeId;
+    }
 
     private void SelectTab(string tab) => ActiveTab = tab;
 
     private async Task Close() => await OnClose.InvokeAsync();
 
-    private void SetActive(string connectionId)
+    private async void SetActive(string connectionId)
     {
+        await SessionStorage.SetAsync("active_connection_id", connectionId);
+
         foreach (var conn in Connections)
             conn.IsActive = conn.ConnectionId == connectionId;
     }
 
-    private void EditarConexion(string id)
-    {       
-        Navigation.NavigateTo($"/connection/edit/{id}",true);
+    private async Task EditarConexion(ConnectionDTO conn)
+    {
+        await SessionStorage.SetAsync("connection_to_edit", conn);
+        Navigation.NavigateTo($"/connection/edit", true);
     }
 
     private void NuevaConexion()
     {
-        Navigation.NavigateTo("/connection/edit",true);
-    }
-
-    private class ConnectionItem
-    {
-        public string ConnectionId { get; set; } = "";
-        public string Host { get; set; } = "";
-        public string Port { get; set; } = "";
-        public bool IsActive { get; set; }
+        Navigation.NavigateTo("/connection/edit", true);
     }
 }

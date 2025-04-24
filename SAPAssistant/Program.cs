@@ -17,13 +17,18 @@ builder.Services.AddScoped(sp => new HttpClient
     BaseAddress = new Uri("http://localhost:8000") // 👈 tu API de FastAPI
 });
 
+builder.Services.AddHttpClient<ConnectionService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:8081");
+});
+
+
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<CustomAuthStateProvider>();
-
 
 var app = builder.Build();
 

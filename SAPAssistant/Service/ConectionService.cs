@@ -5,6 +5,11 @@
 namespace SAPAssistant.Service
 {
 
+    using System.Net.Http.Headers;
+    using System.Net.Http.Json;
+    using SAPAssistant.Models;
+    using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+
     public class ConnectionService
     {
         private readonly HttpClient _http;
@@ -16,20 +21,68 @@ namespace SAPAssistant.Service
             _sessionStorage = sessionStorage;
         }
 
-        public async Task<List<string>> GetConnectionsAsync()
+        public async Task<List<ConnectionDTO>> GetConnectionsAsync()
         {
-            var tokenResult = await _sessionStorage.GetAsync<string>("token");
-            if (!tokenResult.Success || string.IsNullOrEmpty(tokenResult.Value))
-                return new List<string>();
+            try
+            {
+                var tokenResult = await _sessionStorage.GetAsync<string>("token");
+                var userResult = await _sessionStorage.GetAsync<string>("username");
 
-            _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenResult.Value);
+                if (!tokenResult.Success || !userResult.Success)
+                    return new List<ConnectionDTO>();
 
-            var response = await _http.GetAsync("/connections"); // Ruta expuesta por el microservicio de conexiones
-            if (!response.IsSuccessStatusCode)
-                return new List<string>();
+                var token = tokenResult.Value;
+                var userId = userResult.Value;
 
-            return await response.Content.ReadFromJsonAsync<List<string>>() ?? new List<string>(); ;
+                var request = new HttpRequestMessage(HttpMethod.Get, "/user-connections");
+                request.Headers.Add("X-User-Id", userId);
+                // Si tu backend empieza a requerir token en el futuro:
+                // request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var response = await _http.SendAsync(request);
+                if (!response.IsSuccessStatusCode)
+                    return new List<ConnectionDTO>();
+
+                return await response.Content.ReadFromJsonAsync<List<ConnectionDTO>>() ?? new List<ConnectionDTO>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error al obtener conexiones: {ex.Message}");
+                return new List<ConnectionDTO>();
+            }
         }
+
+        public async Task<bool> UpdateConnectionAsync(ConnectionDTO connection)
+        {
+            var userResult = await _sessionStorage.GetAsync<string>("username");
+            if (!userResult.Success) return false;
+
+            var userId = userResult.Value;
+
+            var request = new HttpRequestMessage(HttpMethod.Put, $"/connections/{connection.ConnectionId}");
+            request.Headers.Add("X-User-Id", userId);
+            request.Content = JsonContent.Create(connection);
+
+            var response = await _http.SendAsync(request);
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> CreateConnectionAsync(ConnectionDTO connection)
+        {
+            var userResult = await _sessionStorage.GetAsync<string>("username");
+            if (!userResult.Success) return false;
+
+            var userId = userResult.Value;
+
+            var request = new HttpRequestMessage(HttpMethod.Post, "/connections");
+            request.Headers.Add("X-User-Id", userId);
+            request.Content = JsonContent.Create(connection);
+
+            var response = await _http.SendAsync(request);
+            return response.IsSuccessStatusCode;
+        }
+
+
     }
 
 }
