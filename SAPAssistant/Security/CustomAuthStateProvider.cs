@@ -18,24 +18,34 @@ namespace SAPAssistant.Security
         {
             try
             {
-                var result = await _sessionStorage.GetAsync<string>("username");
-                var username = result.Success ? result.Value : null;
+                var usernameResult = await _sessionStorage.GetAsync<string>("username");
+                var tokenResult = await _sessionStorage.GetAsync<string>("token");
 
-                if (!string.IsNullOrEmpty(username))
+                var username = usernameResult.Success ? usernameResult.Value : null;
+                var token = tokenResult.Success ? tokenResult.Value : null;
+
+                if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(token))
                 {
+                    // ⚠️ Podés agregar más claims si querés roles, etc.
                     var identity = new ClaimsIdentity(new[]
                     {
-                        new Claim(ClaimTypes.Name, username)
-                    }, "apiauth");
+                new Claim(ClaimTypes.Name, username),
+                new Claim("access_token", token) // opcional, útil para llamadas API
+            }, authenticationType: "apiauth"); // 👈 esto asegura que esté autenticado
 
                     var user = new ClaimsPrincipal(identity);
                     return new AuthenticationState(user);
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Console.WriteLine("❌ Error al restaurar autenticación: " + ex.Message);
+            }
 
-            return new AuthenticationState(_anonymous);
+            // usuario anónimo
+            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
+
 
         public async Task MarkUserAsAuthenticated(string username, string token)
         {

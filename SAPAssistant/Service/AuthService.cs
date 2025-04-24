@@ -27,6 +27,7 @@ namespace SAPAssistant.Service
             if (user is null) return false;
 
             await _authProvider.MarkUserAsAuthenticated(user.Username, user.Token);
+            await Task.Delay(100);
             return true;
         }
 

@@ -1,5 +1,8 @@
 ﻿@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
 
-<div class="login-page">
-    @Body
-</div>
+<CascadingAuthenticationState>
+    <div class="login-page">
+        @Body
+    </div>
+</CascadingAuthenticationState>

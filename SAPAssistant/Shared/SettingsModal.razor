@@ -113,13 +113,13 @@
     }
 
     private void EditarConexion(string id)
-    {
-        Navigation.NavigateTo($"/EdithSettings?id={id}");
+    {       
+        Navigation.NavigateTo($"/connection/edit/{id}",true);
     }
 
     private void NuevaConexion()
     {
-        Navigation.NavigateTo("/EdithSettings");
+        Navigation.NavigateTo("/connection/edit",true);
     }
 
     private class ConnectionItem
