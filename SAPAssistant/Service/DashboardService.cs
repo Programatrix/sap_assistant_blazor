@@ -13,56 +13,56 @@ namespace SAPAssistant.Service
 
         private void InicializarDatosPrueba()
         {
-            // KPIs Fijos
+            // KPI 1: Valor Único (simple)
             KPIs.Add(new DashboardCardModel
             {
                 Id = Guid.NewGuid(),
                 Title = "Ventas Totales Hoy",
                 Value = "$123,000",
                 Description = "Total de ventas realizadas hoy.",
+                CardType = DashboardCardType.ValueOnly, // 🔥 Tipo específico
                 IsFixed = true,
                 RefreshAsync = async (onFinished) =>
                 {
                     await Task.Delay(500); // Simula refresco
-                                           // Aquí podrías actualizar el valor real
-
                     if (onFinished != null)
-                        await onFinished(); // 🔥 Notificar que terminó
-                }
-
-            });
-
-            KPIs.Add(new DashboardCardModel
-            {
-                Id = Guid.NewGuid(),
-                Title = "Pedidos Pendientes",
-                Value = "24 pedidos",
-                Description = "Órdenes de clientes aún sin despachar.",
-                IsFixed = true,
-                RefreshAsync = async (onFinished) =>
-                {
-                    await Task.Delay(500); // Simula refresco
-                                           // Aquí podrías actualizar el valor real
-
-                    if (onFinished != null)
-                        await onFinished(); // 🔥 Notificar que terminó
+                        await onFinished();
                 }
             });
 
+            // KPI 2: Comparativo (% variación)
             KPIs.Add(new DashboardCardModel
             {
                 Id = Guid.NewGuid(),
-                Title = "Stock Crítico",
-                Value = "15 productos",
-                Description = "Artículos con niveles bajos de inventario.",
+                Title = "Ventas Hoy (Comparativo)",
+                Value = "$123,000",
+                Variation = 5.2, // 🔥 Ahora con variación positiva
+                Description = "Ventas de hoy comparadas con ayer.",
+                CardType = DashboardCardType.Comparative, // 🔥 Tipo Comparativa
                 IsFixed = true,
                 RefreshAsync = async (onFinished) =>
                 {
-                    await Task.Delay(500); // Simula refresco
-                                           // Aquí podrías actualizar el valor real
-
+                    await Task.Delay(500);
                     if (onFinished != null)
-                        await onFinished(); // 🔥 Notificar que terminó
+                        await onFinished();
+                }
+            });
+
+            // KPI 3: Mini Gráfico
+            KPIs.Add(new DashboardCardModel
+            {
+                Id = Guid.NewGuid(),
+                Title = "Ventas Últimos 7 Días",
+                Value = "$45,000",
+                ChartData = new List<double> { 3000, 5000, 7000, 6000, 6500, 9000, 11000 }, // 🔥 Datos de ejemplo
+                Description = "Tendencia de ventas de la semana.",
+                CardType = DashboardCardType.MiniChart, // 🔥 Tipo MiniGráfico
+                IsFixed = true,
+                RefreshAsync = async (onFinished) =>
+                {
+                    await Task.Delay(500);
+                    if (onFinished != null)
+                        await onFinished();
                 }
             });
         }
@@ -73,15 +73,14 @@ namespace SAPAssistant.Service
             {
                 if (kpi.RefreshAsync != null)
                 {
-                    kpi.IsLoading = true; // 🔥 Opcional: marcar todos como cargando
+                    kpi.IsLoading = true;
                     await kpi.RefreshAsync(async () =>
                     {
-                        kpi.IsLoading = false; // 🔥 Terminado el loading de cada KPI
+                        kpi.IsLoading = false;
                     });
                 }
             }
         }
-
 
         public void DeleteKPI(Guid id)
         {
@@ -101,22 +100,19 @@ namespace SAPAssistant.Service
                 Value = "🔄 Generando...",
                 Description = $"KPI generado automáticamente ({chartType}).",
                 IsFixed = false,
-                IsLoading = true, // Empieza cargando
+                IsLoading = true,
+                CardType = DashboardCardType.ValueOnly, // 🔥 Por defecto, si quieres que luego varíe, puedes parametrizar
             };
 
             newKpi.RefreshAsync = async (onFinished) =>
             {
-                await Task.Delay(2000); // Simular proceso IA o SQL
-
-                newKpi.Value = "$150,000"; // Actualizar valor
-
+                await Task.Delay(2000);
+                newKpi.Value = "$150,000";
                 if (onFinished != null)
-                    await onFinished(); // 🔥 Llamar al callback para notificar fin
+                    await onFinished();
             };
 
             KPIs.Add(newKpi);
         }
-
     }
-
 }

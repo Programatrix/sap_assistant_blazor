@@ -1,5 +1,6 @@
 ﻿@page "/dashboard"
 @using SAPAssistant.Service
+@using SAPAssistant.Models
 @attribute [Authorize]
 @layout AssistantLayout
 
@@ -19,10 +20,6 @@
 }
 else
 {
-    <div>
-        <h2>👉 Debug: KPIs actuales: @DashboardService.KPIs.Count</h2> <!-- Debug: contar KPIs -->
-    </div>
-
     @if (DashboardService.KPIs.Count == 0)
     {
         <DashboardEmptyState OnCreateKPI="OpenWizard" />
@@ -32,10 +29,7 @@ else
         <div class="dashboard-grid">
             @foreach (var card in DashboardService.KPIs)
             {
-                <div class="debug-card">
-                    <p>👉 Debug: Título KPI: @card.Title</p> <!-- Debug: mostrar título -->
-                    <DashboardCard Card="card" />
-                </div>
+                <DashboardCardWrapper Card="card" />
             }
         </div>
     }
@@ -52,12 +46,12 @@ else
     private void CloseWizard()
     {
         IsWizardOpen = false;
-        StateHasChanged(); // Forzar redibujado
+        StateHasChanged();
     }
 
     private void EditDashboard()
     {
-        // Aquí podrías activar modo edición
+        // Aquí podrías activar modo edición en el futuro
     }
 
     private async Task RefreshAll()

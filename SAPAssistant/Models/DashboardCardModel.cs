@@ -13,6 +13,15 @@
         public string TypeIcon { get; set; } = "";
         public bool IsLoading { get; set; } = false; // 🔥 NUEVO: Controla si está en estado "cargando"
         public Func<Func<Task>, Task>? RefreshAsync { get; set; } // Para refrescar su valor
+        public DashboardCardType CardType { get; set; } = DashboardCardType.ValueOnly;
+        public double? Variation { get; set; }
+        public List<double>? ChartData { get; set; } // para el mini gráfico
     }
 
+    public enum DashboardCardType
+    {
+        ValueOnly,     // 🔥 Tarjeta simple: solo el valor principal
+        Comparative,   // 🔥 Tarjeta con valor + porcentaje de variación
+        MiniChart      // 🔥 Tarjeta con valor + mini gráfico de tendencia
+    }
 }

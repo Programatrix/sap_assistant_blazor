@@ -1,0 +1,25 @@
+﻿@using SAPAssistant.Models
+
+@switch (Card.CardType)
+{
+    case DashboardCardType.ValueOnly:
+        <DashboardCardValue Card="Card" />
+        break;
+    case DashboardCardType.Comparative:
+        <DashboardCardComparative Card="Card" />
+        break;
+    case DashboardCardType.MiniChart:
+        <DashboardCardMiniChart Card="Card" />
+        break;
+    default:
+        <div class="dashboard-card error-card">
+            <h2>Tipo de tarjeta desconocido</h2>
+            <p>Por favor revisa la configuración del KPI.</p>
+        </div>
+        break;
+}
+
+@code {
+    [Parameter]
+    public DashboardCardModel Card { get; set; } = default!;
+}

@@ -1,8 +1,8 @@
 ﻿@page "/home"
 @attribute [Authorize]
 @layout AssistantLayout
-
 @inject NavigationManager NavigationManager
+<link href="css/tu-archivo.css" rel="stylesheet" />
 
 <div class="home-container">
 
@@ -12,10 +12,13 @@
 
     <!-- Input de Consulta Rápida -->
     <div class="quick-assistant-form">
-        <InputText @bind-Value="PromptModel.Prompt" placeholder="Escribe tu consulta aquí..." class="quick-input" />
+        <input class="quick-input"
+               value="@PromptModel.Prompt"
+               placeholder="Escribe tu consulta aquí..."
+               @oninput="e => PromptModel.Prompt = e.Value?.ToString()" />
         <button class="quick-submit" @onclick="HandleQuickPrompt">
             ➔
-        </button>
+        </button>      
     </div>
 
     <!-- KPIs -->
