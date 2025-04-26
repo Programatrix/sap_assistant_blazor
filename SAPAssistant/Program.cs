@@ -29,6 +29,7 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<CustomAuthStateProvider>();
+builder.Services.AddSingleton<DashboardService>();
 
 var app = builder.Build();
 

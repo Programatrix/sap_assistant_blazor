@@ -1,0 +1,74 @@
+﻿@page "/home"
+@attribute [Authorize]
+@layout AssistantLayout
+
+@inject NavigationManager NavigationManager
+
+<div class="home-container">
+
+    <!-- Encabezado -->
+    <h1 class="home-title">👋 ¡Hola, @UserName!</h1>
+    <p class="home-subtitle">Hoy es @TodayDate. ¿En qué puedo ayudarte hoy?</p>
+
+    <!-- Input de Consulta Rápida -->
+    <div class="quick-assistant-form">
+        <InputText @bind-Value="PromptModel.Prompt" placeholder="Escribe tu consulta aquí..." class="quick-input" />
+        <button class="quick-submit" @onclick="HandleQuickPrompt">
+            ➔
+        </button>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-summary-grid">
+        <div class="kpi-card">
+            <p class="kpi-title">Ventas Hoy</p>
+            <p class="kpi-value">$132,000</p>
+            <p class="kpi-change up">↑ 5%</p>
+        </div>
+
+        <div class="kpi-card">
+            <p class="kpi-title">Pedidos Pendientes</p>
+            <p class="kpi-value">25</p>
+            <p class="kpi-change down">↓ 3%</p>
+        </div>
+
+        <div class="kpi-card">
+            <p class="kpi-title">Stock Crítico</p>
+            <p class="kpi-value">8 productos</p>
+        </div>
+    </div>
+
+    <!-- Mini Gráficos -->
+    <div class="mini-charts-grid">
+        <div class="mini-chart">
+            📈 Ventas Últimos 7 días
+        </div>
+        <div class="mini-chart">
+            📦 Stock Crítico
+        </div>
+    </div>
+
+</div>
+
+@code {
+    private string UserName = "Usuario"; // Cambiar por nombre real si tienes auth.
+    private string TodayDate = DateTime.Now.ToString("dddd, dd MMMM yyyy");
+
+    private PromptInput PromptModel = new();
+
+    private async Task HandleQuickPrompt()
+    {
+        if (string.IsNullOrWhiteSpace(PromptModel.Prompt))
+            return;
+
+        // Aquí en el futuro podrías llamar al backend
+        await Task.Delay(500);
+        // Opcional: redirigir al /assistant
+        NavigationManager.NavigateTo($"/assistant?prompt={Uri.EscapeDataString(PromptModel.Prompt)}");
+    }
+
+    private class PromptInput
+    {
+        public string Prompt { get; set; } = "";
+    }
+}

@@ -1,0 +1,67 @@
+﻿@page "/dashboard"
+@using SAPAssistant.Service
+@attribute [Authorize]
+@layout AssistantLayout
+
+@inject DashboardService DashboardService
+
+<h1>📊 Mi Cockpit Inteligente</h1>
+
+<div class="dashboard-actions">
+    <button class="btn-global-refresh" @onclick="RefreshAll">🔄 Actualizar Todo</button>
+    <button class="btn-create-kpi" @onclick="OpenWizard">✨ Crear Nuevo KPI</button>
+    <button class="btn-edit-dashboard" @onclick="EditDashboard">🛠️ Editar Dashboard</button>
+</div>
+
+@if (IsWizardOpen)
+{
+    <DashboardWizard OnFinished="CloseWizard" />
+}
+else
+{
+    <div>
+        <h2>👉 Debug: KPIs actuales: @DashboardService.KPIs.Count</h2> <!-- Debug: contar KPIs -->
+    </div>
+
+    @if (DashboardService.KPIs.Count == 0)
+    {
+        <DashboardEmptyState OnCreateKPI="OpenWizard" />
+    }
+    else
+    {
+        <div class="dashboard-grid">
+            @foreach (var card in DashboardService.KPIs)
+            {
+                <div class="debug-card">
+                    <p>👉 Debug: Título KPI: @card.Title</p> <!-- Debug: mostrar título -->
+                    <DashboardCard Card="card" />
+                </div>
+            }
+        </div>
+    }
+}
+
+@code {
+    private bool IsWizardOpen = false;
+
+    private void OpenWizard()
+    {
+        IsWizardOpen = true;
+    }
+
+    private void CloseWizard()
+    {
+        IsWizardOpen = false;
+        StateHasChanged(); // Forzar redibujado
+    }
+
+    private void EditDashboard()
+    {
+        // Aquí podrías activar modo edición
+    }
+
+    private async Task RefreshAll()
+    {
+        await DashboardService.RefreshAllKPIs();
+    }
+}

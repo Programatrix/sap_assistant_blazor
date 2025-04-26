@@ -1,0 +1,60 @@
+﻿@using SAPAssistant.Models
+@using SAPAssistant.Service
+@inject DashboardService DashboardService
+
+<div class="dashboard-card">
+    <div class="card-header">
+        @if (!string.IsNullOrWhiteSpace(Card.TypeLabel) || !string.IsNullOrWhiteSpace(Card.TypeIcon))
+        {
+            <span class="card-tag">@Card.TypeIcon @Card.TypeLabel</span>
+        }
+
+        <div class="card-actions">
+            <button @onclick="Refresh">🔄</button>
+            @if (!Card.IsFixed)
+            {
+                <button @onclick="Delete">❌</button>
+            }
+        </div>
+    </div>
+
+    <h2>@Card.Title</h2>
+
+    @if (Card.IsLoading)
+    {
+        <div class="spinner-container">
+            <div class="spinner"></div> <!-- 🔥 Spinner animado mientras carga -->
+        </div>
+    }
+    else
+    {
+        <p class="big-number">@Card.Value</p>
+    }
+
+    <p class="card-description">@Card.Description</p>
+</div>
+
+@code {
+    [Parameter]
+    public DashboardCardModel Card { get; set; } = default!;
+
+    private async Task Refresh()
+    {
+        if (Card.RefreshAsync != null)
+        {
+            Card.IsLoading = true;
+            StateHasChanged(); // Mostrar el spinner
+
+            await Card.RefreshAsync(async () =>
+            {
+                Card.IsLoading = false;
+                await InvokeAsync(StateHasChanged); // 🔥 Asegurar re-render
+            });
+        }
+    }
+
+    private void Delete()
+    {
+        DashboardService.DeleteKPI(Card.Id);
+    }
+}
