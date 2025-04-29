@@ -1,5 +1,6 @@
 ﻿@using SAPAssistant.Models
 @using SAPAssistant.Service
+@inject IJSRuntime JSRuntime
 
 <div class="dashboard-card">
     <div class="card-header">
@@ -32,8 +33,7 @@
         @if (Card.ChartData != null && Card.ChartData.Any())
         {
             <div class="mini-chart">
-                📈 (Aquí irá el mini gráfico)
-                <!-- Podrías usar un pequeño SVG o Canvas personalizado en el futuro -->
+                <canvas id="@CanvasId" style="width: 100%; height: 50px;"></canvas>
             </div>
         }
     }
@@ -47,6 +47,16 @@
 
     [Inject]
     private DashboardService DashboardService { get; set; } = default!;
+
+    private string CanvasId => $"miniChart-{Card.Id}";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && Card.ChartData != null && Card.ChartData.Any())
+        {
+            await JSRuntime.InvokeVoidAsync("drawMiniChart", CanvasId, Card.ChartData);
+        }
+    }
 
     private async Task Refresh()
     {
