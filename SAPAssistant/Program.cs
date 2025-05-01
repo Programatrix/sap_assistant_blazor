@@ -22,6 +22,11 @@ builder.Services.AddHttpClient<ConnectionService>(client =>
     client.BaseAddress = new Uri("http://localhost:8081");
 });
 
+builder.Services.AddHttpClient<AssistantService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:8000");
+});
+
 
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddScoped<AuthService>();

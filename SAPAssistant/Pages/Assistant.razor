@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using SAPAssistant.Service
 @layout AssistantLayout
 
 <div class="chat-wrapper">
@@ -42,18 +43,43 @@
     private List<ChatMessage> ChatHistory = new();
     private bool ShowScrollToBottom = false;
 
+    private string UserId = "demo"; // Aquí puedes vincularlo al login real luego
+
     [Inject] private IJSRuntime JS { get; set; } = default!;
+    [Inject] private AssistantService AssistantService { get; set; } = default!;
 
     private async Task HandleSubmit()
     {
         if (!string.IsNullOrWhiteSpace(UserInput))
         {
-            ChatHistory.Add(new ChatMessage { IsUser = true, Content = UserInput });
+            var pregunta = UserInput.Trim();
+            ChatHistory.Add(new ChatMessage { IsUser = true, Content = pregunta });
 
             UserInput = string.Empty;
+            StateHasChanged();
 
-            await Task.Delay(300); // Simula una respuesta
-            ChatHistory.Add(new ChatMessage { IsUser = false, Content = $"Respuesta a: {UserInput}" });
+            try
+            {
+                var resultado = await AssistantService.ConsultarAsync(pregunta);
+
+                ChatHistory.Add(new ChatMessage
+                    {
+                        IsUser = false,
+                        Content = resultado?.Resumen ?? "✅ Consulta ejecutada con éxito."
+                    });
+
+                // Opcional: Mostrar el SQL o cantidad de resultados
+                // ChatHistory.Add(new ChatMessage { IsUser = false, Content = $"SQL generado:\n{resultado.Sql}" });
+
+            }
+            catch (Exception ex)
+            {
+                ChatHistory.Add(new ChatMessage
+                    {
+                        IsUser = false,
+                        Content = $"❌ Error: {ex.Message}"
+                    });
+            }
 
             await ScrollToBottom();
         }
