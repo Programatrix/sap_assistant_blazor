@@ -23,9 +23,10 @@ namespace SAPAssistant.Service
 
             var requestBody = new
             {
+                //TODO: RECUPERAR LA CONEXIÓN ACTIVA Y EL ENGINE SE DEBERIA RECUPERAR DESDE EL MICROSERVICIO QUE EJECUTA LA QUERY
                 pregunta = pregunta,
-                conexion = "default",   // puedes hacerlo dinámico luego
-                engine = "hana"         // fijo por ahora
+                connection_id = "hana_serversap100H3",   // ← corregido
+                engine = "hana"
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, "/assistant/query")
