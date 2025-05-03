@@ -1,0 +1,40 @@
+﻿@page "/conexiones"
+@using SAPAssistant.Components.Connection
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedSessionStorage SessionStorage
+@inject NavigationManager Navigation
+
+<h2>🔗 Selecciona una conexión activa</h2>
+<p>Necesitas una conexión activa para usar el asistente.</p>
+
+<ConectionManager  OnConnectionActivated="HandleConnectionActivated" />
+
+@if (HayConexionActiva)
+{
+    <div style="margin-top: 2rem;">
+        <button class="btn btn-primary" @onclick="VolverHome">
+            ✅ Volver al inicio
+        </button>
+    </div>
+}
+
+@code {
+    private bool HayConexionActiva = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var result = await SessionStorage.GetAsync<string>("active_connection_id");
+            HayConexionActiva = result.Success && !string.IsNullOrEmpty(result.Value);
+            StateHasChanged();
+        }
+    }
+    private void HandleConnectionActivated(bool activo)
+    {
+        HayConexionActiva = activo;
+        StateHasChanged();
+    }
+
+    private void VolverHome() => Navigation.NavigateTo("/");
+}

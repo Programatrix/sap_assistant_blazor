@@ -2,9 +2,8 @@
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using SAPAssistant.Models
 @using SAPAssistant.Service
+@using SAPAssistant.Components.Connection
 @inject NavigationManager Navigation
-@inject ConnectionService ConnectionService
-@inject ProtectedSessionStorage SessionStorage
 
 <div class="settings-overlay" @onclick="Close">
     <div class="settings-modal" @onclick:stopPropagation="true">
@@ -42,53 +41,7 @@
                 else if (ActiveTab == "Conexiones")
                 {
                     <h3>Mis conexiones</h3>
-                    <table class="conn-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Host</th>
-                                <th>Puerto</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var conn in Connections)
-                            {
-                                <tr>
-                                    <td>@conn.ConnectionId</td>
-                                    <td>@conn.Host</td>
-                                    <td>@conn.Port</td>
-                                    <td>
-                                        @if (conn.IsActive)
-                                        {
-                                            <span><span class="checkmark">✔</span> Activa</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="estado-inactivo">—</span>
-                                        }
-                                    </td>
-                                    <td class="acciones">
-                                        <button class="edit-button" @onclick="() => EditarConexion(conn)">Editar</button>
-                                        @if (!conn.IsActive)
-                                        {
-                                            <button class="icon-button" title="Usar esta conexión" @onclick="() => SetActive(conn.ConnectionId)">
-                                                <span class="material-icons">check_circle</span>
-                                            </button>
-                                        }
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-
-                    <div class="new-conn-container">
-                        <button class="new-conn-btn" @onclick="NuevaConexion">
-                            <span class="material-icons">add</span>
-                            Nueva conexión
-                        </button>
-                    </div>
+                    <ConectionManager />
                 }
             </div>
         </div>
@@ -101,39 +54,6 @@
     private List<string> Tabs = new() { "General", "Apariencia", "Preferencias", "Conexiones" };
     private string ActiveTab = "Conexiones";
 
-    private List<ConnectionDTO> Connections = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        Connections = await ConnectionService.GetConnectionsAsync();
-
-        var activeResult = await SessionStorage.GetAsync<string>("active_connection_id");
-        var activeId = activeResult.Success ? activeResult.Value : null;
-
-        foreach (var conn in Connections)
-            conn.IsActive = conn.ConnectionId == activeId;
-    }
-
     private void SelectTab(string tab) => ActiveTab = tab;
-
     private async Task Close() => await OnClose.InvokeAsync();
-
-    private async void SetActive(string connectionId)
-    {
-        await SessionStorage.SetAsync("active_connection_id", connectionId);
-
-        foreach (var conn in Connections)
-            conn.IsActive = conn.ConnectionId == connectionId;
-    }
-
-    private async Task EditarConexion(ConnectionDTO conn)
-    {
-        await SessionStorage.SetAsync("connection_to_edit", conn);
-        Navigation.NavigateTo($"/connection/edit", true);
-    }
-
-    private void NuevaConexion()
-    {
-        Navigation.NavigateTo("/connection/edit", true);
-    }
 }

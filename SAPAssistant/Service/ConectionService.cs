@@ -82,6 +82,30 @@ namespace SAPAssistant.Service
             return response.IsSuccessStatusCode;
         }
 
+        public async Task<bool> ValidateConnectionAsync(string connectionId)
+        {
+            try
+            {
+                var userResult = await _sessionStorage.GetAsync<string>("username");
+                if (!userResult.Success)
+                    return false;
+
+                var userId = userResult.Value;
+
+                var request = new HttpRequestMessage(HttpMethod.Post, $"/connections/{connectionId}/validate");
+                request.Headers.Add("X-User-Id", userId);
+
+                var response = await _http.SendAsync(request);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error al validar conexión {connectionId}: {ex.Message}");
+                return false;
+            }
+        }
+
+
 
     }
 
