@@ -83,7 +83,7 @@
     private List<ConnectionDTO> Connections = new();
     private bool MostrarMensaje = false;
     private bool MostrarError = false;
-
+    [Parameter] public bool EsModal { get; set; } = false;
     [Parameter] public EventCallback<bool> OnConnectionActivated { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -131,8 +131,8 @@
     private async Task EditarConexion(ConnectionDTO conn)
     {
         await SessionStorage.SetAsync("connection_to_edit", conn);
-        Navigation.NavigateTo("/connection/edit", true);
+        Navigation.NavigateTo("/connection/edit", EsModal);
     }
 
-    private void NuevaConexion() => Navigation.NavigateTo("/connection/edit", true);
+    private void NuevaConexion() => Navigation.NavigateTo("/connection/edit", EsModal);
 }

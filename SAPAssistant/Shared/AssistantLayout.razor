@@ -1,10 +1,14 @@
-﻿@using SAPAssistant.Security
+﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using SAPAssistant.Security
+@using SAPAssistant.Service
 @inherits LayoutComponentBase
 @attribute [Authorize]
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
+@inject ConnectionService ConnectionService
+@inject ProtectedSessionStorage SessionStorage
 
-@if (isLoading)
+@if (isLoading || validandoConexion)
 {
     <p>Cargando...</p>
 }
@@ -51,6 +55,7 @@ else
     private bool IsMenuOpen = false;
     private bool isLoading = true;
     private bool ShowSettings = false;
+    private bool validandoConexion = true;
 
     [Inject] private CustomAuthStateProvider AuthProvider { get; set; } = default!;
 
@@ -82,10 +87,32 @@ else
         if (!user.Identity?.IsAuthenticated ?? true)
         {
             Navigation.NavigateTo("/login", true);
+            return;
         }
-        else
+
+        // Si ya estás en /conexiones, no validamos
+        var currentUri = Navigation.ToBaseRelativePath(Navigation.Uri).ToLower();
+        if (!currentUri.StartsWith("conexiones"))
         {
-            isLoading = false;
+            var result = await SessionStorage.GetAsync<string>("active_connection_id");
+            if (result.Success && !string.IsNullOrEmpty(result.Value))
+            {
+                var isValid = await ConnectionService.ValidateConnectionAsync(result.Value);
+                if (!isValid)
+                {
+                    await SessionStorage.DeleteAsync("active_connection_id");
+                    Navigation.NavigateTo("/conexiones", true);
+                    return;
+                }
+            }
+            else
+            {
+                Navigation.NavigateTo("/conexiones", true);
+                return;
+            }
         }
+
+        isLoading = false;
+        validandoConexion = false;
     }
 }

@@ -1,0 +1,37 @@
+﻿@using SAPAssistant.Security
+@inherits LayoutComponentBase
+@attribute [Authorize]
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+@if (isLoading)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <div class="simple-layout">
+        @Body
+    </div>
+}
+
+@code {
+    private bool isLoading = true;
+
+    [Inject] private CustomAuthStateProvider AuthProvider { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity?.IsAuthenticated ?? true)
+        {
+            Navigation.NavigateTo("/login", true);
+        }
+        else
+        {
+            isLoading = false;
+        }
+    }
+}

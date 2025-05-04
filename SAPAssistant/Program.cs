@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Components.Web;
 using SAPAssistant.Data;
 using SAPAssistant.Security;
 using SAPAssistant.Service;
+using SAPAssistant.Security.Policies;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,11 +14,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddHttpClient();
+
+// API principal
 builder.Services.AddScoped(sp => new HttpClient
 {
-    BaseAddress = new Uri("http://localhost:8000") // 👈 tu API de FastAPI
+    BaseAddress = new Uri("http://localhost:8000")
 });
 
+// Servicios API específicos
 builder.Services.AddHttpClient<ConnectionService>(client =>
 {
     client.BaseAddress = new Uri("http://localhost:8081");
@@ -27,14 +32,22 @@ builder.Services.AddHttpClient<AssistantService>(client =>
     client.BaseAddress = new Uri("http://localhost:8000");
 });
 
-
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddScoped<AuthService>();
-builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddSingleton<DashboardService>();
+
+// ✅ Política de conexión activa
+builder.Services.AddAuthorizationCore(options =>
+{
+    options.AddPolicy("Conectado", policy =>
+        policy.Requirements.Add(new ConnectionRequirement()));
+});
+
+// ✅ Handler de autorización
+builder.Services.AddScoped<IAuthorizationHandler, ConnectionAuthorizationHandler>();
 
 var app = builder.Build();
 
@@ -42,14 +55,11 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
-
 app.UseRouting();
 
 app.MapBlazorHub();

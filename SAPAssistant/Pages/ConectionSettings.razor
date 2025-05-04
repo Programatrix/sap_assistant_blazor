@@ -58,7 +58,7 @@
 @code {
     private ConnectionDTO connectionData = new();
     private string Password = string.Empty;
-
+   
     private bool IsEditMode => !string.IsNullOrWhiteSpace(connectionData.ConnectionId);
 
     protected override async Task OnInitializedAsync()
