@@ -43,11 +43,18 @@
                             }
                         </td>
                         <td class="acciones">
-                            <button class="edit-button" @onclick="() => EditarConexion(conn)">Editar</button>
+                            <button class="edit-button" @onclick="() => EditarConexion(conn)" disabled="@IsActivating">Editar</button>
                             @if (!conn.IsActive)
                             {
-                                <button class="icon-button" title="Usar esta conexión" @onclick="() => SetActive(conn.ConnectionId)">
-                                    <span class="material-icons">check_circle</span>
+                                <button class="icon-button" title="Usar esta conexión" @onclick="() => SetActive(conn.ConnectionId)" disabled="@IsActivating">
+                                    @if (IsActivating && ActivatingConnectionId == conn.ConnectionId)
+                                    {
+                                        <span class="spinner-border"></span>
+                                    }
+                                    else
+                                    {
+                                        <span class="material-icons">check_circle</span>
+                                    }
                                 </button>
                             }
                         </td>
@@ -57,7 +64,7 @@
         </table>
 
         <div class="new-conn-container">
-            <button class="new-conn-btn" @onclick="NuevaConexion">
+            <button class="new-conn-btn" @onclick="NuevaConexion" disabled="@IsActivating">
                 <span class="material-icons">add</span>
                 Nueva conexión
             </button>
@@ -83,56 +90,85 @@
     private List<ConnectionDTO> Connections = new();
     private bool MostrarMensaje = false;
     private bool MostrarError = false;
+    private bool IsActivating = false;
+    private string? ActivatingConnectionId = null;
+
     [Parameter] public bool EsModal { get; set; } = false;
     [Parameter] public EventCallback<bool> OnConnectionActivated { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         Connections = await ConnectionService.GetConnectionsAsync();
-
-        var activeResult = await SessionStorage.GetAsync<string>("active_connection_id");
-        var activeId = activeResult.Success ? activeResult.Value : null;
-
-        foreach (var conn in Connections)
-            conn.IsActive = conn.ConnectionId == activeId;
     }
 
-    private async void SetActive(string connectionId)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender)
+        {
+            var activeResult = await SessionStorage.GetAsync<string>("active_connection_id");
+            var activeId = activeResult.Success ? activeResult.Value : null;
+
+            foreach (var conn in Connections)
+                conn.IsActive = conn.ConnectionId == activeId;
+
+            StateHasChanged();
+        }
+    }
+
+    private async Task SetActive(string connectionId)
+    {
+        if (IsActivating)
+            return;
+
+        IsActivating = true;
+        ActivatingConnectionId = connectionId;
         MostrarMensaje = false;
         MostrarError = false;
         StateHasChanged();
 
-        var isValid = await ConnectionService.ValidateConnectionAsync(connectionId);
-        if (!isValid)
+        try
         {
-            MostrarError = true;
-            StateHasChanged();
+            var isValid = await ConnectionService.ValidateConnectionAsync(connectionId);
+
+            if (!isValid)
+            {
+                MostrarError = true;
+                StateHasChanged();
+                await Task.Delay(3000);
+                MostrarError = false;
+                return;
+            }
+
+            await SessionStorage.SetAsync("active_connection_id", connectionId);
+
+            foreach (var conn in Connections)
+                conn.IsActive = conn.ConnectionId == connectionId;
+
+            MostrarMensaje = true;
+            await OnConnectionActivated.InvokeAsync(true);
             await Task.Delay(3000);
-            MostrarError = false;
-            StateHasChanged();
-            return;
+            MostrarMensaje = false;
         }
-
-        await SessionStorage.SetAsync("active_connection_id", connectionId);
-
-        foreach (var conn in Connections)
-            conn.IsActive = conn.ConnectionId == connectionId;
-
-        MostrarMensaje = true;
-        await OnConnectionActivated.InvokeAsync(true);
-        StateHasChanged();
-
-        await Task.Delay(3000);
-        MostrarMensaje = false;
-        StateHasChanged();
+        finally
+        {
+            IsActivating = false;
+            ActivatingConnectionId = null;
+            StateHasChanged();
+        }
     }
 
     private async Task EditarConexion(ConnectionDTO conn)
     {
+        if (IsActivating) return;
+
         await SessionStorage.SetAsync("connection_to_edit", conn);
         Navigation.NavigateTo("/connection/edit", EsModal);
     }
 
-    private void NuevaConexion() => Navigation.NavigateTo("/connection/edit", EsModal);
+    private void NuevaConexion()
+    {
+        if (IsActivating) return;
+
+        Navigation.NavigateTo("/connection/edit", EsModal);
+    }
 }

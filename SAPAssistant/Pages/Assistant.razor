@@ -123,9 +123,13 @@
                     });
             }
 
+            // 🔄 Asegura que se haya renderizado antes de hacer scroll
+            await InvokeAsync(StateHasChanged);
+            await Task.Delay(50); // pequeña pausa para dar tiempo al render
             await ScrollToBottom();
         }
     }
+
 
     private async Task ResizeTextarea()
     {
