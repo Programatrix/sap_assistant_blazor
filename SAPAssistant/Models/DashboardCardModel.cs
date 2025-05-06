@@ -16,6 +16,13 @@
         public DashboardCardType CardType { get; set; } = DashboardCardType.ValueOnly;
         public double? Variation { get; set; }
         public List<double>? ChartData { get; set; } // para el mini gráfico
+
+         // 🔽 Nuevos para el catálogo y vista detalle
+        public string SqlQuery { get; set; } = "";
+        public string SuggestedChart { get; set; } = "";
+        public string[] DrillDownLevels { get; set; } = Array.Empty<string>();
+        public string PromptOrigin { get; set; } = "";
+        public string Category { get; set; } = "";
     }
 
     public enum DashboardCardType
