@@ -1,0 +1,175 @@
+﻿.settings-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.settings-modal {
+    background: #2a2a2a;
+    color: white;
+    width: 800px;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.settings-content {
+    display: flex;
+    min-height: 400px;
+}
+
+.tabs {
+    width: 180px;
+    border-right: 1px solid #444;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-right: 1rem;
+}
+
+.tab-item {
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+    .tab-item:hover {
+        background-color: #3a3a3a;
+    }
+
+    .tab-item.active {
+        background-color: #3b82f6;
+        color: white;
+    }
+
+.tab-panel {
+    flex: 1;
+    padding: 0 1.5rem;
+    overflow-y: auto;
+}
+
+.btn-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    color: #aaa;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    z-index: 10;
+}
+
+    .btn-close:hover {
+        color: white;
+    }
+
+/* Tabla de conexiones */
+.conn-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 14px;
+}
+
+    .conn-table th, .conn-table td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid #444;
+    }
+
+    .conn-table th {
+        background-color: #333;
+        font-weight: 600;
+    }
+
+    .conn-table td {
+        background-color: #2a2a2a;
+    }
+
+    .conn-table tr:hover {
+        background-color: #383838;
+    }
+
+.estado-inactivo {
+    color: #888;
+    font-size: 13px;
+}
+
+.checkmark {
+    color: #4ade80;
+    margin-right: 6px;
+}
+
+.acciones {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.edit-button {
+    background-color: #4b5563;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 13px;
+}
+
+    .edit-button:hover {
+        background-color: #6b7280;
+    }
+
+.icon-button {
+    background: transparent;
+    border: none;
+    color: #4ade80;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px;
+}
+
+    .icon-button:hover {
+        color: #86efac;
+    }
+
+.material-icons {
+    vertical-align: middle;
+    font-size: 20px;
+}
+
+/* Nueva conexión */
+.new-conn-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.new-conn-btn {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.6rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+    .new-conn-btn:hover {
+        background-color: #2563eb;
+    }

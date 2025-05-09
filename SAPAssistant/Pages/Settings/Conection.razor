@@ -1,0 +1,67 @@
+﻿@page "/conexiones"
+@layout PostLoginLayout
+@using SAPAssistant.Service
+@using SAPAssistant.Components.Connection
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject NavigationManager Navigation
+@inject ConnectionService ConnectionService
+@inject ProtectedSessionStorage SessionStorage
+
+<h2>🔗 Selecciona una conexión activa</h2>
+<p>Necesitas una conexión activa para usar el asistente.</p>
+
+<ConectionManager OnConnectionActivated="HandleConnectionActivated" EsModal="false" />
+
+@if (MostrarAviso)
+{
+    <div class="mensaje-error">
+        ⚠️ La conexión previamente activa ya no es válida.
+    </div>
+}
+
+@if (HayConexionActiva)
+{
+    <div style="margin-top: 2rem;">
+        <button class="btn btn-primary" @onclick="VolverHome">
+            ✅ Volver al inicio
+        </button>
+    </div>
+}
+
+@code {
+    private bool HayConexionActiva = false;
+    private bool MostrarAviso = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var result = await SessionStorage.GetAsync<string>("active_connection_id");
+            if (result.Success && !string.IsNullOrEmpty(result.Value))
+            {
+                var isValid = await ConnectionService.ValidateConnectionAsync(result.Value);
+                if (isValid)
+                {
+                    HayConexionActiva = true;
+                }
+                else
+                {
+                    HayConexionActiva = false;
+                    MostrarAviso = true;
+                    await SessionStorage.DeleteAsync("active_connection_id");
+                }
+
+                StateHasChanged();
+            }
+        }
+    }
+
+    private void HandleConnectionActivated(bool activo)
+    {
+        HayConexionActiva = activo;
+        MostrarAviso = false;
+        StateHasChanged();
+    }
+
+    private void VolverHome() => Navigation.NavigateTo("/");
+}

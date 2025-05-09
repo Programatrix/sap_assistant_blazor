@@ -1,0 +1,174 @@
+﻿@namespace SAPAssistant.Components.Connection
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using SAPAssistant.Models
+@using SAPAssistant.Service
+@inject ConnectionService ConnectionService
+@inject ProtectedSessionStorage SessionStorage
+@inject NavigationManager Navigation
+
+<div class="connection-manager">
+    <h3>Mis conexiones</h3>
+
+    @if (Connections == null)
+    {
+        <p>Cargando conexiones...</p>
+    }
+    else
+    {
+        <table class="conn-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Host</th>
+                    <th>Puerto</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var conn in Connections)
+                {
+                    <tr>
+                        <td>@conn.ConnectionId</td>
+                        <td>@conn.Host</td>
+                        <td>@conn.Port</td>
+                        <td>
+                            @if (conn.IsActive)
+                            {
+                                <span><span class="checkmark">✔</span> Activa</span>
+                            }
+                            else
+                            {
+                                <span class="estado-inactivo">—</span>
+                            }
+                        </td>
+                        <td class="acciones">
+                            <button class="edit-button" @onclick="() => EditarConexion(conn)" disabled="@IsActivating">Editar</button>
+                            @if (!conn.IsActive)
+                            {
+                                <button class="icon-button" title="Usar esta conexión" @onclick="() => SetActive(conn.ConnectionId)" disabled="@IsActivating">
+                                    @if (IsActivating && ActivatingConnectionId == conn.ConnectionId)
+                                    {
+                                        <span class="spinner-border"></span>
+                                    }
+                                    else
+                                    {
+                                        <span class="material-icons">check_circle</span>
+                                    }
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="new-conn-container">
+            <button class="new-conn-btn" @onclick="NuevaConexion" disabled="@IsActivating">
+                <span class="material-icons">add</span>
+                Nueva conexión
+            </button>
+        </div>
+
+        @if (MostrarMensaje)
+        {
+            <div class="mensaje-activacion">
+                ✅ Conexión activada correctamente
+            </div>
+        }
+
+        @if (MostrarError)
+        {
+            <div class="mensaje-error">
+                ❌ No se pudo validar la conexión. Verifica los datos.
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private List<ConnectionDTO> Connections = new();
+    private bool MostrarMensaje = false;
+    private bool MostrarError = false;
+    private bool IsActivating = false;
+    private string? ActivatingConnectionId = null;
+
+    [Parameter] public bool EsModal { get; set; } = false;
+    [Parameter] public EventCallback<bool> OnConnectionActivated { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Connections = await ConnectionService.GetConnectionsAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var activeResult = await SessionStorage.GetAsync<string>("active_connection_id");
+            var activeId = activeResult.Success ? activeResult.Value : null;
+
+            foreach (var conn in Connections)
+                conn.IsActive = conn.ConnectionId == activeId;
+
+            StateHasChanged();
+        }
+    }
+
+    private async Task SetActive(string connectionId)
+    {
+        if (IsActivating)
+            return;
+
+        IsActivating = true;
+        ActivatingConnectionId = connectionId;
+        MostrarMensaje = false;
+        MostrarError = false;
+        StateHasChanged();
+
+        try
+        {
+            var isValid = await ConnectionService.ValidateConnectionAsync(connectionId);
+
+            if (!isValid)
+            {
+                MostrarError = true;
+                StateHasChanged();
+                await Task.Delay(3000);
+                MostrarError = false;
+                return;
+            }
+
+            await SessionStorage.SetAsync("active_connection_id", connectionId);
+
+            foreach (var conn in Connections)
+                conn.IsActive = conn.ConnectionId == connectionId;
+
+            MostrarMensaje = true;
+            await OnConnectionActivated.InvokeAsync(true);
+            await Task.Delay(3000);
+            MostrarMensaje = false;
+        }
+        finally
+        {
+            IsActivating = false;
+            ActivatingConnectionId = null;
+            StateHasChanged();
+        }
+    }
+
+    private async Task EditarConexion(ConnectionDTO conn)
+    {
+        if (IsActivating) return;
+
+        await SessionStorage.SetAsync("connection_to_edit", conn);
+        Navigation.NavigateTo("/connection/edit", EsModal);
+    }
+
+    private void NuevaConexion()
+    {
+        if (IsActivating) return;
+
+        Navigation.NavigateTo("/connection/edit", EsModal);
+    }
+}

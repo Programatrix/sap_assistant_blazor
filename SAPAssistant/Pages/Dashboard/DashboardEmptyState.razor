@@ -1,0 +1,15 @@
+﻿<div class="empty-state">
+    <h2>💬 Aún no tienes KPIs personalizados</h2>
+    <p>Haz clic en el botón para crear tu primer KPI basado en IA.</p>
+    <button class="btn-create-kpi" @onclick="CreateKPI">✨ Crear KPI</button>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback OnCreateKPI { get; set; }
+
+    private async Task CreateKPI()
+    {
+        await OnCreateKPI.InvokeAsync();
+    }
+}

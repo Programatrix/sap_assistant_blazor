@@ -1,0 +1,42 @@
+﻿@using SAPAssistant.Service
+@inject DashboardService DashboardService
+
+<div class="dashboard-wizard">
+    <h2>✨ Crea tu nuevo KPI</h2>
+
+    <EditForm Model="NewKpiModel" OnValidSubmit="CreateKPI">
+        <InputText @bind-Value="NewKpiModel.Prompt" placeholder="¿Qué quieres consultar?" class="input-prompt" />
+        <select @bind="NewKpiModel.ChartType" class="select-chart-type">
+            <option value="bar">📊 Gráfico de Barras</option>
+            <option value="pie">🥧 Gráfico de Pastel</option>
+            <option value="number">🔢 Número</option>
+        </select>
+        <button type="submit" class="btn-submit">Agregar al Dashboard</button>
+    </EditForm>
+
+    <button class="btn-cancel" @onclick="Cancel">Cancelar</button>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback OnFinished { get; set; }
+
+    private NewKpiInputModel NewKpiModel = new();
+
+    private async Task CreateKPI()
+    {
+        await DashboardService.CreateNewKPI(NewKpiModel.Prompt,NewKpiModel.ChartType);
+        await OnFinished.InvokeAsync();
+    }
+
+    private async Task Cancel()
+    {
+        await OnFinished.InvokeAsync();
+    }
+
+    private class NewKpiInputModel
+    {
+        public string Prompt { get; set; } = "";
+        public string ChartType { get; set; } = "bar";
+    }
+}

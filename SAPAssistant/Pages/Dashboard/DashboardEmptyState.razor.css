@@ -1,0 +1,32 @@
+﻿/* DashboardEmptyState.css */
+
+.empty-state {
+    background: #1e1e2f;
+    padding: 40px;
+    border-radius: 12px;
+    color: white;
+    text-align: center;
+    margin-top: 50px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+    .empty-state h2 {
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: #ccc;
+    }
+
+    .empty-state .btn-create-kpi {
+        margin-top: 20px;
+        background-color: #17a2b8;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        color: white;
+    }
+
+        .empty-state .btn-create-kpi:hover {
+            background-color: #138496;
+        }

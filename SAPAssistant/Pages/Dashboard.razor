@@ -1,0 +1,134 @@
+﻿@page "/dashboard"
+@attribute [Authorize]
+@layout AssistantLayout
+
+<h1>📊 Dashboard Inteligente</h1>
+
+<!-- Botón Global -->
+<div class="dashboard-actions">
+    <button class="btn-global-refresh" @onclick="RefreshAllCards">🔄 Actualizar Todos los KPIs</button>
+</div>
+
+<!-- Formulario de Prompts -->
+<EditForm Model="PromptModel" OnValidSubmit="HandlePromptSubmit" class="prompt-form">
+    <InputText @bind-Value="PromptModel.Prompt" placeholder="¿Qué quieres consultar?" class="input-prompt" />
+    <button type="submit" class="btn-submit">Crear Tarjeta</button>
+</EditForm>
+
+<!-- Sección KPIs Fijos -->
+<h2>🔒 KPIs Principales</h2>
+<div class="dashboard-grid">
+    @foreach (var card in FixedCards)
+    {
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2>@card.Title</h2>
+                <div class="card-actions">
+                    <button class="btn-refresh" @onclick="() => RefreshFixedCard(card)">🔄</button>
+                </div>
+            </div>
+            <p class="big-number">@card.Value</p>
+            <p class="card-description">@card.Description</p>
+        </div>
+    }
+</div>
+
+<!-- Sección KPIs Dinámicos -->
+<h2>✨ KPIs Dinámicos (IA)</h2>
+<div class="dashboard-grid">
+    @foreach (var card in DynamicCards)
+    {
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2>@card.Title</h2>
+                <div class="card-actions">
+                    <button class="btn-refresh" @onclick="() => RefreshDynamicCard(card)">🔄</button>
+                    <button class="btn-delete" @onclick="() => DeleteDynamicCard(card)">❌</button>
+                </div>
+            </div>
+            <p class="big-number">@card.Value</p>
+            <p class="card-description">@card.Description</p>
+        </div>
+    }
+</div>
+
+@code {
+    private PromptInput PromptModel = new();
+    private List<DashboardCard> FixedCards = new();
+    private List<DashboardCard> DynamicCards = new();
+
+    protected override void OnInitialized()
+    {
+        // Inicializar KPIs fijos
+        FixedCards.Add(new DashboardCard { Id = Guid.NewGuid(), Title = "Ventas Totales", Value = "$0", Description = "Total de ventas hoy" });
+        FixedCards.Add(new DashboardCard { Id = Guid.NewGuid(), Title = "Pedidos Pendientes", Value = "0", Description = "Órdenes pendientes de envío" });
+        FixedCards.Add(new DashboardCard { Id = Guid.NewGuid(), Title = "Stock Crítico", Value = "0", Description = "Productos en stock crítico" });
+    }
+
+    private async Task HandlePromptSubmit()
+    {
+        if (string.IsNullOrWhiteSpace(PromptModel.Prompt))
+            return;
+
+        // Simulación de respuesta IA
+        var simulatedResponse = new
+        {
+            Query = "SELECT Region, SUM(Total) FROM Ventas GROUP BY Region",
+            SuggestedChart = "bar"
+        };
+
+        if (simulatedResponse.SuggestedChart is "bar" or "pie" or "number")
+        {
+            DynamicCards.Add(new DashboardCard
+                {
+                    Id = Guid.NewGuid(),
+                    Title = PromptModel.Prompt,
+                    Value = "🔄 (Datos simulados)",
+                    Description = "Tarjeta generada automáticamente."
+                });
+        }
+
+        PromptModel.Prompt = "";
+    }
+
+    private async Task RefreshFixedCard(DashboardCard card)
+    {
+        card.Value = "🔄 Actualizando...";
+        await Task.Delay(500); // Simula actualización
+        card.Value = "✅ Actualizado (fijo)";
+    }
+
+    private async Task RefreshDynamicCard(DashboardCard card)
+    {
+        card.Value = "🔄 Actualizando...";
+        await Task.Delay(500); // Simula actualización
+        card.Value = "✅ Actualizado (dinámico)";
+    }
+
+    private async Task RefreshAllCards()
+    {
+        foreach (var card in FixedCards)
+        {
+            await RefreshFixedCard(card);
+        }
+        foreach (var card in DynamicCards)
+        {
+            await RefreshDynamicCard(card);
+        }
+    }
+
+    private void DeleteDynamicCard(DashboardCard card)
+    {
+        DynamicCards.Remove(card);
+    }
+
+    private class PromptInput { public string Prompt { get; set; } = ""; }
+
+    private class DashboardCard
+    {
+        public Guid Id { get; set; }
+        public string Title { get; set; } = "";
+        public string Value { get; set; } = "";
+        public string Description { get; set; } = "";
+    }
+}

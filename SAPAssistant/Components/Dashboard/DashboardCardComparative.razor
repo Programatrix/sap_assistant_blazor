@@ -1,0 +1,79 @@
+﻿@using SAPAssistant.Models
+@using SAPAssistant.Service
+
+<div class="dashboard-card">
+    <div class="card-header">
+        @if (!string.IsNullOrWhiteSpace(Card.TypeLabel) || !string.IsNullOrWhiteSpace(Card.TypeIcon))
+        {
+            <span class="card-tag">@Card.TypeIcon @Card.TypeLabel</span>
+        }
+
+        <div class="card-actions">
+            <button @onclick="Refresh">🔄</button>
+            @if (!Card.IsFixed)
+            {
+                <button @onclick="Delete">❌</button>
+            }
+        </div>
+    </div>
+
+    <h2>@Card.Title</h2>
+
+    @if (Card.IsLoading)
+    {
+        <div class="spinner-container">
+            <div class="spinner"></div>
+        </div>
+    }
+    else
+    {
+        <p class="big-number">@Card.Value</p>
+
+        @if (Card.Variation.HasValue)
+        {
+            <p class="variation">
+                @if (Card.Variation > 0)
+                {
+                    <span class="positive">↑ @($"{Card.Variation.Value}% respecto a ayer")</span>
+                }
+                else if (Card.Variation < 0)
+                {
+                    <span class="negative">↓ @($"{Math.Abs(Card.Variation.Value)}% respecto a ayer")</span>
+                }
+                else
+                {
+                    <span class="neutral">Sin cambios</span>
+                }
+            </p>
+        }
+    }
+
+    <p class="card-description">@Card.Description</p>
+</div>
+
+@code {
+    [Parameter]
+    public DashboardCardModel Card { get; set; } = default!;
+
+    [Inject]
+    private DashboardService DashboardService { get; set; } = default!;
+
+    private async Task Refresh()
+    {
+        if (Card.RefreshAsync != null)
+        {
+            Card.IsLoading = true;
+            StateHasChanged();
+            await Card.RefreshAsync(async () =>
+            {
+                Card.IsLoading = false;
+                await InvokeAsync(StateHasChanged);
+            });
+        }
+    }
+
+    private void Delete()
+    {
+        DashboardService.DeleteKPI(Card.Id);
+    }
+}

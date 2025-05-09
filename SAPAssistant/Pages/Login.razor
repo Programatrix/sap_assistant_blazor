@@ -1,0 +1,48 @@
+﻿@page "/login"
+@using SAPAssistant.Models
+@using SAPAssistant.Service
+@attribute [AllowAnonymous]
+@layout PublicLayout
+
+<div class="login-wrapper">
+    <h1 class="login-title">Iniciar Sesión</h1>
+
+    <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-container">
+            <InputText class="input" @bind-Value="loginModel.Username" placeholder="Usuario" />
+            <InputText type="password" class="input" @bind-Value="loginModel.Password" placeholder="Contraseña" />
+            <button type="submit" class="login-btn">Entrar</button>
+        </div>
+    </EditForm>
+
+    @if (loginError != null)
+    {
+        <p class="error">@loginError</p>
+    }
+</div>
+
+@code {
+    private LoginRequest loginModel = new();
+    private string? loginError;
+
+    [Inject] private AuthService AuthService { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    private async Task HandleLogin()
+    {
+        loginError = null;
+
+        var success = await AuthService.LoginAsync(loginModel);
+        if (success)
+        {
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            loginError = "❌ Credenciales inválidas. Verifica tu usuario y contraseña.";
+        }
+    }
+}

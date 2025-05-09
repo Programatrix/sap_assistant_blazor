@@ -1,0 +1,118 @@
+﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using SAPAssistant.Security
+@using SAPAssistant.Service
+@inherits LayoutComponentBase
+@attribute [Authorize]
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ConnectionService ConnectionService
+@inject ProtectedSessionStorage SessionStorage
+
+@if (isLoading || validandoConexion)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <div class="layout-container dark-mode" @onmousedown="HandleGlobalClick">
+        <!-- Menú lateral -->
+        <div class="sidebar">
+            <NavMenu />
+        </div>
+
+        <!-- Contenido principal -->
+        <div class="main-area">
+            <header class="topbar">
+                <div class="title">Synkro Assistant</div>
+                <div class="user-profile">
+                    <button class="avatar" @onclick="ToggleMenu" @onclick:stopPropagation="true">JK</button>
+                    @if (IsMenuOpen)
+                    {
+                        <div class="user-menu" @onmousedown:stopPropagation="true">
+                            <ul>
+                                <li @onclick="OpenSettings">⚙ Configuración</li>
+                                <li @onclick="Logout">🚪 Cerrar sesión</li>
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </header>
+
+            <!-- Contenido con scroll aislado -->
+            <main class="page-content">
+                @Body
+            </main>
+        </div>
+    </div>
+}
+
+@if (ShowSettings)
+{
+    <SettingsModal OnClose="CloseSettings" />
+}
+
+@code {
+    private bool IsMenuOpen = false;
+    private bool isLoading = true;
+    private bool ShowSettings = false;
+    private bool validandoConexion = true;
+
+    [Inject] private CustomAuthStateProvider AuthProvider { get; set; } = default!;
+
+    private void ToggleMenu() => IsMenuOpen = !IsMenuOpen;
+
+    private void HandleGlobalClick(MouseEventArgs e)
+    {
+        if (IsMenuOpen)
+        {
+            IsMenuOpen = false;
+            StateHasChanged();
+        }
+    }
+
+    private void OpenSettings() => ShowSettings = true;
+    private void CloseSettings() => ShowSettings = false;
+
+    private async Task Logout()
+    {
+        await AuthProvider.MarkUserAsLoggedOut();
+        Navigation.NavigateTo("/login", true);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity?.IsAuthenticated ?? true)
+        {
+            Navigation.NavigateTo("/login", true);
+            return;
+        }
+
+        // Si ya estás en /conexiones, no validamos
+        var currentUri = Navigation.ToBaseRelativePath(Navigation.Uri).ToLower();
+        if (!currentUri.StartsWith("conexiones"))
+        {
+            var result = await SessionStorage.GetAsync<string>("active_connection_id");
+            if (result.Success && !string.IsNullOrEmpty(result.Value))
+            {
+                var isValid = await ConnectionService.ValidateConnectionAsync(result.Value);
+                if (!isValid)
+                {
+                    await SessionStorage.DeleteAsync("active_connection_id");
+                    Navigation.NavigateTo("/conexiones", true);
+                    return;
+                }
+            }
+            else
+            {
+                Navigation.NavigateTo("/conexiones", true);
+                return;
+            }
+        }
+
+        isLoading = false;
+        validandoConexion = false;
+    }
+}
