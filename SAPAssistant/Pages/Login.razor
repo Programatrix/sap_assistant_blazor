@@ -4,45 +4,139 @@
 @attribute [AllowAnonymous]
 @layout PublicLayout
 
-<div class="login-wrapper">
-    <h1 class="login-title">Iniciar Sesión</h1>
+<div class="login-page">
+    <div class="login-wrapper">
+        <h1 class="login-title">Iniciar Sesión</h1>
 
-    <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+        <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
-        <div class="form-container">
-            <InputText class="input" @bind-Value="loginModel.Username" placeholder="Usuario" />
-            <InputText type="password" class="input" @bind-Value="loginModel.Password" placeholder="Contraseña" />
-            <button type="submit" class="login-btn">Entrar</button>
-        </div>
-    </EditForm>
+            <div class="form-container">
+                <!-- Usuario -->
+                <label class="text-left w-full text-sm mb-1 text-gray-300">Usuario *</label>
+                <InputText class="@GetInputClass(userNameError)"
+                           @bind-Value="loginModel.Username"
+                           @oninput="ValidateFields"
+                           placeholder="Introduce tu usuario" />
 
-    @if (loginError != null)
-    {
-        <p class="error">@loginError</p>
-    }
+                <!-- Contraseña -->
+                <label class="text-left w-full text-sm mb-1 text-gray-300">Contraseña *</label>
+                <div class="password-wrapper">
+                    <InputText @bind-Value="loginModel.Password"
+                               @oninput="ValidateFields"
+                               class="@GetInputClass(passwordError)"
+                               type="@(ShowPassword ? "text" : "password")"
+                               placeholder="Introduce tu contraseña" />
+
+                    <button type="button"
+                            class="toggle-password-icon"
+                            @onclick="TogglePasswordVisibility"
+                            aria-label="Mostrar/Ocultar contraseña">
+                        @if (ShowPassword)
+                        {
+                            @EyeOffIcon
+                        }
+                        else
+                        {
+                            @EyeIcon
+                        }
+                    </button>
+                </div>
+
+                <!-- Botón de Login -->
+                <button type="submit"
+                        class="login-btn"
+                        disabled="@(!CanSubmit || IsLoading)">
+                    Entrar
+                </button>
+            </div>
+        </EditForm>
+    </div>
 </div>
+
+@if (IsLoading)
+{
+    <div class="loading-overlay">
+        <svg class="spinner-large" viewBox="0 0 50 50">
+            <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+        </svg>
+    </div>
+}
 
 @code {
     private LoginRequest loginModel = new();
-    private string? loginError;
+    private bool IsLoading = false;
+    private bool userNameError = false;
+    private bool passwordError = false;
+    private bool ShowPassword = false;
+
+    private bool CanSubmit =>
+        !string.IsNullOrWhiteSpace(loginModel.Username) &&
+        !string.IsNullOrWhiteSpace(loginModel.Password);
 
     [Inject] private AuthService AuthService { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Inject] private NotificationService NotificationService { get; set; } = default!;
 
     private async Task HandleLogin()
     {
-        loginError = null;
+        IsLoading = true;
 
-        var success = await AuthService.LoginAsync(loginModel);
-        if (success)
+        userNameError = string.IsNullOrWhiteSpace(loginModel.Username);
+        passwordError = string.IsNullOrWhiteSpace(loginModel.Password);
+
+        if (!userNameError && !passwordError)
         {
-            Navigation.NavigateTo("/");
+            var result = await AuthService.LoginAsync(loginModel);
+
+            if (result.Success)
+            {
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                NotificationService.ShowToast(result);
+                passwordError = true;
+            }
         }
-        else
-        {
-            loginError = "❌ Credenciales inválidas. Verifica tu usuario y contraseña.";
-        }
+
+        IsLoading = false;
     }
+
+    private void TogglePasswordVisibility() => ShowPassword = !ShowPassword;
+
+    private void ValidateFields()
+    {
+        userNameError = string.IsNullOrWhiteSpace(loginModel.Username);
+        passwordError = string.IsNullOrWhiteSpace(loginModel.Password);
+    }
+
+    private string GetInputClass(bool hasError) => hasError ? "input input-error" : "input";
+
+    private RenderFragment EyeIcon => builder =>
+    {
+        builder.AddMarkupContent(0, @"
+            <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white' width='20' height='20'>
+                <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2'
+                      d='M15 12a3 3 0 11-6 0 3 3 0 016 0z' />
+                <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2'
+                      d='M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943
+                      9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' />
+            </svg>");
+    };
+
+    private RenderFragment EyeOffIcon => builder =>
+    {
+        builder.AddMarkupContent(0, @"
+            <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white' width='20' height='20'>
+                <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2'
+                      d='M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7
+                      a9.964 9.964 0 012.132-3.368m1.941-1.941A9.964 9.964 0 0112 5c4.477 0
+                      8.268 2.943 9.542 7a9.965 9.965 0 01-4.132 4.868M15 12a3 3 0
+                      11-6 0 3 3 0 016 0z' />
+                <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2'
+                      d='M3 3l18 18' />
+            </svg>");
+    };
 }

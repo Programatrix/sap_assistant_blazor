@@ -1,0 +1,27 @@
+﻿@using SAPAssistant.Exceptions
+@if (Result != null && !string.IsNullOrEmpty(Result.Message))
+{
+    <div class="toast-container">
+        <div class="toast-message @(Result.Success ? "toast-success" : "toast-danger")">
+            @Result.Message
+            @if (!Result.Success && !string.IsNullOrEmpty(Result.ErrorCode))
+            {
+                <div class="error-code">[Código: @Result.ErrorCode]</div>
+            }
+            <button class="close-btn" @onclick="ClearMessage">×</button>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public ResultMessage? Result { get; set; }
+    [Parameter] public EventCallback OnClear { get; set; }
+
+    private void ClearMessage()
+    {
+        if (OnClear.HasDelegate)
+        {
+            OnClear.InvokeAsync(null);
+        }
+    }
+}
