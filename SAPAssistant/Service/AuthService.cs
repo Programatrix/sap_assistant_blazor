@@ -1,5 +1,7 @@
-﻿using SAPAssistant.Models;
+﻿using SAPAssistant.Exceptions;
+using SAPAssistant.Models;
 using SAPAssistant.Security;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -18,17 +20,39 @@ namespace SAPAssistant.Service
             _authProvider = authProvider;
         }
 
-        public async Task<bool> LoginAsync(LoginRequest request)
+        public async Task<ResultMessage> LoginAsync(LoginRequest request)
         {
-            var response = await _http.PostAsJsonAsync("/login", request);
-            if (!response.IsSuccessStatusCode) return false;
+            try
+            {
+                var response = await _http.PostAsJsonAsync("/login", request);
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    return ResultMessage.Fail("Usuario o contraseña incorrectos.", "AUTH-401");
+                }
 
-            var user = await response.Content.ReadFromJsonAsync<LoginResponse>();
-            if (user is null) return false;
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ResultMessage.Fail("El sistema no está disponible. Intenta más tarde.", $"SVC-{(int)response.StatusCode}");
+                }
 
-            await _authProvider.MarkUserAsAuthenticated(user.Username, user.Token);
-            await Task.Delay(100);
-            return true;
+                var user = await response.Content.ReadFromJsonAsync<LoginResponse>();
+                if (user is null)
+                {
+                    return ResultMessage.Fail("No se pudo procesar la respuesta del servidor.", "AUTH-INVALID-RESPONSE");
+                }
+
+                await _authProvider.MarkUserAsAuthenticated(user.Username, user.Token);
+                return ResultMessage.Ok("Inicio de sesión exitoso.");
+            }
+            catch (HttpRequestException)
+            {
+                return ResultMessage.Fail("Problema de conexión. Verifique su conexión a Internet.", "NET-ERROR");
+            }
+            catch (Exception)
+            {
+                return ResultMessage.Fail("Error inesperado. Por favor, intente nuevamente.", "UNEXPECTED-ERROR");
+            }
+
         }
 
         public async Task LogoutAsync()
