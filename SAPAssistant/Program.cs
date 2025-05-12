@@ -7,6 +7,7 @@ using SAPAssistant.Security;
 using SAPAssistant.Service;
 using SAPAssistant.Security.Policies;
 using Microsoft.AspNetCore.Authorization;
+using SAPAssistant.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +39,8 @@ builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddSingleton<DashboardService>();
+builder.Services.AddSingleton<NotificationService>();
+
 
 // ✅ Política de conexión activa
 builder.Services.AddAuthorizationCore(options =>

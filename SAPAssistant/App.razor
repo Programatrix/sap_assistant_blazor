@@ -1,21 +1,8 @@
-﻿<CascadingAuthenticationState>
+﻿@using SAPAssistant.Exceptions
+<CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly" PreferExactMatches="@true">
         <Found Context="routeData">
-            @if (routeData.PageType.Name == "Login") // o "Register", etc.
-            {
-                <RouteView RouteData="@routeData" DefaultLayout="@typeof(PublicLayout)" />
-            }
-            else
-            {
-                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(AssistantLayout)">
-                    <NotAuthorized>
-                        <LayoutView Layout="@typeof(PublicLayout)">
-                            <p>No tienes acceso a esta página. Inicia sesión.</p>
-                            <a href="/login">Ir al Login</a>
-                        </LayoutView>
-                    </NotAuthorized>
-                </AuthorizeRouteView>
-            }
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(PublicLayout)" />
         </Found>
         <NotFound>
             <LayoutView Layout="@typeof(PublicLayout)">
@@ -23,4 +10,35 @@
             </LayoutView>
         </NotFound>
     </Router>
+
+    <!-- ✅ Toast Global -->
+    <SAPAssistant.Components.AlertMessageError Result="GlobalResult" OnClear="ClearGlobalAlert" />
 </CascadingAuthenticationState>
+
+@code {
+    [Inject] private NotificationService NotificationService { get; set; } = default!;
+    private ResultMessage? GlobalResult;
+
+    protected override void OnInitialized()
+    {
+        NotificationService.OnNotify += ShowToast;
+    }
+
+    private void ShowToast(ResultMessage result)
+    {
+        InvokeAsync(() =>
+        {
+            GlobalResult = result;
+            StateHasChanged();
+        });
+    }
+
+    private void ClearGlobalAlert()
+    {
+        InvokeAsync(() =>
+        {
+            GlobalResult = null;
+            StateHasChanged();
+        });
+    }
+}
