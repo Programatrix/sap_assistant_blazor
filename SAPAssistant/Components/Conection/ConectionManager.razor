@@ -9,7 +9,17 @@
 <div class="connection-manager">
     <h3>Mis conexiones</h3>
 
-    @if (Connections == null)
+    @if (!string.IsNullOrEmpty(ErrorAlCargar))
+    {
+        <div class="mensaje-error">
+            @ErrorAlCargar
+            <br />
+            <button class="retry-button" @onclick="RecargarConexiones" disabled="@IsActivating">
+                🔄 Reintentar
+            </button>
+        </div>
+    }
+    else if (Connections == null || !Connections.Any())
     {
         <p>Cargando conexiones...</p>
     }
@@ -92,13 +102,23 @@
     private bool MostrarError = false;
     private bool IsActivating = false;
     private string? ActivatingConnectionId = null;
+    private string? ErrorAlCargar = null;
 
     [Parameter] public bool EsModal { get; set; } = false;
     [Parameter] public EventCallback<bool> OnConnectionActivated { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        Connections = await ConnectionService.GetConnectionsAsync();
+        var result = await ConnectionService.GetConnectionsAsync();
+
+        if (result.Success)
+        {
+            Connections = result.Data ?? new();
+        }
+        else
+        {
+            ErrorAlCargar = $"❌ {result.Message} (Código: {result.ErrorCode})";
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -113,6 +133,14 @@
 
             StateHasChanged();
         }
+    }
+
+    private async Task RecargarConexiones()
+    {
+        ErrorAlCargar = null;
+        StateHasChanged();
+        await OnInitializedAsync();
+        StateHasChanged();
     }
 
     private async Task SetActive(string connectionId)
