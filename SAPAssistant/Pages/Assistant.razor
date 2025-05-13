@@ -5,7 +5,7 @@
 
 <div class="chat-wrapper">
     <div class="chat-box">
-        <!-- Área de mensajes con scroll -->
+        <!-- Área de mensajes con scroll controlado -->
         <div class="messages" @ref="MessagesRef" @onscroll="OnScrollChanged">
             @foreach (var msg in ChatHistory)
             {
@@ -20,7 +20,7 @@
             <button class="scroll-to-bottom" @onclick="ScrollToBottom">⬇️</button>
         }
 
-        <!-- Área de entrada -->
+        <!-- Área de entrada fija -->
         <div class="input-area">
             <form @onsubmit="HandleSubmit">
                 <textarea @bind="UserInput"
@@ -36,7 +36,7 @@
     </div>
 </div>
 
-<!-- Sección de resultados -->
+<!-- Sección de resultados fuera del área de chat -->
 @if (UltimoResultado != null)
 {
     <div class="resultado-panel">
@@ -123,13 +123,11 @@
                     });
             }
 
-            // 🔄 Asegura que se haya renderizado antes de hacer scroll
             await InvokeAsync(StateHasChanged);
-            await Task.Delay(50); // pequeña pausa para dar tiempo al render
+            await Task.Delay(50);
             await ScrollToBottom();
         }
     }
-
 
     private async Task ResizeTextarea()
     {

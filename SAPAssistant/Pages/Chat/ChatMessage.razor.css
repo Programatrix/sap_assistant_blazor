@@ -1,0 +1,22 @@
+﻿.chat-message {
+    margin: 10px 0;
+    display: flex;
+}
+
+    .chat-message.user .message-content {
+        margin-left: auto;
+        background-color: #00bfa6;
+        color: #fff;
+    }
+
+    .chat-message.assistant .message-content {
+        margin-right: auto;
+        background-color: #3a3a4d;
+    }
+
+.message-content {
+    padding: 12px 18px;
+    border-radius: 18px;
+    max-width: 60%;
+    word-wrap: break-word;
+}

@@ -1,19 +1,10 @@
-﻿:root {
-    --primary-color: #3b82f6;
-    --primary-hover: #2563eb;
-    --background-color: #1e1e1e;
-    --surface-color: #2a2a2a;
-    --text-color: #f1f1f1;
-    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.chat-wrapper {
-    flex: 1;
+﻿.chat-wrapper {
     display: flex;
     justify-content: center;
+    background-color: #1e1e1e;
+    color: #f1f1f1;
+    height: 100vh;
     overflow: hidden;
-    background-color: var(--background-color);
-    color: var(--text-color);
 }
 
 .chat-box {
@@ -23,17 +14,19 @@
     max-width: 1000px;
     height: 100vh;
     position: relative;
+    overflow: hidden;
 }
 
 /* Área de mensajes con scroll */
 .messages {
-    flex: 1;
+    flex-grow: 1;
     overflow-y: auto;
     padding: 2rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    margin-bottom: 120px; /* Espacio para el área de input */
+    box-sizing: border-box;
+    max-height: calc(100vh - 120px); /* Ajusta según la altura del input */
 }
 
 /* Estilo de cada mensaje */
@@ -47,7 +40,7 @@
 }
 
     .message.user {
-        background-color: var(--primary-color);
+        background-color: #3b82f6;
         color: white;
         align-self: flex-end;
     }
@@ -58,7 +51,7 @@
         align-self: flex-start;
     }
 
-/* Input fijo en la parte inferior */
+/* Área de entrada fija */
 .input-area {
     position: fixed;
     bottom: 0;
@@ -66,13 +59,12 @@
     right: 0;
     z-index: 10;
     padding: 1rem 2rem;
-    background-color: var(--background-color);
+    background-color: #1e1e1e;
     border-top: 1px solid #2a2a2a;
     display: flex;
     justify-content: center;
 }
 
-    /* Contenedor del formulario estilo ChatGPT */
     .input-area form {
         display: flex;
         width: 100%;
@@ -84,12 +76,11 @@
         align-items: center;
     }
 
-/* Textarea auto-expandible */
 textarea.auto-expand {
     flex: 1;
     background-color: transparent;
     border: none;
-    color: var(--text-color);
+    color: #f1f1f1;
     font-size: 16px;
     line-height: 1.5;
     padding: 12px;
@@ -106,10 +97,9 @@ textarea.auto-expand {
         color: #a9a9b3;
     }
 
-/* Botón Enviar */
 .input-area button {
     background-color: transparent;
-    color: var(--text-color);
+    color: #f1f1f1;
     border: none;
     font-weight: bold;
     font-size: 15px;
@@ -120,27 +110,6 @@ textarea.auto-expand {
 
     .input-area button:hover {
         color: #4ea3ff;
-    }
-
-/* Flechita flotante (scroll al final) */
-.scroll-to-bottom {
-    position: absolute;
-    bottom: 100px;
-    right: 30px;
-    z-index: 20;
-    background-color: #40414f;
-    border: none;
-    color: white;
-    padding: 0.5rem 0.7rem;
-    font-size: 20px;
-    border-radius: 50%;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-    .scroll-to-bottom:hover {
-        background-color: #4ea3ff;
     }
 
 /* -----------------------------
@@ -157,44 +126,3 @@ textarea.auto-expand {
     margin-right: auto;
     border-radius: 12px;
 }
-
-    .resultado-panel h3,
-    .resultado-panel h4 {
-        margin-top: 1.5rem;
-        margin-bottom: 0.5rem;
-        color: var(--text-color);
-    }
-
-    .resultado-panel pre {
-        background-color: var(--background-color);
-        padding: 1rem;
-        border-radius: 8px;
-        overflow-x: auto;
-        font-size: 14px;
-        line-height: 1.4;
-        color: #dcdcdc;
-    }
-
-    .resultado-panel table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 1rem;
-        background-color: var(--background-color);
-    }
-
-    .resultado-panel th,
-    .resultado-panel td {
-        border: 1px solid #333;
-        padding: 0.75rem;
-        text-align: left;
-        font-size: 14px;
-    }
-
-    .resultado-panel th {
-        background-color: #343541;
-        color: var(--text-color);
-    }
-
-    .resultado-panel td {
-        color: #e0e0e0;
-    }
