@@ -1,0 +1,40 @@
+﻿<div class="chat-history">
+    <button @onclick="NewChat">+ Nuevo Chat</button>
+
+    <ul>
+        @foreach (var chat in Chats)
+        {
+            <li @onclick="@(() => SelectChat(chat.Id))">@chat.Title</li>
+        }
+    </ul>
+</div>
+
+@code {
+    [Parameter] public EventCallback<string> OnChatSelected { get; set; }
+
+    private List<ChatItem> Chats = new()
+    {
+        new ChatItem { Id = "1", Title = "Chat de Prueba 1" },
+        new ChatItem { Id = "2", Title = "Consulta Proyecto X" },
+        new ChatItem { Id = "3", Title = "SQL Optimización" }
+    };
+
+    private async Task SelectChat(string id)
+    {
+        if (OnChatSelected.HasDelegate)
+            await OnChatSelected.InvokeAsync(id);
+    }
+
+    private void NewChat()
+    {
+        // Lógica para iniciar un nuevo chat (simulada)
+        var newId = (Chats.Count + 1).ToString();
+        Chats.Add(new ChatItem { Id = newId, Title = $"Nuevo Chat {newId}" });
+    }
+
+    public class ChatItem
+    {
+        public string Id { get; set; }
+        public string Title { get; set; }
+    }
+}

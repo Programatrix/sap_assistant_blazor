@@ -1,0 +1,28 @@
+﻿
+@inherits LayoutComponentBase
+@inject NavigationManager Nav
+@using SAPAssistant.Components.Chat
+
+<div class="chat-layout-header">
+    <button @onclick="NavigateHome">← Volver</button>
+    <h2>Asistente de Chat</h2>
+</div>
+
+<div class="chat-layout-main">
+    <ChatHistory OnChatSelected="LoadChat" />
+    <div class="chat-layout-body">
+        @Body
+    </div>
+</div>
+
+<link href="css/chatlayout.css" rel="stylesheet" />
+
+@code {
+    private void NavigateHome() => Nav.NavigateTo("/");
+
+    private void LoadChat(string chatId)
+    {
+        // Aquí puedes manejar la lógica para cargar un chat específico
+        Console.WriteLine($"Chat seleccionado: {chatId}");
+    }
+}

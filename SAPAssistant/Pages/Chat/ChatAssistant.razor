@@ -1,42 +1,33 @@
 ﻿@page "/chat-assistant"
-@using System.Timers
+@layout ChatLayout
+@using Microsoft.AspNetCore.Components.Web
 
-<div class="chat-container">
-    <div class="sidebar">
-        <h3>Asistente</h3>
-        <ul>
-            <li @onclick="@(() => LoadTopic("General"))">General</li>
-            <li @onclick="@(() => LoadTopic("Proyectos"))">Proyectos</li>
-            <li @onclick="@(() => LoadTopic("Consultas SQL"))">Consultas SQL</li>
-        </ul>
+<div class="chat-content-full">
+    <div class="messages" @ref="messagesContainer">
+        @foreach (var msg in Messages)
+        {
+            <ChatMessage Content="@msg.Content" IsUser="@msg.IsUser" />
+        }
     </div>
 
-    <div class="chat-area">
-        <div class="messages" @ref="messagesContainer">
-            @foreach (var msg in Messages)
-            {
-                <ChatMessage Content="@msg.Content" IsUser="@msg.IsUser" />
-            }
-        </div>
+    <div class="input-area">
+        <input @bind="UserInput"
+               @bind:event="oninput"
+               @onkeypress="HandleKeyPress"
+               placeholder="Escribe un mensaje..." />
 
-        <div class="input-area">
-            <input @bind="UserInput" @bind:event="oninput" @onkeypress="HandleKeyPress" placeholder="Escribe un mensaje..." />
-            <button @onclick="SendMessage">Enviar</button>
-        </div>
+        <button @onclick="SendMessage">Enviar</button>
     </div>
 </div>
 
+<link href="css/chatassistant.css" rel="stylesheet" />
+<link href="css/chatmessage.css" rel="stylesheet" />
+
 @code {
-    private string UserInput { get; set; } = "";
+    private string UserInput { get; set; } = string.Empty;
     private List<Message> Messages { get; set; } = new();
 
     private ElementReference messagesContainer;
-
-    private void LoadTopic(string topic)
-    {
-        Messages.Clear();
-        Messages.Add(new Message { Content = $"Has seleccionado la categoría: {topic}. ¿Cómo puedo ayudarte?", IsUser = false });
-    }
 
     private async Task SendMessage()
     {
@@ -46,9 +37,12 @@
         var userMessage = UserInput;
         UserInput = "";
 
-        // Simulando respuesta del asistente
         await Task.Delay(500);
-        Messages.Add(new Message { Content = $"Respuesta automática a: '{userMessage}'", IsUser = false });
+        Messages.Add(new Message
+            {
+                Content = $"Respuesta automática a: '{userMessage}'",
+                IsUser = false
+            });
 
         await ScrollToBottom();
     }
@@ -69,7 +63,7 @@
 
     public class Message
     {
-        public string Content { get; set; }
+        public string Content { get; set; } = string.Empty;
         public bool IsUser { get; set; }
     }
 }
