@@ -1,0 +1,42 @@
+﻿
+<div class="search-wrapper">
+    <input type="text"
+           placeholder="Pregunta lo que quieras"
+           class="search-input"
+           @bind="SearchText"
+           @oninput="HandleInput"
+           @onkeypress="HandleKeyPress" />
+
+    <button class="search-button" @onclick="OnSearchClicked" aria-label="Enviar">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             width="16" height="16" viewBox="0 0 24 24"
+             fill="none" stroke="black" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+    </button>
+
+</div>
+
+@code {
+    [Parameter] public string SearchText { get; set; }
+    [Parameter] public EventCallback<string> SearchTextChanged { get; set; }
+    [Parameter] public EventCallback OnSearch { get; set; }
+
+    private async Task HandleInput(ChangeEventArgs e)
+    {
+        SearchText = e.Value?.ToString();
+        await SearchTextChanged.InvokeAsync(SearchText);
+    }
+
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await OnSearchClicked();
+        }
+    }
+
+    private async Task OnSearchClicked() => await OnSearch.InvokeAsync();
+}

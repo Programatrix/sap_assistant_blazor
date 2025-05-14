@@ -14,4 +14,8 @@
     <None Remove="Pages\Dashboard.razor.css" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.7.6" />
+  </ItemGroup>
+
 </Project>

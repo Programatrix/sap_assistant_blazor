@@ -1,0 +1,13 @@
+﻿@page "/test"
+
+<SearchBar @bind-SearchText="searchInput" 
+            OnSearch="HandleSearch" />
+
+@code {
+    private string searchInput;
+
+    private void HandleSearch()
+    {
+        Console.WriteLine($"Search ejecutado con: {searchInput}");
+    }
+}
