@@ -30,18 +30,19 @@
 /* Área de Entrada */
 .input-area {
     display: flex;
-    align-items: flex-end;
+    justify-content: center;
     background-color: #1e1e2f;
     padding: 20px;
     border-top: 1px solid #333;
     position: sticky;
     bottom: 0;
-    gap: 10px;
     z-index: 10;
+    gap: 10px;
 }
 
     .input-area textarea {
-        flex: 1;
+        width: 100%;
+        max-width: 800px;
         padding: 14px 16px;
         border: none;
         border-radius: 16px;
@@ -49,10 +50,11 @@
         color: #ffffff;
         font-size: 16px;
         outline: none;
-        resize: none;
+        resize: vertical; /* ✅ Permite que el usuario ajuste la altura si quiere */
         line-height: 1.5;
         min-height: 50px;
-        max-height: 150px;
+        max-height: 200px;
+        overflow-y: auto;
         box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
         transition: background-color 0.3s ease;
     }
@@ -66,6 +68,7 @@
         }
 
     .input-area button {
+        margin-left: 10px;
         padding: 14px 24px;
         background-color: #00bfa6;
         border: none;
