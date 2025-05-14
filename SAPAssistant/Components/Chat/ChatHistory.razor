@@ -1,10 +1,15 @@
-﻿<div class="chat-history">
+﻿<link href="css/chathistory.css" rel="stylesheet" />
+
+<div class="chat-history">
     <button @onclick="NewChat">+ Nuevo Chat</button>
 
     <ul>
         @foreach (var chat in Chats)
         {
-            <li @onclick="@(() => SelectChat(chat.Id))">@chat.Title</li>
+            <li class="@(chat.Id == ActiveChatId ? "active" : "")"
+                @onclick="@(() => SelectChat(chat.Id))">
+                @chat.Title
+            </li>
         }
     </ul>
 </div>
@@ -19,17 +24,20 @@
         new ChatItem { Id = "3", Title = "SQL Optimización" }
     };
 
+    private string ActiveChatId = "1"; // Por defecto el primero activo
+
     private async Task SelectChat(string id)
     {
+        ActiveChatId = id;
         if (OnChatSelected.HasDelegate)
             await OnChatSelected.InvokeAsync(id);
     }
 
     private void NewChat()
     {
-        // Lógica para iniciar un nuevo chat (simulada)
         var newId = (Chats.Count + 1).ToString();
         Chats.Add(new ChatItem { Id = newId, Title = $"Nuevo Chat {newId}" });
+        SelectChat(newId); // Activamos automáticamente el nuevo chat
     }
 
     public class ChatItem

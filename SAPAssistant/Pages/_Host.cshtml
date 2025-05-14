@@ -34,6 +34,18 @@
         <a class="dismiss">🗙</a>
     </div>
 
+    <script>
+        window.blazorAutoResize = {
+            resize: function (textarea) {
+                if (textarea) {
+                    textarea.style.height = 'auto';
+                    textarea.style.height = textarea.scrollHeight + 'px';
+                }
+            }
+        };
+    </script>
+
+
     <script src="_framework/blazor.server.js"></script>
 </body>
 </html>

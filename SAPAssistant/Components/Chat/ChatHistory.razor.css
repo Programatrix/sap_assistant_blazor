@@ -31,7 +31,18 @@
         margin: 0;
         overflow-y: auto;
         flex-grow: 1;
+        scrollbar-width: thin;
+        scrollbar-color: #555 #2b2b3c;
     }
+
+        .chat-history ul::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-history ul::-webkit-scrollbar-thumb {
+            background-color: #555;
+            border-radius: 4px;
+        }
 
     .chat-history li {
         margin: 10px 0;
@@ -39,8 +50,17 @@
         color: #cccccc;
         transition: color 0.3s ease;
         font-size: 14px;
+        padding: 8px;
+        border-radius: 6px;
     }
 
         .chat-history li:hover {
             color: #00bfa6;
+            background-color: #3a3a4d;
+        }
+
+        .chat-history li.active {
+            color: #00bfa6;
+            background-color: #3a3a4d;
+            font-weight: bold;
         }

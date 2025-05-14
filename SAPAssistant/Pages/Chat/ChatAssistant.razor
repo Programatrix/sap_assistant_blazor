@@ -1,6 +1,8 @@
 ﻿@page "/chat-assistant"
 @layout ChatLayout
 @using Microsoft.AspNetCore.Components.Web
+@inject IJSRuntime JS
+
 
 <div class="chat-content-full">
     <div class="messages" @ref="messagesContainer">
@@ -11,10 +13,13 @@
     </div>
 
     <div class="input-area">
-        <input @bind="UserInput"
-               @bind:event="oninput"
-               @onkeypress="HandleKeyPress"
-               placeholder="Escribe un mensaje..." />
+        <textarea @bind="UserInput"
+                  @ref="InputAreaRef"
+                  @oninput="AutoResize"
+                  @onkeydown="HandleKeyDown"
+                  placeholder="Escribe un mensaje..."
+                  rows="1"></textarea>
+
 
         <button @onclick="SendMessage">Enviar</button>
     </div>
@@ -26,7 +31,6 @@
 @code {
     private string UserInput { get; set; } = string.Empty;
     private List<Message> Messages { get; set; } = new();
-
     private ElementReference messagesContainer;
 
     private async Task SendMessage()
@@ -35,7 +39,7 @@
 
         Messages.Add(new Message { Content = UserInput, IsUser = true });
         var userMessage = UserInput;
-        UserInput = "";
+        UserInput = string.Empty;
 
         await Task.Delay(500);
         Messages.Add(new Message
@@ -53,13 +57,24 @@
         await messagesContainer.FocusAsync();
     }
 
-    private async Task HandleKeyPress(KeyboardEventArgs e)
+    private async Task HandleKeyDown(KeyboardEventArgs e)
     {
-        if (e.Key == "Enter")
-        {
+        if (e.Key == "Enter" && !e.ShiftKey)
+        {          
             await SendMessage();
         }
     }
+
+    private ElementReference InputAreaRef;
+
+    private async Task AutoResize()
+    {
+        if (InputAreaRef.Context != null)
+        {
+            await JS.InvokeVoidAsync("blazorAutoResize.resize", InputAreaRef);
+        }
+    }
+
 
     public class Message
     {
