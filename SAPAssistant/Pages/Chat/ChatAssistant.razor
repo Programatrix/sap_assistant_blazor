@@ -3,7 +3,6 @@
 @using Microsoft.AspNetCore.Components.Web
 @inject IJSRuntime JS
 
-
 <div class="chat-content-full">
     <div class="messages" @ref="messagesContainer">
         @foreach (var msg in Messages)
@@ -13,15 +12,7 @@
     </div>
 
     <div class="input-area">
-        <textarea @bind="UserInput"
-                  @ref="InputAreaRef"
-                  @oninput="AutoResize"
-                  @onkeydown="HandleKeyDown"
-                  placeholder="Escribe un mensaje..."
-                  rows="1"></textarea>
-
-
-        <button @onclick="SendMessage">Enviar</button>
+        <SearchBar @bind-SearchText="UserInput" OnSearch="SendMessage" />
     </div>
 </div>
 
@@ -56,25 +47,6 @@
         await Task.Delay(100);
         await messagesContainer.FocusAsync();
     }
-
-    private async Task HandleKeyDown(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter" && !e.ShiftKey)
-        {          
-            await SendMessage();
-        }
-    }
-
-    private ElementReference InputAreaRef;
-
-    private async Task AutoResize()
-    {
-        if (InputAreaRef.Context != null)
-        {
-            await JS.InvokeVoidAsync("blazorAutoResize.resize", InputAreaRef);
-        }
-    }
-
 
     public class Message
     {
