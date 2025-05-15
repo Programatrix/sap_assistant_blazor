@@ -8,17 +8,17 @@
 
 .search-input {
     width: 100%;
-    padding: 1.4rem 3rem 1.4rem 1.5rem;
+    padding: 1.4rem 5rem 1.4rem 1.5rem; /* Aumentamos padding a la derecha para dejar espacio al botón y scrollbar */
     border-radius: 2.5rem;
     background-color: #2e2e2e;
     color: #fff;
     border: 1px solid #444;
     outline: none;
     font-size: 1rem;
-    resize: none; /* El tamaño lo controlamos por JS */
+    resize: none;
     overflow-y: auto;
     line-height: 1.5;
-    max-height: 200px; /* Límite de altura antes de scroll */
+    max-height: 200px;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -34,7 +34,7 @@
 
 .search-button {
     position: absolute;
-    right: 1rem;
+    right: 2rem; /* Aumentamos la separación del borde */
     top: 50%;
     transform: translateY(-50%);
     background: #fff;
