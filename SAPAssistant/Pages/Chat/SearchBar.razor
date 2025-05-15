@@ -1,12 +1,13 @@
 ﻿@using Microsoft.AspNetCore.Components
+@inject IJSRuntime JS
 
 <div class="search-wrapper">
-    <input type="text"
-           placeholder="Escribe un mensaje..."
-           class="search-input"
-           @bind="SearchText"
-           @oninput="HandleInput"
-           @onkeypress="HandleKeyPress" />
+    <textarea placeholder="Escribe un mensaje..."
+              class="search-input search-input-auto"
+              @bind="SearchText"
+              @oninput="HandleInput"
+              @onkeydown="HandleKeyDown"
+              rows="1"></textarea>
 
     <button class="search-button" @onclick="OnSearchClicked" aria-label="Enviar">
         <svg xmlns="http://www.w3.org/2000/svg"
@@ -28,12 +29,16 @@
     {
         SearchText = e.Value?.ToString();
         await SearchTextChanged.InvokeAsync(SearchText);
+
+        // Ajuste de altura automática
+        await JS.InvokeVoidAsync("autoResize", ".search-input-auto");
     }
 
-    private async Task HandleKeyPress(KeyboardEventArgs e)
+    private async Task HandleKeyDown(KeyboardEventArgs e)
     {
         if (e.Key == "Enter" && !e.ShiftKey)
         {
+            //e.PreventDefault(); // Esto evita el salto de línea SOLO en este caso
             await OnSearchClicked();
         }
     }
@@ -46,4 +51,3 @@
         }
     }
 }
-
