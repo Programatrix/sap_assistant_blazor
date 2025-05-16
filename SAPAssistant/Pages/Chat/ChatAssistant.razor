@@ -1,7 +1,10 @@
 ﻿@page "/chat-assistant"
 @layout ChatLayout
 @using Microsoft.AspNetCore.Components.Web
+@using SAPAssistant.Service
+@using SAPAssistant.Models
 @inject IJSRuntime JS
+@inject AssistantService AssistantService
 
 <div class="chat-content-full">
     <div class="messages" @ref="messagesContainer">
@@ -11,10 +14,53 @@
         }
     </div>
 
-    <div class="input-area">
-        <SearchBar @bind-SearchText="UserInput" OnSearch="SendMessage" />
+    <div class="input-area">       
+        <SearchBar @bind-SearchText="UserInput" OnSearch="@(msg => SendMessage(msg))" />
     </div>
 </div>
+
+<!-- Sección de resultados -->
+@if (UltimoResultado != null)
+{
+    <div class="resultado-panel">
+        <h3>🧠 Resumen generado</h3>
+        <p>@UltimoResultado.Resumen</p>
+
+        <h4>📄 Consulta SQL generada</h4>
+        <pre>@UltimoResultado.Sql</pre>
+
+        <h4>📊 Resultados</h4>
+
+        @if (UltimoResultado.Resultados.Any())
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        @foreach (var col in UltimoResultado.Resultados[0].Keys)
+                        {
+                            <th>@col</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in UltimoResultado.Resultados)
+                    {
+                        <tr>
+                            @foreach (var val in row.Values)
+                            {
+                                <td>@val</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>No se encontraron resultados.</p>
+        }
+    </div>
+}
 
 <link href="css/chatassistant.css" rel="stylesheet" />
 <link href="css/chatmessage.css" rel="stylesheet" />
@@ -24,28 +70,43 @@
     private List<Message> Messages { get; set; } = new();
     private ElementReference messagesContainer;
 
-    private async Task SendMessage()
+    private QueryResponse? UltimoResultado = null;
+
+    private async Task SendMessage(string message)
     {
-        if (string.IsNullOrWhiteSpace(UserInput)) return;
+        if (string.IsNullOrWhiteSpace(message)) return;
 
-        Messages.Add(new Message { Content = UserInput, IsUser = true });
-        var userMessage = UserInput;
-        UserInput = string.Empty;
+        Messages.Add(new Message { Content = message, IsUser = true });
 
-        await Task.Delay(500);
-        Messages.Add(new Message
-            {
-                Content = $"Respuesta automática a: '{userMessage}'",
-                IsUser = false
-            });
+        try
+        {
+            var resultado = await AssistantService.ConsultarAsync(message);
+
+            Messages.Add(new Message
+                {
+                    IsUser = false,
+                    Content = resultado?.Resumen ?? "✅ Consulta ejecutada con éxito."
+                });
+
+            UltimoResultado = resultado; // ✅ Guardamos el resultado para mostrar la sección de resumen y tabla
+        }
+        catch (Exception ex)
+        {
+            Messages.Add(new Message
+                {
+                    IsUser = false,
+                    Content = $"❌ Error: {ex.Message}"
+                });
+
+            UltimoResultado = null;
+        }
 
         await ScrollToBottom();
     }
 
     private async Task ScrollToBottom()
     {
-        await Task.Delay(100);
-        await messagesContainer.FocusAsync();
+        await JS.InvokeVoidAsync("chatEnhancer.scrollToBottom", messagesContainer);
     }
 
     public class Message

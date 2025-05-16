@@ -22,8 +22,9 @@
 
 @code {
     [Parameter] public string SearchText { get; set; }
-    [Parameter] public EventCallback<string> SearchTextChanged { get; set; }
-    [Parameter] public EventCallback OnSearch { get; set; }
+    [Parameter] public EventCallback<string> SearchTextChanged { get; set; }    
+    [Parameter] public EventCallback<string> OnSearch { get; set; }
+
 
     private async Task HandleInput(ChangeEventArgs e)
     {
@@ -39,7 +40,7 @@
         if (e.Key == "Enter" && !e.ShiftKey)
         {
             //e.PreventDefault(); // Esto evita el salto de línea SOLO en este caso
-            await OnSearchClicked();
+            //await OnSearchClicked(); NO FUNCIONA 
         }
     }
 
@@ -47,7 +48,10 @@
     {
         if (!string.IsNullOrWhiteSpace(SearchText))
         {
-            await OnSearch.InvokeAsync();
+            var textToSend = SearchText;
+            SearchText = string.Empty;
+            await SearchTextChanged.InvokeAsync(SearchText); // Notificamos el cambio visual
+            await OnSearch.InvokeAsync(textToSend);
         }
     }
 }
