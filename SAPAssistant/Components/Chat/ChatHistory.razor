@@ -1,48 +1,77 @@
-﻿<link href="css/chathistory.css" rel="stylesheet" />
+﻿@using SAPAssistant.Models
+@using SAPAssistant.Service
+@inject ChatHistoryService ChatService
+@inject NavigationManager Navigation
 
-<div class="chat-history">
-    <button @onclick="NewChat">+ Nuevo Chat</button>
+<div class="sidebar">
+    <button class="btn btn-primary w-100 mb-3" @onclick="StartNewChat">+ Nuevo Chat</button>
 
-    <ul>
-        @foreach (var chat in Chats)
-        {
-            <li class="@(chat.Id == ActiveChatId ? "active" : "")"
-                @onclick="@(() => SelectChat(chat.Id))">
-                @chat.Title
-            </li>
-        }
-    </ul>
+    @if (Sessions == null)
+    {
+        <p>Cargando chats...</p>
+    }
+    else if (!Sessions.Any())
+    {
+        <p>No hay chats guardados.</p>
+    }
+    else
+    {
+        <ul class="list-group">
+            @foreach (var chat in Sessions.OrderByDescending(c => c.Fecha))
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span @onclick="() => OpenChat(chat.Id)" style="cursor: pointer;">
+                        <b>@chat.Titulo</b><br />
+                        <small>@chat.Fecha.ToShortDateString()</small>
+                    </span>
+                    <button class="btn btn-sm btn-danger" @onclick="() => DeleteChat(chat.Id)">🗑️</button>
+                </li>
+            }
+        </ul>
+    }
 </div>
 
 @code {
-    [Parameter] public EventCallback<string> OnChatSelected { get; set; }
+    private List<ChatSession> Sessions = new();
 
-    private List<ChatItem> Chats = new()
+    protected override async Task OnInitializedAsync()
     {
-        new ChatItem { Id = "1", Title = "Chat de Prueba 1" },
-        new ChatItem { Id = "2", Title = "Consulta Proyecto X" },
-        new ChatItem { Id = "3", Title = "SQL Optimización" }
-    };
-
-    private string ActiveChatId = "1"; // Por defecto el primero activo
-
-    private async Task SelectChat(string id)
-    {
-        ActiveChatId = id;
-        if (OnChatSelected.HasDelegate)
-            await OnChatSelected.InvokeAsync(id);
+        await LoadHistoryAsync();
     }
 
-    private void NewChat()
+    private async Task LoadHistoryAsync()
     {
-        var newId = (Chats.Count + 1).ToString();
-        Chats.Add(new ChatItem { Id = newId, Title = $"Nuevo Chat {newId}" });
-        SelectChat(newId); // Activamos automáticamente el nuevo chat
+        try
+        {
+            Sessions = await ChatService.GetChatHistoryAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Error cargando historial de chats: {ex.Message}");
+            Sessions = new List<ChatSession>();
+        }
     }
 
-    public class ChatItem
+    private void StartNewChat()
     {
-        public string Id { get; set; }
-        public string Title { get; set; }
+        Navigation.NavigateTo("/chat-assistant");
+    }
+
+    private async Task OpenChat(string chatId)
+    {
+        Navigation.NavigateTo($"/chat-assistant/{chatId}");
+    }
+
+    private async Task DeleteChat(string chatId)
+    {
+        try
+        {
+            await ChatService.DeleteChatSessionAsync(chatId);
+            await LoadHistoryAsync(); // Refrescar lista
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Error al eliminar chat: {ex.Message}");
+        }
     }
 }

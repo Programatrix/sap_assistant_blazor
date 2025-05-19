@@ -40,6 +40,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>
 builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddSingleton<DashboardService>();
 builder.Services.AddSingleton<NotificationService>();
+builder.Services.AddScoped<ChatHistoryService>();
 
 
 // ✅ Política de conexión activa
