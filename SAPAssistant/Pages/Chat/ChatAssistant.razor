@@ -12,55 +12,56 @@
         {
             <ChatMessage Content="@msg.Content" IsUser="@msg.IsUser" />
         }
+
+        @if (UltimoResultado != null)
+        {
+            <!-- ✅ Incluimos los resultados DENTRO del área de mensajes -->
+            <div class="resultado-panel">
+                <h3>🧠 Resumen generado</h3>
+                <p>@UltimoResultado.Resumen</p>
+
+                <h4>📄 Consulta SQL generada</h4>
+                <pre>@UltimoResultado.Sql</pre>
+
+                <h4>📊 Resultados</h4>
+
+                @if (UltimoResultado.Resultados.Any())
+                {
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                @foreach (var col in UltimoResultado.Resultados[0].Keys)
+                                {
+                                    <th>@col</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in UltimoResultado.Resultados)
+                            {
+                                <tr>
+                                    @foreach (var val in row.Values)
+                                    {
+                                        <td>@val</td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p>No se encontraron resultados.</p>
+                }
+            </div>
+        }
     </div>
 
-    <div class="input-area">       
-        <SearchBar @bind-SearchText="UserInput" OnSearch="@(msg => SendMessage(msg))" />
+    <div class="input-area">
+        <SearchBar @bind-SearchText="UserInput" OnSearch="SendMessage" />
     </div>
 </div>
 
-<!-- Sección de resultados -->
-@if (UltimoResultado != null)
-{
-    <div class="resultado-panel">
-        <h3>🧠 Resumen generado</h3>
-        <p>@UltimoResultado.Resumen</p>
-
-        <h4>📄 Consulta SQL generada</h4>
-        <pre>@UltimoResultado.Sql</pre>
-
-        <h4>📊 Resultados</h4>
-
-        @if (UltimoResultado.Resultados.Any())
-        {
-            <table class="table">
-                <thead>
-                    <tr>
-                        @foreach (var col in UltimoResultado.Resultados[0].Keys)
-                        {
-                            <th>@col</th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var row in UltimoResultado.Resultados)
-                    {
-                        <tr>
-                            @foreach (var val in row.Values)
-                            {
-                                <td>@val</td>
-                            }
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
-        else
-        {
-            <p>No se encontraron resultados.</p>
-        }
-    </div>
-}
 
 <link href="css/chatassistant.css" rel="stylesheet" />
 <link href="css/chatmessage.css" rel="stylesheet" />
@@ -88,7 +89,7 @@
                     Content = resultado?.Resumen ?? "✅ Consulta ejecutada con éxito."
                 });
 
-            UltimoResultado = resultado; // ✅ Guardamos el resultado para mostrar la sección de resumen y tabla
+            UltimoResultado = resultado;
         }
         catch (Exception ex)
         {
