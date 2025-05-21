@@ -11,7 +11,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Components\Chat\ErrorMessageComponent.razor.css" />
     <None Remove="Pages\Dashboard.razor.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Components\Chat\ErrorMessageComponent.razor.css" />
   </ItemGroup>
 
   <ItemGroup>

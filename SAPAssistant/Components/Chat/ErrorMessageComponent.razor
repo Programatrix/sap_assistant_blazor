@@ -1,0 +1,10 @@
+﻿@using SAPAssistant.Models.Chat
+@code {
+    [Parameter] public MessageBase Message { get; set; }
+
+    private ErrorMessage M => (ErrorMessage)Message;
+}
+
+<div class="error-message">
+    <strong>❌ Error:</strong> @M.Error
+</div>

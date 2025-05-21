@@ -1,0 +1,73 @@
+﻿@using SAPAssistant.Models.Chat
+@inject IJSRuntime JS
+
+<div class="resultado-panel">
+    <h3>🧠 Resumen generado</h3>
+    <p>@((MarkupString)M.Resumen)</p>
+
+    <button class="toggle-sql-btn" @onclick="() => MostrarSql = !MostrarSql">
+        @(MostrarSql ? "Ocultar consulta SQL" : "Ver consulta SQL")
+    </button>
+
+    @if (MostrarSql)
+    {
+        <div class="sql-block">
+            <button class="copy-btn" @onclick="CopiarSql" title="Copiar">📋</button>
+
+            @if (Copiado)
+            {
+                <div class="copiado-alert">✅ Copiada</div>
+            }
+
+            <pre>@M.Sql</pre>
+        </div>
+    }
+
+    @if (M.Resultados.Any())
+    {
+        <h4>📊 Resultados</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    @foreach (var col in M.Resultados[0].Keys)
+                    {
+                        <th>@col</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in M.Resultados)
+                {
+                    <tr>
+                        @foreach (var val in row.Values)
+                        {
+                            <td>@val</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No se encontraron resultados.</p>
+    }
+</div>
+
+@code {
+    [Parameter] public MessageBase Message { get; set; }
+    private ResultMessage M => (ResultMessage)Message;
+
+    private bool MostrarSql { get; set; } = false;
+    private bool Copiado { get; set; } = false;
+
+    private async Task CopiarSql()
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", M.Sql);
+        Copiado = true;
+        StateHasChanged();
+        await Task.Delay(2000);
+        Copiado = false;
+        StateHasChanged();
+    }
+}
