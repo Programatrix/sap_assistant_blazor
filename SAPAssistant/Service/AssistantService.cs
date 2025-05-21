@@ -19,14 +19,14 @@ namespace SAPAssistant.Service
         public async Task<QueryResponse?> ConsultarAsync(string pregunta)
         {
             var userResult = await _sessionStorage.GetAsync<string>("username");
+            var conectionresult = await _sessionStorage.GetAsync<string>("active_connection_id");
             var username = userResult.Value ?? throw new Exception("Usuario no encontrado en sesión.");
 
             var requestBody = new
             {
                 //TODO: RECUPERAR LA CONEXIÓN ACTIVA Y EL ENGINE SE DEBERIA RECUPERAR DESDE EL MICROSERVICIO QUE EJECUTA LA QUERY
                 pregunta = pregunta,
-                connection_id = "hana_serversap100H3",   // ← corregido
-                engine = "hana"
+                connection_id = conectionresult.Value                  
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, "/assistant/query")
