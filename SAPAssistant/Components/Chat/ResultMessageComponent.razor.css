@@ -69,12 +69,12 @@
         color: #1e1e2f;
     }
 
-/* Contenedor del bloque SQL */
+/* Contenedor SQL */
 .sql-block {
     position: relative;
 }
 
-/* Botón copiar con ícono SVG */
+/* Botón copiar SQL */
 .copy-btn {
     position: absolute;
     top: 8px;
@@ -105,7 +105,7 @@
         transform: scale(1.15);
     }
 
-/* Alerta visual al copiar */
+/* Alerta Copiada */
 .copiado-alert {
     position: absolute;
     top: 8px;
@@ -133,7 +133,7 @@
     }
 }
 
-/* Barra de herramientas de resultado */
+/* Toolbar de acciones */
 .resultado-toolbar {
     text-align: right;
     margin-bottom: 10px;
@@ -154,4 +154,21 @@
 
     .export-btn:hover {
         background-color: #00d9c0;
+    }
+
+/* Botón Copiar Tabla */
+.copy-table-btn {
+    background-color: #444;
+    color: #e0e0e0;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    margin-left: 8px;
+    transition: background-color 0.2s ease;
+}
+
+    .copy-table-btn:hover {
+        background-color: #555;
     }

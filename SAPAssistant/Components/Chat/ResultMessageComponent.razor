@@ -33,6 +33,7 @@
     {
         <div class="resultado-toolbar">
             <button class="export-btn" @onclick="ExportarCsv">⬇️ Exportar CSV</button>
+            <button class="copy-table-btn" @onclick="CopiarTabla">📋 Copiar tabla</button>
         </div>
 
         <h4>📊 Resultados</h4>
@@ -74,6 +75,26 @@
     private async Task CopiarSql()
     {
         await JS.InvokeVoidAsync("navigator.clipboard.writeText", M.Sql);
+        Copiado = true;
+        StateHasChanged();
+        await Task.Delay(2000);
+        Copiado = false;
+        StateHasChanged();
+    }
+
+    private async Task CopiarTabla()
+    {
+        if (M.Resultados.Count == 0) return;
+
+        var headers = string.Join("\t", M.Resultados[0].Keys);
+        var rows = M.Resultados.Select(row =>
+            string.Join("\t", row.Values.Select(v => v?.ToString()?.Replace("\t", " ") ?? ""))
+        );
+
+        var fullText = string.Join("\n", new[] { headers }.Concat(rows));
+
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", fullText);
+
         Copiado = true;
         StateHasChanged();
         await Task.Delay(2000);
