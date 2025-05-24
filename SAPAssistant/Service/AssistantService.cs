@@ -1,7 +1,8 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using System.Text.Json;
 using SAPAssistant.Models;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 namespace SAPAssistant.Service
 {
@@ -16,20 +17,21 @@ namespace SAPAssistant.Service
             _sessionStorage = sessionStorage;
         }
 
-        public async Task<QueryResponse?> ConsultarAsync(string pregunta)
+        public async Task<QueryResponse?> ConsultarAsync(string mensaje)
         {
             var userResult = await _sessionStorage.GetAsync<string>("username");
-            var conectionresult = await _sessionStorage.GetAsync<string>("active_connection_id");
+            var connectionResult = await _sessionStorage.GetAsync<string>("active_connection_id");
             var username = userResult.Value ?? throw new Exception("Usuario no encontrado en sesión.");
+            var connectionId = connectionResult.Value ?? throw new Exception("Conexión activa no encontrada.");
 
             var requestBody = new
             {
-                //TODO: RECUPERAR LA CONEXIÓN ACTIVA Y EL ENGINE SE DEBERIA RECUPERAR DESDE EL MICROSERVICIO QUE EJECUTA LA QUERY
-                pregunta = pregunta,
-                connection_id = conectionresult.Value                  
+                mensaje = mensaje,
+                connection_id = connectionId,
+                chat_id = "default"
             };
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "/assistant/query")
+            var request = new HttpRequestMessage(HttpMethod.Post, "/assistant/message")
             {
                 Content = JsonContent.Create(requestBody)
             };
@@ -38,15 +40,37 @@ namespace SAPAssistant.Service
 
             var response = await _http.SendAsync(request);
 
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<QueryResponse>();
-            }
-            else
+            if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
                 throw new Exception($"Error en la API: {error}");
             }
+
+            var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+            var tipo = json.GetProperty("tipo").GetString();
+
+            if (tipo == "consulta")
+            {
+                return new QueryResponse
+                {
+                    Sql = json.GetProperty("sql").GetString(),
+                    Resumen = json.GetProperty("resumen").GetString(),
+                    Resultados = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
+                        json.GetProperty("resultados").GetRawText())
+                };
+            }
+            else if (tipo == "refinamiento")
+            {
+                return new QueryResponse
+                {
+                    Sql = json.GetProperty("sql").GetString(),
+                    Resumen = json.GetProperty("resumen").GetString(),
+                    Resultados = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
+                        json.GetProperty("resultados").GetRawText())
+                };
+            }
+
+            throw new Exception("Respuesta de tipo desconocido");
         }
     }
 }
