@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Headers;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
 using SAPAssistant.Models;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
@@ -60,7 +59,7 @@ namespace SAPAssistant.Service
                         json.GetProperty("resultados").GetRawText())
                 };
             }
-            else if (tipo == "aclaracion")
+            else if (tipo == "aclaracion" || tipo == "system")
             {
                 return new QueryResponse
                 {
@@ -75,7 +74,7 @@ namespace SAPAssistant.Service
             {
                 throw new Exception($"❌ Tipo de respuesta desconocido: {tipo}");
             }
-
         }
     }
 }
+

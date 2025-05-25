@@ -51,6 +51,13 @@
                         Content = resultado.Mensaje
                     });
             }
+            else if (resultado?.Tipo == "system")
+            {
+                Messages.Add(new SystemMessage
+                    {
+                        Mensaje = resultado.Mensaje
+                    });
+            }
             else
             {
                 Messages.Add(new ResultMessage
@@ -86,6 +93,7 @@
             "Text" => typeof(TextMessageComponent),
             "Result" => typeof(ResultMessageComponent),
             "Error" => typeof(ErrorMessageComponent),
+            "system" => typeof(SystemMessageComponent),
             _ => typeof(TextMessageComponent)
         };
     }
