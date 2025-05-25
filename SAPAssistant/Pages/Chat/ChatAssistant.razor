@@ -43,13 +43,24 @@
         {
             var resultado = await AssistantService.ConsultarAsync(message);
 
-            Messages.Add(new ResultMessage
-                {
-                    IsUser = false,
-                    Resumen = resultado?.Resumen ?? "",
-                    Sql = resultado?.Sql ?? "",
-                    Resultados = resultado?.Resultados ?? new()
-                });
+            if (resultado?.Tipo == "aclaracion")
+            {
+                Messages.Add(new TextMessage
+                    {
+                        IsUser = false,
+                        Content = resultado.Mensaje
+                    });
+            }
+            else
+            {
+                Messages.Add(new ResultMessage
+                    {
+                        IsUser = false,
+                        Resumen = resultado?.Resumen ?? "",
+                        Sql = resultado?.Sql ?? "",
+                        Resultados = resultado?.Resultados ?? new()
+                    });
+            }
         }
         catch (Exception ex)
         {

@@ -49,28 +49,33 @@ namespace SAPAssistant.Service
             var json = await response.Content.ReadFromJsonAsync<JsonElement>();
             var tipo = json.GetProperty("tipo").GetString();
 
-            if (tipo == "consulta")
+            if (tipo == "consulta" || tipo == "refinamiento")
             {
                 return new QueryResponse
                 {
+                    Tipo = tipo,
                     Sql = json.GetProperty("sql").GetString(),
                     Resumen = json.GetProperty("resumen").GetString(),
                     Resultados = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
                         json.GetProperty("resultados").GetRawText())
                 };
             }
-            else if (tipo == "refinamiento")
+            else if (tipo == "aclaracion")
             {
                 return new QueryResponse
                 {
-                    Sql = json.GetProperty("sql").GetString(),
-                    Resumen = json.GetProperty("resumen").GetString(),
-                    Resultados = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
-                        json.GetProperty("resultados").GetRawText())
+                    Tipo = tipo,
+                    Mensaje = json.GetProperty("mensaje").GetString(),
+                    Sql = null,
+                    Resumen = null,
+                    Resultados = new List<Dictionary<string, object>>()
                 };
+            }
+            else
+            {
+                throw new Exception($"❌ Tipo de respuesta desconocido: {tipo}");
             }
 
-            throw new Exception("Respuesta de tipo desconocido");
         }
     }
 }
