@@ -25,7 +25,7 @@ builder.Services.AddScoped(sp => new HttpClient
 // Servicios API específicos
 builder.Services.AddHttpClient<ConnectionService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8081");
+    client.BaseAddress = new Uri("http://localhost:8000");
 });
 
 builder.Services.AddHttpClient<AssistantService>(client =>

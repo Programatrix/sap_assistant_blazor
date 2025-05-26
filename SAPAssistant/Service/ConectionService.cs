@@ -1,5 +1,4 @@
-﻿ 
-using SAPAssistant.Models;    
+﻿using SAPAssistant.Models;
 using System.Net.Http.Json;
 using System.Net.Http.Headers;
 using SAPAssistant.Exceptions;
@@ -18,37 +17,6 @@ namespace SAPAssistant.Service
             _sessionStorage = sessionStorage;
         }
 
-        //public async Task<List<ConnectionDTO>> GetConnectionsAsync()
-        //{
-        //    try
-        //    {
-        //        var tokenResult = await _sessionStorage.GetAsync<string>("token");
-        //        var userResult = await _sessionStorage.GetAsync<string>("username");
-
-        //        if (!tokenResult.Success || !userResult.Success)
-        //            return new List<ConnectionDTO>();
-
-        //        var token = tokenResult.Value;
-        //        var userId = userResult.Value;
-
-        //        var request = new HttpRequestMessage(HttpMethod.Get, "/user-connections");
-        //        request.Headers.Add("X-User-Id", userId);
-        //        // Si tu backend empieza a requerir token en el futuro:
-        //        // request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-        //        var response = await _http.SendAsync(request);
-        //        if (!response.IsSuccessStatusCode)
-        //            return new List<ConnectionDTO>();
-
-        //        return await response.Content.ReadFromJsonAsync<List<ConnectionDTO>>() ?? new List<ConnectionDTO>();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"❌ Error al obtener conexiones: {ex.Message}");
-        //        return new List<ConnectionDTO>();
-        //    }
-        //}
-
         public async Task<ResultMessage<List<ConnectionDTO>>> GetConnectionsAsync()
         {
             try
@@ -65,7 +33,8 @@ namespace SAPAssistant.Service
                 var token = tokenResult.Value;
                 var userId = userResult.Value;
 
-                var request = new HttpRequestMessage(HttpMethod.Get, "/user-connections");
+                // ✅ CAMBIADO el endpoint para incluir el prefijo correcto
+                var request = new HttpRequestMessage(HttpMethod.Get, "/connection/user-connections");
                 request.Headers.Add("X-User-Id", userId);
                 // request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -93,6 +62,25 @@ namespace SAPAssistant.Service
             }
         }
 
+        public async Task<ConnectionDTO?> GetConnectionByIdAsync(string connectionId)
+        {
+            var userResult = await _sessionStorage.GetAsync<string>("username");
+            if (!userResult.Success)
+                return null;
+
+            var userId = userResult.Value;
+
+            // ✅ CAMBIADO el endpoint para incluir el prefijo
+            var request = new HttpRequestMessage(HttpMethod.Get, $"/connection/connections/{connectionId}");
+            request.Headers.Add("X-User-Id", userId);
+
+            var response = await _http.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            return await response.Content.ReadFromJsonAsync<ConnectionDTO>();
+        }
+
         public async Task<bool> UpdateConnectionAsync(ConnectionDTO connection)
         {
             var userResult = await _sessionStorage.GetAsync<string>("username");
@@ -100,7 +88,7 @@ namespace SAPAssistant.Service
 
             var userId = userResult.Value;
 
-            var request = new HttpRequestMessage(HttpMethod.Put, $"/connections/{connection.ConnectionId}");
+            var request = new HttpRequestMessage(HttpMethod.Put, $"/connection/connections/{connection.ConnectionId}");
             request.Headers.Add("X-User-Id", userId);
             request.Content = JsonContent.Create(connection);
 
@@ -115,7 +103,7 @@ namespace SAPAssistant.Service
 
             var userId = userResult.Value;
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "/connections");
+            var request = new HttpRequestMessage(HttpMethod.Post, "/connection/connections");
             request.Headers.Add("X-User-Id", userId);
             request.Content = JsonContent.Create(connection);
 
@@ -133,7 +121,7 @@ namespace SAPAssistant.Service
 
                 var userId = userResult.Value;
 
-                var request = new HttpRequestMessage(HttpMethod.Post, $"/connections/{connectionId}/validate");
+                var request = new HttpRequestMessage(HttpMethod.Post, $"/connection/connections/{connectionId}/validate");
                 request.Headers.Add("X-User-Id", userId);
 
                 var response = await _http.SendAsync(request);
@@ -145,9 +133,5 @@ namespace SAPAssistant.Service
                 return false;
             }
         }
-
-
-
     }
-
 }
