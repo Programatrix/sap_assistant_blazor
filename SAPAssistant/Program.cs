@@ -19,19 +19,20 @@ builder.Services.AddHttpClient();
 // API principal
 builder.Services.AddScoped(sp => new HttpClient
 {
-    BaseAddress = new Uri("http://localhost:8000")
+    BaseAddress = new Uri("http://91.99.139.55:8000")
 });
 
 // Servicios API específicos
 builder.Services.AddHttpClient<ConnectionService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8000");
+    client.BaseAddress = new Uri("http://91.99.139.55:8000");
 });
 
 builder.Services.AddHttpClient<AssistantService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8000");
+    client.BaseAddress = new Uri("http://91.99.139.55:8000");
 });
+
 
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddScoped<AuthService>();
