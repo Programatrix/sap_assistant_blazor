@@ -10,5 +10,7 @@
         public string Database { get; set; } = "";    
         public string Password { get; set; } = "";    
         public Boolean IsActive { get; set; } = false;
+        public string db_type { get; set; } = "";
+        public string remote_ip { get; set; } = "";
     }
 }
