@@ -155,7 +155,8 @@
         StateHasChanged();
 
         try
-        {
+        {           
+                       
             var isValid = await ConnectionService.ValidateConnectionAsync(connectionId);
 
             if (!isValid)
@@ -163,14 +164,15 @@
                 MostrarError = true;
                 StateHasChanged();
                 await Task.Delay(3000);
-                MostrarError = false;
+                MostrarError = false;                
                 return;
             }
 
             await SessionStorage.SetAsync("active_connection_id", connectionId);
+           
 
-            foreach (var conn in Connections)
-                conn.IsActive = conn.ConnectionId == connectionId;
+            foreach (var c in Connections)
+                c.IsActive = c.ConnectionId == connectionId;
 
             MostrarMensaje = true;
             await OnConnectionActivated.InvokeAsync(true);

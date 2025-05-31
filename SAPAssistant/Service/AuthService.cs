@@ -42,6 +42,8 @@ namespace SAPAssistant.Service
                 }
 
                 await _authProvider.MarkUserAsAuthenticated(user.Username, user.Token);
+                await _authProvider.SaveRemoteUrlAsync(user.remote_url); // ✅ Guardar remote_url
+
                 return ResultMessage.Ok("Inicio de sesión exitoso.");
             }
             catch (HttpRequestException)
@@ -52,7 +54,6 @@ namespace SAPAssistant.Service
             {
                 return ResultMessage.Fail("Error inesperado. Por favor, intente nuevamente.", "UNEXPECTED-ERROR");
             }
-
         }
 
         public async Task LogoutAsync()

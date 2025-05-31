@@ -13,4 +13,10 @@
         public string db_type { get; set; } = "";
         public string remote_ip { get; set; } = "";
     }
+
+    public class RawConnection
+    {
+        public Dictionary<string, ConnectionDTO> ConnectionMap { get; set; } = new();
+    }
+
 }
