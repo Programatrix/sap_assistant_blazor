@@ -136,9 +136,10 @@ namespace SAPAssistant.Service
 
                 var request = new HttpRequestMessage(HttpMethod.Post, $"/connection/connections/{connectionId}/validate");
                 request.Headers.Add("X-User-Id", userId);
-                request.Headers.Add("x_remote_ip", remoteIp);
+                request.Headers.Add("x-remote-ip", remoteIp);
 
                 var response = await _http.SendAsync(request);
+                var errorContent = await response.Content.ReadAsStringAsync();
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
