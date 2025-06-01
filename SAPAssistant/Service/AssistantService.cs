@@ -22,6 +22,8 @@ namespace SAPAssistant.Service
             var connectionResult = await _sessionStorage.GetAsync<string>("active_connection_id");
             var username = userResult.Value ?? throw new Exception("Usuario no encontrado en sesión.");
             var connectionId = connectionResult.Value ?? throw new Exception("Conexión activa no encontrada.");
+            var ipResult = await _sessionStorage.GetAsync<string>("remote_url");
+            string remote_ip = ipResult.Value ?? throw new Exception("No se ha podido recuperar la remote_ip asociada al usuario");
 
             var requestBody = new
             {
@@ -36,6 +38,7 @@ namespace SAPAssistant.Service
             };
 
             request.Headers.Add("X-User-Id", username);
+            request.Headers.Add("x_remote_ip", remote_ip);
 
             var response = await _http.SendAsync(request);
 
