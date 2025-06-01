@@ -1,0 +1,14 @@
+﻿/* Conexiones.razor.css */
+.mensaje-error {
+    margin-top: 1rem;
+    color: #a94442;
+    background-color: #f2dede;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #ebccd1;
+}
+
+button.btn {
+    padding: 0.5rem 1rem;
+    font-weight: bold;
+}

@@ -38,7 +38,7 @@ namespace SAPAssistant.Service
             };
 
             request.Headers.Add("X-User-Id", username);
-            request.Headers.Add("x_remote_ip", remote_ip);
+            request.Headers.Add("x-remote-ip", remote_ip);
 
             var response = await _http.SendAsync(request);
 
