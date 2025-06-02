@@ -1,15 +1,4 @@
-﻿:root {
-    --primary-color: #3b82f6;
-    --primary-hover: #2563eb;
-    --background-color: #1e1e1e;
-    --card-color: #2a2a2a;
-    --text-color: #ffffff;
-    --error-color: #e53e3e;
-    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    --placeholder-color: #b0b0b0;
-}
-
-body, html {
+﻿body, html {
     margin: 0;
     padding: 0;
     font-family: var(--font-family);
