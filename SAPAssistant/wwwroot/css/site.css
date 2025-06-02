@@ -431,6 +431,7 @@ body, html {
     padding: 0;
     font-family: var(--font-family);
     background-color: var(--background-color);
+    min-height: 100vh;
 }
 
 .login-page {
@@ -1292,11 +1293,20 @@ main {
 
 /* ====== FIN: Estilos migrados ====== */
 
-/* Jerarquía visual y agrupación para páginas */
+/* Mejora de centrado y espaciado general */
+body, html {
+    min-height: 100vh;
+}
+
 .page-container {
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     max-width: 900px;
-    margin: 2rem auto;
-    padding: 2rem 1.5rem;
+    margin: 3rem auto 2rem auto;
+    padding: 2.5rem 2rem 2.5rem 2rem;
     background: var(--background-secondary, #23272f);
     border-radius: 16px;
     box-shadow: 0 2px 16px 0 rgba(0,0,0,0.10);
@@ -1307,32 +1317,24 @@ main {
     font-weight: 700;
     margin-bottom: 0.5rem;
     color: var(--primary, #4fa3ff);
+    text-align: center;
 }
 
 .page-subtitle {
     font-size: 1.2rem;
     font-weight: 400;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
     color: var(--text-secondary, #b0b0b0);
+    text-align: center;
 }
 
 .section {
+    width: 100%;
     margin-bottom: 2.5rem;
 }
 
-.section-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: var(--primary, #4fa3ff);
-}
-
 .table-wrapper {
-    background: var(--background-tertiary, #23272f);
-    border-radius: 10px;
-    box-shadow: 0 1px 6px 0 rgba(0,0,0,0.07);
-    padding: 1.2rem;
-    margin-bottom: 1.5rem;
+    width: 100%;
     overflow-x: auto;
 }
 
@@ -1342,4 +1344,5 @@ main {
     margin-bottom: 1.5rem;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: flex-end;
 }

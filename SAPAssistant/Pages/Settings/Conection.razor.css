@@ -19,3 +19,15 @@ button.btn {
 }
 
 /* Se eliminan reglas de h2, p y .btn-primary para evitar conflictos con la jerarquía global */
+
+/* Ajuste para que el botón de volver al inicio quede alineado a la derecha y no pegado al borde inferior */
+.actions-row {
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+    margin-bottom: 0;
+}
+
+/* Ajuste para evitar doble margen en la tabla y el botón */
+.table-wrapper {
+    margin-bottom: 0.5rem;
+}
