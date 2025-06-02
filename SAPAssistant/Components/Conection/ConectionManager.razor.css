@@ -1,6 +1,39 @@
 ﻿/* === CONTENEDOR GENERAL === */
 .connection-manager {
-    padding: 1rem 0;
+    padding: 2.5rem 0 2rem 0;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Espaciado entre títulos y tabla */
+.connection-title {
+    margin-bottom: 2rem;
+}
+
+.conn-table {
+    margin-top: 2rem;
+    margin-bottom: 2.5rem;
+}
+
+/* Espaciado entre botones y tabla */
+.new-conn-container {
+    margin-top: 2.5rem;
+}
+
+/* Espaciado entre botones de acción */
+.acciones {
+    gap: 1rem;
+}
+
+/* Espaciado entre filas de la tabla */
+.conn-table tr {
+    height: 56px;
+}
+
+/* Espaciado para el botón volver al inicio */
+.volver-inicio-btn {
+    margin-top: 2.5rem;
+    margin-bottom: 1.5rem;
 }
 
 /* === MODAL OVERLAY === */
@@ -89,6 +122,7 @@
     border-collapse: collapse;
     margin-top: 1rem;
     font-size: 14px;
+    margin-bottom: 2.5rem;
 }
 
     .conn-table th,
@@ -167,6 +201,7 @@
     display: flex;
     justify-content: flex-end;
     margin-top: 1rem;
+    margin-top: 2.5rem;
 }
 
 .new-conn-btn {
@@ -272,6 +307,43 @@
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+.connection-title {
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.connection-subtitle {
+    margin-bottom: 2.5rem;
+    color: var(--placeholder-color);
+}
+
+.conn-table {
+    margin-bottom: 2.5rem;
+}
+
+.form-actions, .new-conn-container {
+    margin-top: 2.5rem;
+}
+
+button, .btn, .edit-button, .new-conn-btn {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 900px) {
+    .connection-manager {
+        padding: 1.5rem 0 1rem 0;
+    }
+    .conn-table {
+        margin-bottom: 1.5rem;
+    }
+    .form-actions, .new-conn-container {
+        margin-top: 1.5rem;
     }
 }
 
