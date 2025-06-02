@@ -20,7 +20,7 @@ body, html {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #2e2e32;
+    background-color: var(--background-color);
 }
 
 .login-wrapper {
