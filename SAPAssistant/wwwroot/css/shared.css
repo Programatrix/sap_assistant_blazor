@@ -1,0 +1,99 @@
+﻿:root {
+    --primary-color: #3b82f6;
+    --primary-hover: #2563eb;
+    --background-color: #1e1e1e;
+    --surface-color: #2a2a2a;
+    --text-color: #ffffff;
+    --text-muted: #b0b0b0;
+    --error-color: #ef4444;
+    --success-color: #22c55e;
+    --warn-color: #facc15;
+    --info-color: #38bdf8;
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+html, body {
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+a, .btn-link {
+    color: var(--primary-color);
+}
+
+/* Botones */
+button,
+.btn {
+    color: #fff;
+    background-color: var(--primary-color);
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+    .btn-primary:hover {
+        background-color: var(--primary-hover);
+    }
+
+/* Inputs */
+.input {
+    padding: 0.5rem;
+    border: 1px solid #444;
+    border-radius: 0.4rem;
+    background-color: var(--surface-color);
+    color: white;
+}
+
+.input-error {
+    border-color: var(--error-color);
+}
+
+/* Tipografía */
+.title {
+    font-size: 1.75rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+/* Formularios */
+.form-label {
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+    color: #ccc;
+    display: block;
+}
+
+/* Botón de icono (mostrar/ocultar contraseña) */
+button[aria-label] {
+    background: none;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+
+    button[aria-label]:hover {
+        opacity: 1;
+    }
+
+/* Focus */
+button:focus,
+.btn:focus,
+input:focus,
+textarea:focus,
+select:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem var(--primary-hover);
+    outline: none;
+}

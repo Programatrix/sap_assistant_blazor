@@ -4,33 +4,35 @@
 @attribute [AllowAnonymous]
 @layout PublicLayout
 
-<div class="login-page">
-    <div class="login-wrapper">
-        <h1 class="login-title">Iniciar Sesión</h1>
+<div class="auth-page">
+    <div class="card">
+        <h1 class="title">Iniciar Sesión</h1>
 
         <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
-            <div class="form-container">
+            <div class="form">
                 <!-- Usuario -->
-                <label class="text-left w-full text-sm mb-1 text-gray-300">Usuario *</label>
+                <label class="form-label">Usuario *</label>
                 <InputText class="@GetInputClass(userNameError)"
                            @bind-Value="loginModel.Username"
                            @oninput="ValidateFields"
                            placeholder="Introduce tu usuario" />
 
                 <!-- Contraseña -->
-                <label class="text-left w-full text-sm mb-1 text-gray-300">Contraseña *</label>
-                <div class="password-wrapper">
+                <label class="form-label">Contraseña *</label>
+                <div style="position: relative;">
                     <InputText @bind-Value="loginModel.Password"
                                @oninput="ValidateFields"
                                class="@GetInputClass(passwordError)"
                                type="@(ShowPassword ? "text" : "password")"
-                               placeholder="Introduce tu contraseña" />
+                               placeholder="Introduce tu contraseña"
+                               style="width: 100%; padding-right: 2.5rem;" />
 
                     <button type="button"
-                            class="toggle-password-icon"
+                            class="btn"
+                            style="position: absolute; top: 50%; right: 0.5rem; transform: translateY(-50%); background: transparent; border: none;"
                             @onclick="TogglePasswordVisibility"
                             aria-label="Mostrar/Ocultar contraseña">
                         @if (ShowPassword)
@@ -46,7 +48,7 @@
 
                 <!-- Botón de Login -->
                 <button type="submit"
-                        class="login-btn"
+                        class="btn btn-primary"
                         disabled="@(!CanSubmit || IsLoading)">
                     Entrar
                 </button>

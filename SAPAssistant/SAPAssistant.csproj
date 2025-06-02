@@ -13,6 +13,7 @@
   <ItemGroup>
     <None Remove="Components\Chat\ErrorMessageComponent.razor.css" />
     <None Remove="Pages\Dashboard.razor.css" />
+    <None Remove="Pages\Login.razor.css" />
   </ItemGroup>
 
   <ItemGroup>
