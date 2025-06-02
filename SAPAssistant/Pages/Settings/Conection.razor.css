@@ -1,26 +1,21 @@
 ﻿/* Conexiones.razor.css */
+
+/* Mensaje de error adaptado a la nueva jerarquía visual */
 .mensaje-error {
-    margin-top: 1rem;
-    color: #a94442;
+    margin-top: 1.5rem;
+    color: var(--danger, #a94442);
     background-color: #f2dede;
-    padding: 1rem;
+    padding: 1rem 1.5rem;
     border-radius: 0.5rem;
     border: 1px solid #ebccd1;
+    font-size: 1rem;
+    font-weight: 500;
+    box-shadow: 0 1px 6px 0 rgba(0,0,0,0.04);
 }
 
 button.btn {
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 1.2rem;
     font-weight: bold;
 }
 
-h2 {
-    margin-bottom: 1.5rem;
-}
-
-p {
-    margin-bottom: 2.5rem;
-}
-
-.btn-primary {
-    margin-top: 2.5rem;
-}
+/* Se eliminan reglas de h2, p y .btn-primary para evitar conflictos con la jerarquía global */

@@ -1291,3 +1291,55 @@ main {
 /* --- Components/Conection/ConectionManager.razor.css --- */
 
 /* ====== FIN: Estilos migrados ====== */
+
+/* Jerarquía visual y agrupación para páginas */
+.page-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2rem 1.5rem;
+    background: var(--background-secondary, #23272f);
+    border-radius: 16px;
+    box-shadow: 0 2px 16px 0 rgba(0,0,0,0.10);
+}
+
+.page-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--primary, #4fa3ff);
+}
+
+.page-subtitle {
+    font-size: 1.2rem;
+    font-weight: 400;
+    margin-bottom: 2rem;
+    color: var(--text-secondary, #b0b0b0);
+}
+
+.section {
+    margin-bottom: 2.5rem;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--primary, #4fa3ff);
+}
+
+.table-wrapper {
+    background: var(--background-tertiary, #23272f);
+    border-radius: 10px;
+    box-shadow: 0 1px 6px 0 rgba(0,0,0,0.07);
+    padding: 1.2rem;
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+}
+
+.actions-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
