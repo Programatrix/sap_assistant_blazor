@@ -33,7 +33,8 @@
 /* Espaciado para el botón volver al inicio */
 .volver-inicio-btn {
     margin-top: 2.5rem;
-    margin-bottom: 1.5rem;
+    margin-left: 2rem;
+    margin-bottom: 2rem;
 }
 
 /* === MODAL OVERLAY === */
@@ -119,10 +120,12 @@
 /* === TABLA DE CONEXIONES === */
 .conn-table {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-    font-size: 14px;
+    max-width: 1100px;
+    margin: 0 auto;
+    margin-top: 1.5rem;
     margin-bottom: 2.5rem;
+    border-collapse: collapse;
+    font-size: 14px;
 }
 
     .conn-table th,
@@ -319,7 +322,15 @@
 
 .connection-subtitle {
     margin-bottom: 2.5rem;
+    padding-left: 2rem;
     color: var(--placeholder-color);
+}
+
+.conn-table-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2.5rem;
 }
 
 .conn-table {
