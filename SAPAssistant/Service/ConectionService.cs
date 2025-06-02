@@ -1,9 +1,8 @@
-﻿ 
-using SAPAssistant.Models;    
+﻿using SAPAssistant.Models;
 using System.Net.Http.Json;
-using System.Net.Http.Headers;
-using SAPAssistant.Exceptions;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using SAPAssistant.Exceptions;
+using SAPAssistant.Mapper;
 
 namespace SAPAssistant.Service
 {
@@ -18,43 +17,13 @@ namespace SAPAssistant.Service
             _sessionStorage = sessionStorage;
         }
 
-        //public async Task<List<ConnectionDTO>> GetConnectionsAsync()
-        //{
-        //    try
-        //    {
-        //        var tokenResult = await _sessionStorage.GetAsync<string>("token");
-        //        var userResult = await _sessionStorage.GetAsync<string>("username");
-
-        //        if (!tokenResult.Success || !userResult.Success)
-        //            return new List<ConnectionDTO>();
-
-        //        var token = tokenResult.Value;
-        //        var userId = userResult.Value;
-
-        //        var request = new HttpRequestMessage(HttpMethod.Get, "/user-connections");
-        //        request.Headers.Add("X-User-Id", userId);
-        //        // Si tu backend empieza a requerir token en el futuro:
-        //        // request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-        //        var response = await _http.SendAsync(request);
-        //        if (!response.IsSuccessStatusCode)
-        //            return new List<ConnectionDTO>();
-
-        //        return await response.Content.ReadFromJsonAsync<List<ConnectionDTO>>() ?? new List<ConnectionDTO>();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"❌ Error al obtener conexiones: {ex.Message}");
-        //        return new List<ConnectionDTO>();
-        //    }
-        //}
-
         public async Task<ResultMessage<List<ConnectionDTO>>> GetConnectionsAsync()
         {
             try
             {
                 var tokenResult = await _sessionStorage.GetAsync<string>("token");
                 var userResult = await _sessionStorage.GetAsync<string>("username");
+                var remoteIp = await GetRemoteIpAsync();
 
                 if (!tokenResult.Success)
                     return ResultMessage<List<ConnectionDTO>>.Fail("Token no encontrado en la sesión.", "SESSION-TOKEN-NOT-FOUND");
@@ -62,12 +31,15 @@ namespace SAPAssistant.Service
                 if (!userResult.Success)
                     return ResultMessage<List<ConnectionDTO>>.Fail("Usuario no encontrado en la sesión.", "SESSION-USER-NOT-FOUND");
 
+                if (remoteIp == null)
+                    return ResultMessage<List<ConnectionDTO>>.Fail("Ip remota del usuario no encontrada en la sesión.", "SESSION-REMOTE_IP-NOT-FOUND");
+
                 var token = tokenResult.Value;
                 var userId = userResult.Value;
 
-                var request = new HttpRequestMessage(HttpMethod.Get, "/user-connections");
+                var request = new HttpRequestMessage(HttpMethod.Get, "/connection/user-connections");
                 request.Headers.Add("X-User-Id", userId);
-                // request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                request.Headers.Add("x-remote-ip", remoteIp);
 
                 var response = await _http.SendAsync(request);
                 if (!response.IsSuccessStatusCode)
@@ -78,7 +50,8 @@ namespace SAPAssistant.Service
                     );
                 }
 
-                var connections = await response.Content.ReadFromJsonAsync<List<ConnectionDTO>>() ?? new List<ConnectionDTO>();
+                var rawList = await response.Content.ReadFromJsonAsync<List<Dictionary<string, ConnectionDTO>>>();
+                var connections = ConnectionMapper.FromRawList(rawList ?? new());
 
                 return ResultMessage<List<ConnectionDTO>>.Ok(connections, "Conexiones obtenidas exitosamente.");
             }
@@ -93,15 +66,39 @@ namespace SAPAssistant.Service
             }
         }
 
-        public async Task<bool> UpdateConnectionAsync(ConnectionDTO connection)
+        public async Task<ConnectionDTO?> GetConnectionByIdAsync(string connectionId)
         {
             var userResult = await _sessionStorage.GetAsync<string>("username");
-            if (!userResult.Success) return false;
+            var remoteIp = await GetRemoteIpAsync();
+
+            if (!userResult.Success || string.IsNullOrWhiteSpace(remoteIp))
+                return null;
 
             var userId = userResult.Value;
 
-            var request = new HttpRequestMessage(HttpMethod.Put, $"/connections/{connection.ConnectionId}");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"/connection/connections/{connectionId}");
             request.Headers.Add("X-User-Id", userId);
+            request.Headers.Add("x_remote_ip", remoteIp);
+
+            var response = await _http.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            return await response.Content.ReadFromJsonAsync<ConnectionDTO>();
+        }
+
+        public async Task<bool> UpdateConnectionAsync(ConnectionDTO connection)
+        {
+            var userResult = await _sessionStorage.GetAsync<string>("username");
+            var remoteIp = await GetRemoteIpAsync();
+
+            if (!userResult.Success || string.IsNullOrWhiteSpace(remoteIp)) return false;
+
+            var userId = userResult.Value;
+
+            var request = new HttpRequestMessage(HttpMethod.Put, $"/connection/connections/{connection.ConnectionId}");
+            request.Headers.Add("X-User-Id", userId);
+            request.Headers.Add("x_remote_ip", remoteIp);
             request.Content = JsonContent.Create(connection);
 
             var response = await _http.SendAsync(request);
@@ -111,12 +108,15 @@ namespace SAPAssistant.Service
         public async Task<bool> CreateConnectionAsync(ConnectionDTO connection)
         {
             var userResult = await _sessionStorage.GetAsync<string>("username");
-            if (!userResult.Success) return false;
+            var remoteIp = await GetRemoteIpAsync();
+
+            if (!userResult.Success || string.IsNullOrWhiteSpace(remoteIp)) return false;
 
             var userId = userResult.Value;
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "/connections");
+            var request = new HttpRequestMessage(HttpMethod.Post, "/connection/connections");
             request.Headers.Add("X-User-Id", userId);
+            request.Headers.Add("x_remote_ip", remoteIp);
             request.Content = JsonContent.Create(connection);
 
             var response = await _http.SendAsync(request);
@@ -128,15 +128,18 @@ namespace SAPAssistant.Service
             try
             {
                 var userResult = await _sessionStorage.GetAsync<string>("username");
-                if (!userResult.Success)
+                var remoteIp = await GetRemoteIpAsync();
+                if (!userResult.Success || string.IsNullOrWhiteSpace(remoteIp))
                     return false;
 
                 var userId = userResult.Value;
 
-                var request = new HttpRequestMessage(HttpMethod.Post, $"/connections/{connectionId}/validate");
+                var request = new HttpRequestMessage(HttpMethod.Post, $"/connection/connections/{connectionId}/validate");
                 request.Headers.Add("X-User-Id", userId);
+                request.Headers.Add("x-remote-ip", remoteIp);
 
                 var response = await _http.SendAsync(request);
+                var errorContent = await response.Content.ReadAsStringAsync();
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
@@ -146,8 +149,14 @@ namespace SAPAssistant.Service
             }
         }
 
+        private async Task<string?> GetRemoteIpAsync()
+        {
+            var remoteResult = await _sessionStorage.GetAsync<string>("remote_url");
+            if (!remoteResult.Success)
+                return null;
 
-
+            var remoteIp = remoteResult.Value;
+            return remoteIp?.TrimEnd('/');
+        }
     }
-
 }

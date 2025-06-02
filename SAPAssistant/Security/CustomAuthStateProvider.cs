@@ -60,11 +60,21 @@ namespace SAPAssistant.Security
             var user = new ClaimsPrincipal(identity);
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
         }
+        public async Task SaveRemoteUrlAsync(string remoteUrl)
+        {
+            await _sessionStorage.SetAsync("remote_url", remoteUrl);
+        }
+        public async Task<string?> GetRemoteUrlAsync()
+        {
+            var result = await _sessionStorage.GetAsync<string>("remote_url");
+            return result.Success ? result.Value : null;
+        }
 
         public async Task MarkUserAsLoggedOut()
         {
             await _sessionStorage.DeleteAsync("username");
             await _sessionStorage.DeleteAsync("token");
+            await _sessionStorage.DeleteAsync("remote_url");
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_anonymous)));
         }
 

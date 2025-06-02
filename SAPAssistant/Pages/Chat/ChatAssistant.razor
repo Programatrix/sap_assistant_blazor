@@ -1,6 +1,8 @@
 ﻿@page "/chat-assistant"
 @layout ChatLayout
 @using Microsoft.AspNetCore.Components.Web
+@using SAPAssistant.Components.Chat
+@using SAPAssistant.Models.Chat
 @using SAPAssistant.Service
 @using SAPAssistant.Models
 @inject IJSRuntime JS
@@ -10,50 +12,7 @@
     <div class="messages" @ref="messagesContainer">
         @foreach (var msg in Messages)
         {
-            <ChatMessage Content="@msg.Content" IsUser="@msg.IsUser" />
-        }
-
-        @if (UltimoResultado != null)
-        {
-            <!-- ✅ Incluimos los resultados DENTRO del área de mensajes -->
-            <div class="resultado-panel">
-                <h3>🧠 Resumen generado</h3>
-                <p>@UltimoResultado.Resumen</p>
-
-                <h4>📄 Consulta SQL generada</h4>
-                <pre>@UltimoResultado.Sql</pre>
-
-                <h4>📊 Resultados</h4>
-
-                @if (UltimoResultado.Resultados.Any())
-                {
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                @foreach (var col in UltimoResultado.Resultados[0].Keys)
-                                {
-                                    <th>@col</th>
-                                }
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var row in UltimoResultado.Resultados)
-                            {
-                                <tr>
-                                    @foreach (var val in row.Values)
-                                    {
-                                        <td>@val</td>
-                                    }
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                }
-                else
-                {
-                    <p>No se encontraron resultados.</p>
-                }
-            </div>
+            <DynamicComponent Type="@GetComponentType(msg)" Parameters="GetParameters(msg)" />
         }
     </div>
 
@@ -62,44 +21,61 @@
     </div>
 </div>
 
-
 <link href="css/chatassistant.css" rel="stylesheet" />
 <link href="css/chatmessage.css" rel="stylesheet" />
 
 @code {
     private string UserInput { get; set; } = string.Empty;
-    private List<Message> Messages { get; set; } = new();
+    private List<MessageBase> Messages { get; set; } = new();
     private ElementReference messagesContainer;
-
-    private QueryResponse? UltimoResultado = null;
 
     private async Task SendMessage(string message)
     {
         if (string.IsNullOrWhiteSpace(message)) return;
 
-        Messages.Add(new Message { Content = message, IsUser = true });
+        Messages.Add(new TextMessage
+            {
+                Content = message,
+                IsUser = true
+            });
 
         try
         {
             var resultado = await AssistantService.ConsultarAsync(message);
 
-            Messages.Add(new Message
-                {
-                    IsUser = false,
-                    Content = resultado?.Resumen ?? "✅ Consulta ejecutada con éxito."
-                });
-
-            UltimoResultado = resultado;
+            if (resultado?.Tipo == "aclaracion")
+            {
+                Messages.Add(new TextMessage
+                    {
+                        IsUser = false,
+                        Content = resultado.Mensaje
+                    });
+            }
+            else if (resultado?.Tipo == "system")
+            {
+                Messages.Add(new SystemMessage
+                    {
+                        Mensaje = resultado.Mensaje
+                    });
+            }
+            else
+            {
+                Messages.Add(new ResultMessage
+                    {
+                        IsUser = false,
+                        Resumen = resultado?.Resumen ?? "",
+                        Sql = resultado?.Sql ?? "",
+                        Resultados = resultado?.Resultados ?? new()
+                    });
+            }
         }
         catch (Exception ex)
         {
-            Messages.Add(new Message
+            Messages.Add(new ErrorMessage
                 {
                     IsUser = false,
-                    Content = $"❌ Error: {ex.Message}"
+                    Error = ex.Message
                 });
-
-            UltimoResultado = null;
         }
 
         await ScrollToBottom();
@@ -110,9 +86,23 @@
         await JS.InvokeVoidAsync("chatEnhancer.scrollToBottom", messagesContainer);
     }
 
-    public class Message
+    private Type GetComponentType(MessageBase msg)
     {
-        public string Content { get; set; } = string.Empty;
-        public bool IsUser { get; set; }
+        return msg.Type switch
+        {
+            "Text" => typeof(TextMessageComponent),
+            "Result" => typeof(ResultMessageComponent),
+            "Error" => typeof(ErrorMessageComponent),
+            "system" => typeof(SystemMessageComponent),
+            _ => typeof(TextMessageComponent)
+        };
+    }
+
+    private Dictionary<string, object> GetParameters(MessageBase msg)
+    {
+        return new Dictionary<string, object>
+            {
+                ["Message"] = msg
+            };
     }
 }

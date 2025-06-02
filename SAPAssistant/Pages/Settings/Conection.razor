@@ -3,6 +3,7 @@
 @using SAPAssistant.Service
 @using SAPAssistant.Components.Connection
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+
 @inject NavigationManager Navigation
 @inject ConnectionService ConnectionService
 @inject ProtectedSessionStorage SessionStorage
@@ -39,6 +40,7 @@
             var result = await SessionStorage.GetAsync<string>("active_connection_id");
             if (result.Success && !string.IsNullOrEmpty(result.Value))
             {
+
                 var isValid = await ConnectionService.ValidateConnectionAsync(result.Value);
                 if (isValid)
                 {

@@ -1,0 +1,10 @@
+﻿@using SAPAssistant.Models.Chat
+
+@code {
+    [Parameter] public MessageBase Message { get; set; }
+    private SystemMessage M => (SystemMessage)Message;
+}
+
+<div class="chat-message system-message">
+    🧠 @M.Mensaje
+</div>
