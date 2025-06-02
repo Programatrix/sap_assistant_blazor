@@ -12,3 +12,15 @@ button.btn {
     padding: 0.5rem 1rem;
     font-weight: bold;
 }
+
+h2 {
+    margin-bottom: 1.5rem;
+}
+
+p {
+    margin-bottom: 2.5rem;
+}
+
+.btn-primary {
+    margin-top: 2.5rem;
+}
