@@ -2,10 +2,11 @@
     --primary-color: #3b82f6;
     --primary-hover: #2563eb;
     --background-color: #1e1e1e;
-    --surface-color: #2a2a2a;
+    --card-color: #2a2a2a;
     --text-color: #ffffff;
     --error-color: #e53e3e;
     --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --placeholder-color: #b0b0b0;
 }
 
 body, html {
@@ -24,7 +25,7 @@ body, html {
 }
 
 .login-wrapper {
-    background-color: var(--surface-color);
+    background-color: var(--card-color);
     padding: 3rem 2.5rem;
     border-radius: 16px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
@@ -50,8 +51,19 @@ body, html {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 300px;
+    width: 350px;
+    max-width: 90vw;
+    min-width: 260px;
+    background: none;
 }
+
+    @media (max-width: 600px) {
+        .form-container {
+            width: 95vw;
+            min-width: unset;
+            padding: 0 10px;
+        }
+    }
 
 .input {
     width: 100%;
@@ -61,7 +73,7 @@ body, html {
     margin-bottom: 1rem;
     box-sizing: border-box;
     font-family: var(--font-family);
-    background-color: #33343f;
+    background-color: var(--card-color);
     border: 1px solid #444;
     color: var(--text-color);
     outline: none;
@@ -75,7 +87,7 @@ body, html {
     }
 
     .input::placeholder {
-        color: #b0b0b0;
+        color: var(--placeholder-color);
     }
 
 .input-error {
@@ -129,7 +141,7 @@ body, html {
     .toggle-password-icon svg {
         width: 20px;
         height: 20px;
-        color: #b0b0b0;
+        color: var(--placeholder-color);
         transition: color 0.3s;
     }
 
