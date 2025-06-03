@@ -1,54 +1,58 @@
-﻿/* Conexiones.razor.css */
+﻿/* Conexiones.razor.css actualizado para modo oscuro */
 
-/* Mensaje de error adaptado a la nueva jerarquía visual */
+:root {
+    --background-dark: #1e1e24;
+    --panel-dark: #2a2a32;
+    --border-color: #3a3a48;
+    --text-primary: #f0f0f0;
+    --text-secondary: #a0a0a0;
+    --accent: #4fa3ff;
+    --danger: #f44336;
+    --danger-bg: #2e1e1e;
+    --success: #4caf50;
+}
+
+.page-container {
+    color: var(--text-primary);
+    padding: 2rem;
+    max-width: 960px;
+    margin: 0 auto;
+}
+
 .mensaje-error {
     margin-top: 1.5rem;
-    color: var(--danger, #a94442);
-    background-color: #f2dede;
+    color: var(--danger);
+    background-color: var(--danger-bg);
     padding: 1rem 1.5rem;
     border-radius: 0.5rem;
-    border: 1px solid #ebccd1;
+    border: 1px solid var(--danger);
     font-size: 1rem;
     font-weight: 500;
-    box-shadow: 0 1px 6px 0 rgba(0,0,0,0.04);
+    box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.2);
 }
 
-button.btn {
-    padding: 0.5rem 1.2rem;
-    font-weight: bold;
-}
 
-/* Se eliminan reglas de h2, p y .btn-primary para evitar conflictos con la jerarquía global */
-
-/* Ajuste para que el botón de volver al inicio quede alineado a la derecha y no pegado al borde inferior */
 .actions-row {
+    display: flex;
     justify-content: flex-end;
     margin-top: 1.5rem;
     margin-bottom: 0;
 }
 
-/* Ajuste para evitar doble margen en la tabla y el botón */
 .table-wrapper {
     margin-bottom: 0.5rem;
+    background-color: var(--panel-dark);
+    border-radius: 0.5rem;
+    padding: 1rem;
 }
 
-/* Header de sección con título y botón alineados */
 .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding-bottom: 1.2rem;
-    border-bottom: 1px solid var(--border-color, #333a4d);
+    border-bottom: 1px solid var(--border-color);
     margin-bottom: 2rem;
-}
-
-.new-conn-header-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1rem;
-    padding: 0.5rem 1.2rem;
-    font-weight: 600;
 }
 
 .page-title {
@@ -56,5 +60,14 @@ button.btn {
     padding: 0;
     font-size: 1.7rem;
     font-weight: 700;
-    color: var(--primary, #4fa3ff);
+    color: var(--accent);
+}
+
+.page-subtitle {
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.section-title {
+    display: none; /* Ocultado para evitar duplicación */
 }
