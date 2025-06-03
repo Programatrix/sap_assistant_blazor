@@ -11,15 +11,10 @@
 <div class="page-container">
     <div class="section-header">
         <h2 class="page-title">🔗 Selecciona una conexión activa</h2>
-        <button class="btn btn-primary new-conn-header-btn" @onclick="NuevaConexion">
-            <span class="material-icons">add</span>
-            Nueva conexión
-        </button>
     </div>
     <p class="page-subtitle">Necesitas una conexión activa para usar el asistente.</p>
 
     <div class="section">
-        <h3 class="section-title">Mis conexiones</h3>
         <div class="table-wrapper">
             <ConectionManager OnConnectionActivated="HandleConnectionActivated" EsModal="false" />
         </div>
@@ -35,7 +30,7 @@
     @if (HayConexionActiva)
     {
         <div class="actions-row">
-            <button class="btn btn-primary" @onclick="VolverHome">
+            <button class="new-conn-btn" @onclick="VolverHome">
                 ✅ Volver al inicio
             </button>
         </div>
@@ -58,7 +53,6 @@
             var result = await SessionStorage.GetAsync<string>("active_connection_id");
             if (result.Success && !string.IsNullOrEmpty(result.Value))
             {
-
                 var isValid = await ConnectionService.ValidateConnectionAsync(result.Value);
                 if (isValid)
                 {
@@ -70,7 +64,6 @@
                     MostrarAviso = true;
                     await SessionStorage.DeleteAsync("active_connection_id");
                 }
-
                 StateHasChanged();
             }
         }

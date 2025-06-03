@@ -1346,3 +1346,31 @@ body, html {
     align-items: center;
     justify-content: flex-end;
 }
+
+/*/ nuevo estilo de botones --> Copiado de ConectionManager */
+.new-conn-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    padding: 0;
+}
+
+.new-conn-btn {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.6rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+    .new-conn-btn:hover {
+        background-color: #2563eb;
+    }
