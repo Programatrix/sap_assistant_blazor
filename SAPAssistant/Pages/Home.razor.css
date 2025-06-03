@@ -1,7 +1,7 @@
 ﻿/* General */
 .home-container {
     padding: 40px;
-    background-color: var(--background-color);
+    background-color: #1C1C1E;
     min-height: 100vh;
 }
 
@@ -10,12 +10,12 @@
     font-size: 2.3em;
     font-weight: bold;
     margin-bottom: 8px;
-    color: var(--text-color);
+    color: white;
 }
 
 .home-subtitle {
     font-size: 1.2em;
-    color: var(--placeholder-color);
+    color: #9B9B9D;
     margin-bottom: 30px;
 }
 
@@ -23,11 +23,11 @@
 .quick-assistant-form {
     display: flex;
     align-items: center;
-    background-color: var(--card-color);
-    border-radius: var(--border-radius);
+    background-color: #2C2C2E;
+    border-radius: 12px;
     padding: 10px 16px;
     margin-bottom: 50px;
-    box-shadow: var(--box-shadow);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
     gap: 10px; /* Espacio entre input y botón */
     width: 100% !important; /* 👈 ¡Añade esto! */
 }
@@ -37,35 +37,15 @@
     flex-grow: 1;
     min-width: 0;
     font-size: 1.2em;
-    color: var(--text-color);
+    color: white;
     background-color: transparent;
     padding: 8px 0;
 }
 
-    .quick-input::placeholder {
-        color: var(--placeholder-color);
-        opacity: 1;
-    }
-
-/* Botón de Enviar */
-.quick-submit {
-    background-color: var(--success-color);
-    color: var(--text-color);
-    border: none;
-    border-radius: 10px;
-    padding: 10px 12px; /* 👈 Menos padding */
-    font-size: 1.2em; /* 👈 Tamaño de fuente más pequeño */
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.quick-input::placeholder {
+    color: #888888;
+    opacity: 1;
 }
-
-    .quick-submit:hover {
-        background-color: #23923d;
-        transform: scale(1.05);
-    }
 
 /* KPIs */
 .kpi-summary-grid {
@@ -76,11 +56,11 @@
 }
 
 .kpi-card {
-    background-color: var(--card-color);
+    background-color: #2C2C2E;
     border-radius: 16px;
     padding: 25px;
     text-align: center;
-    color: var(--text-color);
+    color: white;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
     transition: transform 0.2s ease-in-out;
 }
@@ -107,11 +87,11 @@
 }
 
     .kpi-change.up {
-        color: #00ff7f;
+        color: #00ff7f; /* Verde brillante */
     }
 
     .kpi-change.down {
-        color: #ff5c5c;
+        color: #ff5c5c; /* Rojo suave */
     }
 
 /* Mini Gráficos */
@@ -123,10 +103,10 @@
 }
 
 .mini-chart {
-    background-color: var(--card-color);
+    background-color: #2C2C2E;
     border-radius: 16px;
     padding: 20px;
-    color: var(--text-color);
+    color: white;
     text-align: center;
     font-size: 1.1em;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);

@@ -4,53 +4,55 @@
 @attribute [AllowAnonymous]
 @layout PublicLayout
 
-<div class="login-wrapper">
-    <h1 class="login-title">Iniciar Sesión</h1>
+<div class="login-page">
+    <div class="login-wrapper">
+        <h1 class="login-title">Iniciar Sesión</h1>
 
-    <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+        <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
-        <div class="form-container">
-            <!-- Usuario -->
-            <label class="text-left w-full text-sm mb-1 text-gray-300">Usuario *</label>
-            <InputText class="@GetInputClass(userNameError)"
-                       @bind-Value="loginModel.Username"
-                       @oninput="ValidateFields"
-                       placeholder="Introduce tu usuario" />
-
-            <!-- Contraseña -->
-            <label class="text-left w-full text-sm mb-1 text-gray-300">Contraseña *</label>
-            <div class="password-wrapper">
-                <InputText @bind-Value="loginModel.Password"
+            <div class="form-container">
+                <!-- Usuario -->
+                <label class="text-left w-full text-sm mb-1 text-gray-300">Usuario *</label>
+                <InputText class="@GetInputClass(userNameError)"
+                           @bind-Value="loginModel.Username"
                            @oninput="ValidateFields"
-                           class="@GetInputClass(passwordError)"
-                           type="@(ShowPassword ? "text" : "password")"
-                           placeholder="Introduce tu contraseña" />
+                           placeholder="Introduce tu usuario" />
 
-                <button type="button"
-                        class="toggle-password-icon"
-                        @onclick="TogglePasswordVisibility"
-                        aria-label="Mostrar/Ocultar contraseña">
-                    @if (ShowPassword)
-                    {
-                        @EyeOffIcon
-                    }
-                    else
-                    {
-                        @EyeIcon
-                    }
+                <!-- Contraseña -->
+                <label class="text-left w-full text-sm mb-1 text-gray-300">Contraseña *</label>
+                <div class="password-wrapper">
+                    <InputText @bind-Value="loginModel.Password"
+                               @oninput="ValidateFields"
+                               class="@GetInputClass(passwordError)"
+                               type="@(ShowPassword ? "text" : "password")"
+                               placeholder="Introduce tu contraseña" />
+
+                    <button type="button"
+                            class="toggle-password-icon"
+                            @onclick="TogglePasswordVisibility"
+                            aria-label="Mostrar/Ocultar contraseña">
+                        @if (ShowPassword)
+                        {
+                            @EyeOffIcon
+                        }
+                        else
+                        {
+                            @EyeIcon
+                        }
+                    </button>
+                </div>
+
+                <!-- Botón de Login -->
+                <button type="submit"
+                        class="btn btn-primary"
+                        disabled="@(!CanSubmit || IsLoading)">
+                    Entrar
                 </button>
             </div>
-
-            <!-- Botón de Login -->
-            <button type="submit"
-                    class="login-btn"
-                    disabled="@(!CanSubmit || IsLoading)">
-                Entrar
-            </button>
-        </div>
-    </EditForm>
+        </EditForm>
+    </div>
 </div>
 
 @if (IsLoading)

@@ -15,7 +15,7 @@
                value="@PromptModel.Prompt"
                placeholder="Escribe tu consulta aquí..."
                @oninput="e => PromptModel.Prompt = e.Value?.ToString()" />
-        <button class="quick-submit" @onclick="HandleQuickPrompt">
+        <button class="btn btn-primary" @onclick="HandleQuickPrompt">
             ➔
         </button>      
     </div>

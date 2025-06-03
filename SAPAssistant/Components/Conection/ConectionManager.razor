@@ -14,7 +14,7 @@
         <div class="mensaje-error">
             @ErrorAlCargar
             <br />
-            <button class="retry-button" @onclick="RecargarConexiones" disabled="@IsActivating">
+            <button class="retry-button btn btn-primary" @onclick="RecargarConexiones" disabled="@IsActivating">
                 🔄 Reintentar
             </button>
         </div>
@@ -53,10 +53,10 @@
                             }
                         </td>
                         <td class="acciones">
-                            <button class="edit-button" @onclick="() => EditarConexion(conn)" disabled="@IsActivating">Editar</button>
+                            <button class="edit-button btn btn-primary" @onclick="() => EditarConexion(conn)" disabled="@IsActivating">Editar</button>
                             @if (!conn.IsActive)
                             {
-                                <button class="icon-button" title="Usar esta conexión" @onclick="() => SetActive(conn.ConnectionId)" disabled="@IsActivating">
+                                <button class="icon-button btn btn-primary" title="Usar esta conexión" @onclick="() => SetActive(conn.ConnectionId)" disabled="@IsActivating">
                                     @if (IsActivating && ActivatingConnectionId == conn.ConnectionId)
                                     {
                                         <span class="spinner-border"></span>

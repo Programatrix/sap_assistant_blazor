@@ -17,10 +17,23 @@ a, .btn-link {
     color: #0071c1;
 }
 
+/* Botón primario global adoptando el nuevo estilo */
 .btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.6rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #2563eb;
 }
 
 .btn:focus,
@@ -431,7 +444,6 @@ body, html {
     padding: 0;
     font-family: var(--font-family);
     background-color: var(--background-color);
-    min-height: 100vh;
 }
 
 .login-page {
@@ -1118,19 +1130,6 @@ body, html {
 
 .chat-layout-main {
     display: flex;
-    height: calc(100vh - 60px);
-    overflow: hidden;
-}
-
-.chat-layout-body {
-    flex: 1;
-    background-color: #1e1e2f;
-}
-
-/* --- Shared/MainLayout.razor.css --- */
-.page {
-    position: relative;
-    display: flex;
     flex-direction: column;
 }
 
@@ -1292,85 +1291,3 @@ main {
 /* --- Components/Conection/ConectionManager.razor.css --- */
 
 /* ====== FIN: Estilos migrados ====== */
-
-/* Mejora de centrado y espaciado general */
-body, html {
-    min-height: 100vh;
-}
-
-.page-container {
-    min-height: 70vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    max-width: 900px;
-    margin: 3rem auto 2rem auto;
-    padding: 3.5rem 2rem 2.5rem 2rem;
-    background: var(--background-secondary, #23272f);
-    border-radius: 16px;
-    box-shadow: 0 2px 16px 0 rgba(0,0,0,0.10);
-}
-
-.page-title {
-    font-size: 2.2rem;
-    font-weight: 700;
-    margin-bottom: 0.7rem;
-    color: var(--primary, #4fa3ff);
-    text-align: center;
-}
-
-.page-subtitle {
-    font-size: 1.2rem;
-    font-weight: 400;
-    margin-bottom: 2rem;
-    color: var(--text-secondary, #b0b0b0);
-    text-align: center;
-}
-
-.section {
-    width: 100%;
-    margin-bottom: 2.5rem;
-}
-
-.table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-}
-
-.actions-row {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: flex-end;
-}
-
-/*/ nuevo estilo de botones --> Copiado de ConectionManager */
-.new-conn-container {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    margin-top: 0.5rem;
-    margin-bottom: 0;
-    padding: 0;
-}
-
-.new-conn-btn {
-    background-color: #3b82f6;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 0.6rem 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-    .new-conn-btn:hover {
-        background-color: #2563eb;
-    }

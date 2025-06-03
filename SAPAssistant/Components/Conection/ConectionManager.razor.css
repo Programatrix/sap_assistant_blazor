@@ -1,46 +1,6 @@
 ﻿/* === CONTENEDOR GENERAL === */
 .connection-manager {
-    padding: 2.5rem 0 2rem 0;
-    max-width: 900px;
-    margin: 0 auto;
-}
-
-/* Espaciado entre títulos y tabla */
-.connection-title {
-    margin-bottom: 2rem;
-}
-
-.conn-table {
-    margin-top: 2rem;
-    margin-bottom: 2.5rem;
-}
-
-/* Espaciado entre botones y tabla */
-.new-conn-container {
-    margin-top: 0.5rem;
-    margin-bottom: 0;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    width: 100%;
-    padding: 0;
-}
-
-/* Espaciado entre botones de acción */
-.acciones {
-    gap: 1rem;
-}
-
-/* Espaciado entre filas de la tabla */
-.conn-table tr {
-    height: 56px;
-}
-
-/* Espaciado para el botón volver al inicio */
-.volver-inicio-btn {
-    margin-top: 2.5rem;
-    margin-left: 2rem;
-    margin-bottom: 2rem;
+    padding: 1rem 0;
 }
 
 /* === MODAL OVERLAY === */
@@ -126,11 +86,8 @@
 /* === TABLA DE CONEXIONES === */
 .conn-table {
     width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-    margin-top: 1.5rem;
-    margin-bottom: 0.5rem;
     border-collapse: collapse;
+    margin-top: 1rem;
     font-size: 14px;
 }
 
@@ -172,47 +129,11 @@
     align-items: center;
 }
 
-.edit-button {
-    background-color: #4b5563;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 10px;
-    cursor: pointer;
-    transition: background 0.2s;
-    font-size: 13px;
-}
-
-    .edit-button:hover {
-        background-color: #6b7280;
-    }
-
-.icon-button {
-    background: transparent;
-    border: none;
-    color: #4ade80;
-    font-size: 20px;
-    cursor: pointer;
-    padding: 4px;
-}
-
-    .icon-button:hover {
-        color: #86efac;
-    }
-
-    .icon-button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
 /* === NUEVA CONEXIÓN === */
 .new-conn-container {
     display: flex;
     justify-content: flex-end;
-    align-items: center;
-    margin-top: 0.5rem;
-    margin-bottom: 0;
-    padding: 0;
+    margin-top: 1rem;
 }
 
 .new-conn-btn {
@@ -318,51 +239,6 @@
     to {
         opacity: 1;
         transform: translateY(0);
-    }
-}
-
-.connection-title {
-    margin-bottom: 1.5rem;
-    font-size: 2rem;
-    font-weight: bold;
-    color: var(--text-color);
-}
-
-.connection-subtitle {
-    margin-bottom: 2.5rem;
-    padding-left: 2rem;
-    color: var(--placeholder-color);
-}
-
-.conn-table-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 2.5rem;
-}
-
-.conn-table {
-    margin-bottom: 0.5rem;
-}
-
-.form-actions, .new-conn-container {
-    margin-top: 2.5rem;
-}
-
-button, .btn, .edit-button, .new-conn-btn {
-    margin-right: 0.5rem;
-    margin-bottom: 0.5rem;
-}
-
-@media (max-width: 900px) {
-    .connection-manager {
-        padding: 1.5rem 0 1rem 0;
-    }
-    .conn-table {
-        margin-bottom: 1.5rem;
-    }
-    .form-actions, .new-conn-container {
-        margin-top: 1.5rem;
     }
 }
 
