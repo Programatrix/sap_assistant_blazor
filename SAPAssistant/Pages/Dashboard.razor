@@ -6,13 +6,13 @@
 
 <!-- Botón Global -->
 <div class="dashboard-actions">
-    <button class="btn-global-refresh" @onclick="RefreshAllCards">🔄 Actualizar Todos los KPIs</button>
+    <button class="btn btn-primary" @onclick="RefreshAllCards">🔄 Actualizar Todos los KPIs</button>
 </div>
 
 <!-- Formulario de Prompts -->
 <EditForm Model="PromptModel" OnValidSubmit="HandlePromptSubmit" class="prompt-form">
     <InputText @bind-Value="PromptModel.Prompt" placeholder="¿Qué quieres consultar?" class="input-prompt" />
-    <button type="submit" class="btn-submit">Crear Tarjeta</button>
+    <button type="submit" class="btn btn-primary">Crear Tarjeta</button>
 </EditForm>
 
 <!-- Sección KPIs Fijos -->
@@ -24,7 +24,7 @@
             <div class="card-header">
                 <h2>@card.Title</h2>
                 <div class="card-actions">
-                    <button class="btn-refresh" @onclick="() => RefreshFixedCard(card)">🔄</button>
+                    <button class="btn btn-primary" @onclick="() => RefreshFixedCard(card)">🔄</button>
                 </div>
             </div>
             <p class="big-number">@card.Value</p>
@@ -42,8 +42,8 @@
             <div class="card-header">
                 <h2>@card.Title</h2>
                 <div class="card-actions">
-                    <button class="btn-refresh" @onclick="() => RefreshDynamicCard(card)">🔄</button>
-                    <button class="btn-delete" @onclick="() => DeleteDynamicCard(card)">❌</button>
+                    <button class="btn btn-primary" @onclick="() => RefreshDynamicCard(card)">🔄</button>
+                    <button class="btn btn-primary" @onclick="() => DeleteDynamicCard(card)">❌</button>
                 </div>
             </div>
             <p class="big-number">@card.Value</p>

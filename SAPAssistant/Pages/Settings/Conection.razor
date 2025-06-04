@@ -8,44 +8,30 @@
 @inject ConnectionService ConnectionService
 @inject ProtectedSessionStorage SessionStorage
 
-<div class="page-container">
-    <div class="section-header">
-        <h2 class="page-title">🔗 Selecciona una conexión activa</h2>
+<h2>🔗 Selecciona una conexión activa</h2>
+<p>Necesitas una conexión activa para usar el asistente.</p>
+
+<ConectionManager OnConnectionActivated="HandleConnectionActivated" EsModal="false" />
+
+@if (MostrarAviso)
+{
+    <div class="mensaje-error">
+        ⚠️ La conexión previamente activa ya no es válida.
     </div>
-    <p class="page-subtitle">Necesitas una conexión activa para usar el asistente.</p>
+}
 
-    <div class="section">
-        <div class="table-wrapper">
-            <ConectionManager OnConnectionActivated="HandleConnectionActivated" EsModal="false" />
-        </div>
+@if (HayConexionActiva)
+{
+    <div style="margin-top: 2rem;">
+        <button class="btn btn-primary" @onclick="VolverHome">
+            ✅ Volver al inicio
+        </button>
     </div>
-
-    @if (MostrarAviso)
-    {
-        <div class="mensaje-error">
-            ⚠️ La conexión previamente activa ya no es válida.
-        </div>
-    }
-
-    @if (HayConexionActiva)
-    {
-        
-        <div class="new-conn-container">
-            <button class="new-conn-btn" @onclick="VolverHome">
-                ✅ Volver al inicio
-            </button>
-        </div>
-    }
-</div>
+}
 
 @code {
     private bool HayConexionActiva = false;
     private bool MostrarAviso = false;
-
-    private void NuevaConexion()
-    {
-        Navigation.NavigateTo("/conexiones/nueva");
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -54,6 +40,7 @@
             var result = await SessionStorage.GetAsync<string>("active_connection_id");
             if (result.Success && !string.IsNullOrEmpty(result.Value))
             {
+
                 var isValid = await ConnectionService.ValidateConnectionAsync(result.Value);
                 if (isValid)
                 {
@@ -65,6 +52,7 @@
                     MostrarAviso = true;
                     await SessionStorage.DeleteAsync("active_connection_id");
                 }
+
                 StateHasChanged();
             }
         }
