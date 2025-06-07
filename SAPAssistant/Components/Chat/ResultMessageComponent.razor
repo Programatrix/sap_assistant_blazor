@@ -7,9 +7,17 @@
     <h3>🧠 Resumen generado</h3>
     <p>@((MarkupString)M.Resumen)</p>
 
-    <button class="toggle-sql-btn" @onclick="() => MostrarSql = !MostrarSql">
-        @(MostrarSql ? "Ocultar consulta SQL" : "Ver consulta SQL")
-    </button>
+    <div class="botones-acciones">
+        <button class="toggle-sql-btn" @onclick="() => MostrarSql = !MostrarSql">
+            @(MostrarSql ? "Ocultar consulta SQL" : "Ver consulta SQL")
+        </button>
+
+        @if (M.Resultados.Any())
+        {
+            <button class="export-btn" @onclick="ExportarCsv">⬇️ Exportar CSV</button>
+            <button class="copy-table-btn" @onclick="CopiarTabla">📋 Copiar tabla</button>
+        }
+    </div>
 
     @if (MostrarSql)
     {
@@ -31,11 +39,6 @@
 
     @if (M.Resultados.Any())
     {
-        <div class="resultado-toolbar">
-            <button class="export-btn" @onclick="ExportarCsv">⬇️ Exportar CSV</button>
-            <button class="copy-table-btn" @onclick="CopiarTabla">📋 Copiar tabla</button>
-        </div>
-
         <h4>📊 Resultados</h4>
         <table class="table">
             <thead>

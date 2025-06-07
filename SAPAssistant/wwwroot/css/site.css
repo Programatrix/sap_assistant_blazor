@@ -231,29 +231,37 @@ textarea.auto-expand {
     }
 
 .resultado-panel {
-    background-color: #2b2b3c;
+    background-color: #2c2c2c;
     border-radius: 16px;
-    padding: 20px;
-    margin: 20px 0;
+    padding: 24px;
+    margin: 20px auto;
     max-width: 800px;
-    align-self: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     color: #e0e0e0;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    font-family: 'Segoe UI', 'Roboto', sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.6;
 }
 
-    .resultado-panel h3,
-    .resultado-panel h4 {
+    .resultado-panel h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
         color: #00bfa5;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
+    }
+
+    .resultado-panel h4 {
+        font-size: 1.2rem;
+        color: #26c6da;
+        margin: 10px 0;
     }
 
     .resultado-panel p {
         margin-bottom: 15px;
-        line-height: 1.5;
     }
 
     .resultado-panel pre {
-        background-color: #1e1e2f;
+        background-color: #1e1e1e;
         padding: 15px;
         border-radius: 8px;
         overflow-x: auto;
@@ -265,20 +273,52 @@ textarea.auto-expand {
     .resultado-panel table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 15px;
+        margin-top: 20px;
+        background-color: transparent;
     }
 
     .resultado-panel th,
     .resultado-panel td {
-        border: 1px solid #444;
+        border: 1px solid rgba(255, 255, 255, 0.05);
         padding: 10px;
         text-align: left;
+        background-color: #1f1f1f;
+        color: #e0e0e0;
+        font-size: 0.93rem;
     }
 
     .resultado-panel th {
         background-color: #333;
         color: #00bfa5;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
+
+    .resultado-panel tr:nth-child(even) {
+        background-color: #262626;
+    }
+
+    .resultado-panel tbody tr:hover {
+        background-color: #333333;
+    }
+
+    /* Botones dentro del panel */
+    .resultado-panel button {
+        margin-right: 8px;
+        padding: 8px 14px;
+        border-radius: 8px;
+        background-color: #00bfa5;
+        color: #1e1e1e;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+        .resultado-panel button:hover {
+            background-color: #00a38d;
+        }
 
 /* --- Home.razor.css --- */
 /* General */
