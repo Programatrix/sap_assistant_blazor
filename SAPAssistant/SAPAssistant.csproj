@@ -7,11 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Pages\Assistant.razor" />
     <Content Remove="Pages\Dashboard.razor" />
   </ItemGroup>
 
   <ItemGroup>
     <None Remove="Components\Chat\ErrorMessageComponent.razor.css" />
+    <None Remove="Pages\Assistant.razor.css" />
+    <None Remove="Pages\Chat\ChatAssistant.razor.css" />
     <None Remove="Pages\Dashboard.razor.css" />
   </ItemGroup>
 
