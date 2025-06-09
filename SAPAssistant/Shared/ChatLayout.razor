@@ -1,29 +1,78 @@
 ﻿@inherits LayoutComponentBase
-@inject NavigationManager Nav
+@attribute [Authorize]
+
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using SAPAssistant.Security
+@using SAPAssistant.Service
 @using SAPAssistant.Components.Chat
 
-<div class="chat-layout-header">
-    <div class="header-left">
-        <button @onclick="NavigateHome" class="back-button">← Volver</button>
-    </div>
-    <div class="header-title">
-        <h2>Asistente de Chat</h2>
-    </div>
-</div>
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ConnectionService ConnectionService
+@inject ProtectedSessionStorage SessionStorage
 
-<div class="chat-layout-main">
-    <ChatHistory />
-    <div class="chat-layout-body">
-        @Body
+@if (isLoading || validandoConexion)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <div class="chat-layout-header">
+        <div class="header-left">
+            <button @onclick="NavigateHome" class="back-button">← Volver</button>
+        </div>
+        <div class="header-title">
+            <h2>Asistente de Chat</h2>
+        </div>
     </div>
-</div>
+
+    <div class="chat-layout-main">
+        <ChatHistory />
+        <div class="chat-layout-body">
+            @Body
+        </div>
+    </div>
+}
 
 @code {
-    private void NavigateHome() => Nav.NavigateTo("/");
+    private bool isLoading = true;
+    private bool validandoConexion = true;
 
-    private void LoadChat(string chatId)
+    private void NavigateHome() => Navigation.NavigateTo("/");
+
+    protected override async Task OnInitializedAsync()
     {
-        // Lógica de selección de chat, pendiente de implementar
-        Console.WriteLine($"Chat seleccionado: {chatId}");
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity?.IsAuthenticated ?? true)
+        {
+            Navigation.NavigateTo("/login", true);
+            return;
+        }
+
+        var currentUri = Navigation.ToBaseRelativePath(Navigation.Uri).ToLower();
+        if (!currentUri.StartsWith("conexiones"))
+        {
+            var result = await SessionStorage.GetAsync<string>("active_connection_id");
+            if (result.Success && !string.IsNullOrEmpty(result.Value))
+            {
+                var isValid = await ConnectionService.ValidateConnectionAsync(result.Value);
+                if (!isValid)
+                {
+                    await SessionStorage.DeleteAsync("active_connection_id");
+                    Navigation.NavigateTo("/conexiones", true);
+                    return;
+                }
+            }
+            else
+            {
+                Navigation.NavigateTo("/conexiones", true);
+                return;
+            }
+        }
+
+        isLoading = false;
+        validandoConexion = false;
     }
 }
