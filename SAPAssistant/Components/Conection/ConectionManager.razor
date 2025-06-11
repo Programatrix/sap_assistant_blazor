@@ -56,7 +56,7 @@
                             <button class="edit-button" @onclick="() => EditarConexion(conn)" disabled="@IsActivating">Editar</button>
                             @if (!conn.IsActive)
                             {
-                                <button class="icon-button" title="Usar esta conexión" @onclick="() => SetActive(conn.ConnectionId)" disabled="@IsActivating">
+                                <button class="icon-button" title="Usar esta conexión" @onclick="() => SetActive(conn)" disabled="@IsActivating">
                                     @if (IsActivating && ActivatingConnectionId == conn.ConnectionId)
                                     {
                                         <span class="spinner-border"></span>
@@ -143,13 +143,13 @@
         StateHasChanged();
     }
 
-    private async Task SetActive(string connectionId)
+    private async Task SetActive(ConnectionDTO connection)
     {
         if (IsActivating)
             return;
 
         IsActivating = true;
-        ActivatingConnectionId = connectionId;
+        ActivatingConnectionId = connection.ConnectionId;
         MostrarMensaje = false;
         MostrarError = false;
         StateHasChanged();
@@ -157,7 +157,7 @@
         try
         {           
                        
-            var isValid = await ConnectionService.ValidateConnectionAsync(connectionId);
+            var isValid = await ConnectionService.ValidateConnectionAsync(connection.ConnectionId);
 
             if (!isValid)
             {
@@ -168,11 +168,12 @@
                 return;
             }
 
-            await SessionStorage.SetAsync("active_connection_id", connectionId);
+            await SessionStorage.SetAsync("active_connection_id", connection.ConnectionId);
+            await SessionStorage.SetAsync("active_db_type", connection.db_type);
            
 
             foreach (var c in Connections)
-                c.IsActive = c.ConnectionId == connectionId;
+                c.IsActive = c.ConnectionId == connection.ConnectionId;
 
             MostrarMensaje = true;
             await OnConnectionActivated.InvokeAsync(true);

@@ -24,12 +24,15 @@ namespace SAPAssistant.Service
             var connectionId = connectionResult.Value ?? throw new Exception("Conexión activa no encontrada.");
             var ipResult = await _sessionStorage.GetAsync<string>("remote_url");
             string remote_ip = ipResult.Value ?? throw new Exception("No se ha podido recuperar la remote_ip asociada al usuario");
+            var dbtypeResult = await _sessionStorage.GetAsync<string>("active_db_type");
+            string db_type = dbtypeResult.Value ?? throw new Exception("No se ha informado el tipo de base de datos activa");
 
             var requestBody = new
             {
                 mensaje = mensaje,
                 connection_id = connectionId,
-                chat_id = "default"
+                chat_id = "default",
+                db_type
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, "/assistant/message")
@@ -48,36 +51,24 @@ namespace SAPAssistant.Service
                 throw new Exception($"Error en la API: {error}");
             }
 
-            var json = await response.Content.ReadFromJsonAsync<JsonElement>();
-            var tipo = json.GetProperty("tipo").GetString();
+            var assistantResponse = await response.Content.ReadFromJsonAsync<AssistantResponse>();
 
-            if (tipo == "consulta" || tipo == "refinamiento")
+            if (assistantResponse == null)
+                throw new Exception("No se pudo interpretar la respuesta del asistente.");
+
+            var tipo = assistantResponse.Tipo ?? "system"; // Default si viene null
+
+            // 🔁 Mapeamos a tu modelo QueryResponse
+            return new QueryResponse
             {
-                return new QueryResponse
-                {
-                    Tipo = tipo,
-                    Sql = json.GetProperty("sql").GetString(),
-                    Resumen = json.GetProperty("resumen").GetString(),
-                    Resultados = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
-                        json.GetProperty("resultados").GetRawText())
-                };
-            }
-            else if (tipo == "aclaracion" || tipo == "system")
-            {
-                return new QueryResponse
-                {
-                    Tipo = tipo,
-                    Mensaje = json.GetProperty("mensaje").GetString(),
-                    Sql = null,
-                    Resumen = null,
-                    Resultados = new List<Dictionary<string, object>>()
-                };
-            }
-            else
-            {
-                throw new Exception($"❌ Tipo de respuesta desconocido: {tipo}");
-            }
+                Tipo = tipo,
+                Sql = tipo == "consulta" || tipo == "refinamiento" ? assistantResponse.Output : null,
+                Resumen = null, // Asumimos que no se envía aún, ajusta si cambia
+                Mensaje = tipo == "aclaracion" || tipo == "system" ? assistantResponse.Mensaje ?? assistantResponse.Output : null,
+                Resultados = new List<Dictionary<string, object>>() // Podrías dejarlo nulo si prefieres
+            };
         }
+
     }
 }
 
