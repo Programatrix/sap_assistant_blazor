@@ -40,7 +40,7 @@
         {
             var resultado = await AssistantService.ConsultarAsync(message);
 
-            if (resultado?.Tipo == "aclaracion")
+            if (resultado?.Tipo == "aclaracion" || resultado?.Tipo == "asistente")
             {
                 Messages.Add(new TextMessage
                     {

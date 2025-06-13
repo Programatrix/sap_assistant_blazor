@@ -61,12 +61,28 @@ namespace SAPAssistant.Service
             // 🔁 Mapeamos a tu modelo QueryResponse
             return new QueryResponse
             {
-                Tipo = tipo,
-                Sql = tipo == "consulta" || tipo == "refinamiento" ? assistantResponse.Output : null,
-                Resumen = null, // Asumimos que no se envía aún, ajusta si cambia
-                Mensaje = tipo == "aclaracion" || tipo == "system" ? assistantResponse.Mensaje ?? assistantResponse.Output : null,
-                Resultados = new List<Dictionary<string, object>>() // Podrías dejarlo nulo si prefieres
-            };
+                Tipo = assistantResponse.Tipo,
+                Sql = assistantResponse.Data != null && assistantResponse.Data.ContainsKey("sql")
+                    ? assistantResponse.Data["sql"]?.ToString()
+                    : null,
+
+                            Resumen = assistantResponse.Tipo == "respuesta" && assistantResponse.Tool == "GenerarResumenDesdeDatos"
+                    ? assistantResponse.Mensaje
+                    : null,
+
+                            Mensaje = assistantResponse.Tipo == "aclaracion"
+                       || assistantResponse.Tipo == "system"
+                       || assistantResponse.Tipo == "asistente"
+                    ? assistantResponse.Mensaje
+                    : null,
+
+                            Resultados = assistantResponse.Data != null && assistantResponse.Data.ContainsKey("resultado")
+                    ? JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
+                          assistantResponse.Data["resultado"].ToString()
+                      )
+                    : null
+                        };
+
         }
 
     }

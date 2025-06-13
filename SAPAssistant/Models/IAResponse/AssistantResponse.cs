@@ -1,7 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
 namespace SAPAssistant.Models
-{
+{  
+
     public class AssistantResponse
     {
         [JsonPropertyName("tipo")]
@@ -10,15 +11,16 @@ namespace SAPAssistant.Models
         [JsonPropertyName("mensaje")]
         public string Mensaje { get; set; }
 
-        [JsonPropertyName("output")]
-        public string Output { get; set; }
+        [JsonPropertyName("tool")]
+        public string Tool { get; set; }
 
-        [JsonPropertyName("input")]
-        public string Input { get; set; }
+        [JsonPropertyName("data")]
+        public Dictionary<string, object> Data { get; set; }
 
-        [JsonPropertyName("chat_history")]
-        public List<ChatMessage> ChatHistory { get; set; }
+        [JsonPropertyName("meta")]
+        public Dictionary<string, object> Meta { get; set; }
     }
+
 
     public class ChatMessage
     {
