@@ -56,34 +56,68 @@ namespace SAPAssistant.Service
             if (assistantResponse == null)
                 throw new Exception("No se pudo interpretar la respuesta del asistente.");
 
-            var tipo = assistantResponse.Tipo ?? "system"; // Default si viene null
-
             // 🔁 Mapeamos a tu modelo QueryResponse
-            return new QueryResponse
-            {
-                Tipo = assistantResponse.Tipo,
-                Sql = assistantResponse.Data != null && assistantResponse.Data.ContainsKey("sql")
-                    ? assistantResponse.Data["sql"]?.ToString()
-                    : null,
-
-                            Resumen = assistantResponse.Tipo == "respuesta" && assistantResponse.Tool == "GenerarResumenDesdeDatos"
-                    ? assistantResponse.Mensaje
-                    : null,
-
-                            Mensaje = assistantResponse.Tipo == "aclaracion"
-                       || assistantResponse.Tipo == "system"
-                       || assistantResponse.Tipo == "asistente"
-                    ? assistantResponse.Mensaje
-                    : null,
-
-                            Resultados = assistantResponse.Data != null && assistantResponse.Data.ContainsKey("resultado")
-                    ? JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
-                          assistantResponse.Data["resultado"].ToString()
-                      )
-                    : null
-                        };
+            return MapToQueryResponse(assistantResponse);
 
         }
+
+        private static QueryResponse MapToQueryResponse(AssistantResponse assistantResponse)
+        {
+            var tipo = assistantResponse.Tipo ?? "system";
+
+            string? sql = assistantResponse.Sql;
+            string? resumen = null;
+            string? mensaje = null;
+            List<Dictionary<string, object>>? resultados = null;
+
+            if (assistantResponse.Data.HasValue)
+            {
+                var data = assistantResponse.Data.Value;
+
+                switch (data.ValueKind)
+                {
+                    case JsonValueKind.Object:
+                        {
+                            if (data.TryGetProperty("sql", out var sqlElement))
+                                sql = sqlElement.GetString();
+
+                            if (data.TryGetProperty("resultado", out var resultadoElement) && resultadoElement.ValueKind == JsonValueKind.Array)
+                            {
+                                resultados = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
+                                    resultadoElement.GetRawText()
+                                );
+                            }
+
+                            break;
+                        }
+
+                    case JsonValueKind.Array:
+                        {
+                            // En este caso asumimos que el array completo es el resultado
+                            resultados = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
+                                data.GetRawText()
+                            );
+                            break;
+                        }
+                }
+            }
+
+            if (tipo == "resumen" && assistantResponse.Tool == "GenerarResumenDesdeDatos")
+                resumen = assistantResponse.Mensaje;
+
+            if (tipo == "aclaracion" || tipo == "system" || tipo == "asistente")
+                mensaje = assistantResponse.Mensaje;
+
+            return new QueryResponse
+            {
+                Tipo = tipo,
+                Sql = sql,
+                Resumen = resumen,
+                Mensaje = mensaje,
+                Resultados = resultados
+            };
+        }
+
 
     }
 }

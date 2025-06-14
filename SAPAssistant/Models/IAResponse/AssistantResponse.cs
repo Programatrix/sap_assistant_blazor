@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SAPAssistant.Models
 {  
@@ -15,7 +16,10 @@ namespace SAPAssistant.Models
         public string Tool { get; set; }
 
         [JsonPropertyName("data")]
-        public Dictionary<string, object> Data { get; set; }
+        public JsonElement? Data { get; set; }
+
+        [JsonPropertyName("sql")]
+        public string? Sql { get; set; }
 
         [JsonPropertyName("meta")]
         public Dictionary<string, object> Meta { get; set; }

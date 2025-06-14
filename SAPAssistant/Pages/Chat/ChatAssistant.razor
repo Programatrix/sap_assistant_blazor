@@ -48,6 +48,14 @@
                         Content = resultado.Mensaje
                     });
             }
+            else if (resultado?.Tipo == "resumen")
+            {
+                Messages.Add(new TextMessage
+                    {
+                        IsUser = false,
+                        Content = resultado.Resumen
+                    });
+            }
             else if (resultado?.Tipo == "system")
             {
                 Messages.Add(new SystemMessage
