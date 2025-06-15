@@ -17,7 +17,11 @@
     </div>
 
     <div class="input-area">
-        <SearchBar @bind-SearchText="UserInput" OnSearch="SendMessage" />
+        <SearchBar @bind-SearchText="UserInput" OnSearch="SendMessage" Disabled="isProcessing" />
+        @if (isProcessing)
+        {
+            <div class="loading-spinner">⌛ Procesando...</div>
+        }
     </div>
 </div>
 
@@ -25,11 +29,13 @@
     private string UserInput { get; set; } = string.Empty;
     private List<MessageBase> Messages { get; set; } = new();
     private ElementReference messagesContainer;
+    private bool isProcessing = false;
 
     private async Task SendMessage(string message)
     {
-        if (string.IsNullOrWhiteSpace(message)) return;
+        if (string.IsNullOrWhiteSpace(message) || isProcessing) return;
 
+        isProcessing = true;
         Messages.Add(new TextMessage
             {
                 Content = message,
@@ -83,6 +89,7 @@
                 });
         }
 
+        isProcessing = false;
         await ScrollToBottom();
     }
 
