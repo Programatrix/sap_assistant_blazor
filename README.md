@@ -88,8 +88,9 @@ Permitir a los usuarios visualizar información clave a través de KPIs y gráfi
 
 ## 🔐 Seguridad
 
-- Se prevé la integración de autenticación JWT.  
+- Se prevé la integración de autenticación JWT.
 - Actualmente, la aplicación no cuenta con control de sesiones seguro (uso limitado a entornos de pruebas).
+- Existe la página `/demo` para acceder a una versión de prueba del asistente. Desde allí se puede abrir la interfaz `/demo/chat`, similar a ChatGPT, para realizar consultas. Debe utilizarse únicamente en entornos de pruebas y no implementa control de sesiones seguro.
 
 ---
 
