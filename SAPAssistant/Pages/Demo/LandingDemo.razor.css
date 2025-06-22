@@ -1,0 +1,118 @@
+﻿.hero-section {
+    padding: 6rem 2rem 5rem;
+    background: linear-gradient(160deg, #071A40, #102F88);
+    color: white;
+    text-align: center;
+}
+
+.hero-content {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.cta-buttons {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.how-it-works-section {
+    background: #f4f6fa;
+    padding: 5rem 2rem;
+    text-align: center;
+}
+
+.section-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.how-it-works-section h2 {
+    font-size: 2.25rem;
+    margin-bottom: 2rem;
+    color: #111;
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.card {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    text-align: left;
+    color: #1a1a1a;
+    transition: transform 0.2s ease;
+}
+
+    .card:hover {
+        transform: translateY(-4px);
+    }
+
+    .card h3 {
+        font-size: 1.25rem;
+        margin-top: 1rem;
+        font-weight: 600;
+    }
+
+    .card p {
+        margin-top: 0.5rem;
+        color: #333;
+    }
+
+    .card pre {
+        background: #f8f8f8;
+        padding: 0.75rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        color: #d63384;
+        overflow-x: auto;
+        white-space: pre-wrap;
+    }
+
+.demo-section {
+    background-color: #f4f6fa;
+    padding: 6rem 2rem;
+    text-align: center;
+    color: #111;
+}
+
+    .demo-section h2 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        font-weight: 700;
+        color: #111;
+    }
+
+    .demo-section p {
+        font-size: 1.125rem;
+        margin-bottom: 2rem;
+        color: #333;
+    }
+
+.demo-container {
+    background: #fff;
+    padding: 2.5rem 2rem;
+    border-radius: 16px;
+    max-width: 960px;
+    margin: 0 auto;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Eliminado margin-bottom global que generaba conflictos visuales */
+section {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.landing-wrapper {
+    width: 100%;
+    overflow-x: hidden;
+}

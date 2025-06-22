@@ -1,0 +1,40 @@
+﻿.demo-layout {
+    background: linear-gradient(to bottom right, #071A40, #102F88);
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    min-height: 100vh;
+}
+
+.demo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 2rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.header-left {
+    flex: 1;
+}
+
+.header-title {
+    flex: 2;
+    text-align: center;
+}
+
+.back-button {
+    background: transparent;
+    border: none;
+    color: #ffffffcc;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.back-button:hover {
+    color: #ffffff;
+}
+
+.demo-body {
+    padding: 2rem 3rem;
+}

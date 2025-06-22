@@ -4,3 +4,4 @@
     link.href = "data:text/csv;base64," + base64Content;
     link.click();
 };
+

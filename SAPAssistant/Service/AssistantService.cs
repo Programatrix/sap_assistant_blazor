@@ -29,7 +29,7 @@ namespace SAPAssistant.Service
 
             var requestBody = new
             {
-                mensaje = mensaje,
+                mensaje,
                 connection_id = connectionId,
                 chat_id = "default",
                 db_type
@@ -43,6 +43,29 @@ namespace SAPAssistant.Service
             request.Headers.Add("X-User-Id", username);
             request.Headers.Add("x-remote-ip", remote_ip);
 
+            return await SendAndParseAsync(request);
+        }
+
+        public async Task<QueryResponse?> ConsultarDemoAsync(string mensaje)
+        {
+            var requestBody = new
+            {
+                mensaje,
+                modo_demo = true,
+                chat_id = "demo",
+                db_type = "HANA" // o tu valor demo por defecto
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, "/assistant/demo")
+            {
+                Content = JsonContent.Create(requestBody)
+            };
+
+            return await SendAndParseAsync(request);
+        }
+
+        private async Task<QueryResponse?> SendAndParseAsync(HttpRequestMessage request)
+        {
             var response = await _http.SendAsync(request);
 
             if (!response.IsSuccessStatusCode)
@@ -56,15 +79,12 @@ namespace SAPAssistant.Service
             if (assistantResponse == null)
                 throw new Exception("No se pudo interpretar la respuesta del asistente.");
 
-            // 🔁 Mapeamos a tu modelo QueryResponse
             return MapToQueryResponse(assistantResponse);
-
         }
 
         private static QueryResponse MapToQueryResponse(AssistantResponse assistantResponse)
         {
             var tipo = assistantResponse.Tipo ?? "system";
-
             string? sql = assistantResponse.Sql;
             string? resumen = null;
             string? mensaje = null;
@@ -77,28 +97,19 @@ namespace SAPAssistant.Service
                 switch (data.ValueKind)
                 {
                     case JsonValueKind.Object:
+                        if (data.TryGetProperty("sql", out var sqlElement))
+                            sql = sqlElement.GetString();
+
+                        if (data.TryGetProperty("resultado", out var resultadoElement) &&
+                            resultadoElement.ValueKind == JsonValueKind.Array)
                         {
-                            if (data.TryGetProperty("sql", out var sqlElement))
-                                sql = sqlElement.GetString();
-
-                            if (data.TryGetProperty("resultado", out var resultadoElement) && resultadoElement.ValueKind == JsonValueKind.Array)
-                            {
-                                resultados = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
-                                    resultadoElement.GetRawText()
-                                );
-                            }
-
-                            break;
+                            resultados = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(resultadoElement.GetRawText());
                         }
+                        break;
 
                     case JsonValueKind.Array:
-                        {
-                            // En este caso asumimos que el array completo es el resultado
-                            resultados = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
-                                data.GetRawText()
-                            );
-                            break;
-                        }
+                        resultados = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(data.GetRawText());
+                        break;
                 }
             }
 
@@ -117,8 +128,7 @@ namespace SAPAssistant.Service
                 Resultados = resultados
             };
         }
-
-
     }
+
 }
 

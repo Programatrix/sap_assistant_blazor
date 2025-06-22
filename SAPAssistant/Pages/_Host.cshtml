@@ -21,6 +21,7 @@
     <script src="js/chart-helper.js"></script>
     <script src="js/textarea-resize.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/scripts.js"></script>
 </head>
 <body>
     <component type="typeof(App)" render-mode="Server" />
@@ -43,6 +44,17 @@
                     textarea.style.height = 'auto';
                     textarea.style.height = textarea.scrollHeight + 'px';
                 }
+            }
+        };
+    </script>
+
+    <script>
+        window.demoStorage = {
+            setRemaining: function (value) {
+                sessionStorage.setItem('demo_remaining_attempts', value);
+            },
+            getRemaining: function () {
+                return sessionStorage.getItem('demo_remaining_attempts');
             }
         };
     </script>

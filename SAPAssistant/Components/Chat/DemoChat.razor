@@ -1,11 +1,8 @@
-@page "/demo"
-@layout DemoChatLayaout
-@using Microsoft.AspNetCore.Components.Web
-@using SAPAssistant.Components.Chat
-@using SAPAssistant.Models.Chat
+﻿@using SAPAssistant.Models.Chat
 @using SAPAssistant.Service
-@inject IJSRuntime JS
 @inject AssistantService AssistantService
+@inject IJSRuntime JS
+
 
 <div class="chat-content-full">
     <div class="demo-banner">
@@ -20,7 +17,7 @@
     </div>
 
     <div class="input-area">
-        <SearchBar @bind-SearchText="UserInput" OnSearch="SendMessage" Disabled="isProcessing || remainingAttempts == 0" />
+        <SAPAssistant.Pages.Chat.SearchBar @bind-SearchText="UserInput" OnSearch="SendMessage" Disabled="isProcessing || remainingAttempts == 0" />
         @if (isProcessing)
         {
             <div class="loading-spinner">⌛ Procesando...</div>

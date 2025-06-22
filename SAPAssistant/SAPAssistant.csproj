@@ -12,14 +12,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Components\Chat\DemoChat.razor.css" />
     <None Remove="Components\Chat\ErrorMessageComponent.razor.css" />
     <None Remove="Pages\Assistant.razor.css" />
     <None Remove="Pages\Chat\ChatAssistant.razor.css" />
     <None Remove="Pages\Dashboard.razor.css" />
+    <None Remove="Shared\DemoChatLayaout.razor.css" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Components\Chat\DemoChat.razor.css" />
     <Content Include="Components\Chat\ErrorMessageComponent.razor.css" />
+    <Content Include="Shared\DemoChatLayaout.razor.css" />
   </ItemGroup>
 
   <ItemGroup>

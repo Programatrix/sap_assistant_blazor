@@ -1,0 +1,21 @@
+﻿<section class="hero-section">
+    <div class="hero-content">
+        <h1>Habla con tu ERP</h1>
+        <p>Conviértete en un experto sin escribir SQL.</p>
+        <div class="cta-buttons">
+            <button class="btn-primary">Probar gratis</button>
+            <button class="btn-outline" @onclick="OnDemoClick">Ver demo</button>
+        </div>
+    </div>
+</section>
+
+
+@code {
+    [Parameter] public EventCallback<string> ScrollToDemo { get; set; }
+
+    private async Task OnDemoClick()
+    {
+        if (ScrollToDemo.HasDelegate)
+            await ScrollToDemo.InvokeAsync("demo");
+    }
+}
