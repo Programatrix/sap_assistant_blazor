@@ -2,7 +2,7 @@
 {
     public class TextMessage : MessageBase
     {
-        public string Content { get; set; } = string.Empty;
+        public string Mensaje { get; set; } = string.Empty;
         public override string Type => "Text";
     }
 }

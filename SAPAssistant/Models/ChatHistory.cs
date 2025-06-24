@@ -1,4 +1,6 @@
-﻿namespace SAPAssistant.Models
+﻿using SAPAssistant.Models.Chat;
+
+namespace SAPAssistant.Models
 {
     public class ChatHistory
     {
@@ -11,7 +13,8 @@
         public string Id { get; set; }
         public DateTime Fecha { get; set; }
         public string Titulo { get; set; } = "Nuevo Chat";
-        public List<Message> Mensajes { get; set; } = new();
+        public List<Dictionary<string, object>> MensajesRaw { get; set; } = new(); // del backend
+        public List<MessageBase> Mensajes { get; set; } = new(); // lo que usas en UI
     }
 
     public class Message

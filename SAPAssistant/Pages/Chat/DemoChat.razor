@@ -67,8 +67,8 @@
 
         Messages.Add(new TextMessage
             {
-                Content = message,
-                IsUser = true
+                Mensaje = message,
+                Role = "user"
             });
 
         try
@@ -77,11 +77,11 @@
 
             if (resultado?.Tipo == "aclaracion" || resultado?.Tipo == "asistente")
             {
-                Messages.Add(new TextMessage { IsUser = false, Content = resultado.Mensaje });
+                Messages.Add(new TextMessage { Mensaje = resultado.Mensaje });
             }
             else if (resultado?.Tipo == "resumen")
             {
-                Messages.Add(new TextMessage { IsUser = false, Content = resultado.Resumen });
+                Messages.Add(new TextMessage { Mensaje = resultado.Resumen });
             }
             else if (resultado?.Tipo == "system")
             {
@@ -90,8 +90,7 @@
             else
             {
                 Messages.Add(new ResultMessage
-                    {
-                        IsUser = false,
+                    {                        
                         Resumen = resultado?.Resumen ?? "",
                         Sql = resultado?.Sql ?? "",
                         Resultados = resultado?.Resultados ?? new()
@@ -100,7 +99,7 @@
         }
         catch (Exception ex)
         {
-            Messages.Add(new ErrorMessage { IsUser = false, Error = ex.Message });
+            Messages.Add(new ErrorMessage { Error = ex.Message });
         }
 
         isProcessing = false;

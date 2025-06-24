@@ -1,12 +1,16 @@
 ﻿@page "/"
+@page "/chat/{chatId}"
 @layout ChatLayout
 @using Microsoft.AspNetCore.Components.Web
 @using SAPAssistant.Components.Chat
 @using SAPAssistant.Models.Chat
 @using SAPAssistant.Service
 @using SAPAssistant.Models
+@using System.Text.Json
 @inject IJSRuntime JS
 @inject AssistantService AssistantService
+@inject ChatHistoryService ChatHistoryService
+
 
 <div class="chat-content-full">
     <div class="messages" @ref="messagesContainer">
@@ -26,68 +30,129 @@
 </div>
 
 @code {
+    [Parameter]
+    public string? chatId { get; set; }
+
+    private ChatSession? CurrentSession { get; set; }
     private string UserInput { get; set; } = string.Empty;
     private List<MessageBase> Messages { get; set; } = new();
     private ElementReference messagesContainer;
     private bool isProcessing = false;
+       
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+        Messages.Clear(); // Limpiar mensajes anteriores
+
+        if (!string.IsNullOrWhiteSpace(chatId))
+        {
+            CurrentSession = await ChatHistoryService.GetChatSessionAsync(chatId);
+        }
+        else
+        {
+            CurrentSession = new ChatSession
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Fecha = DateTime.Now,
+                    Titulo = "Nuevo chat"
+                };
+        }
+
+        if (CurrentSession?.MensajesRaw != null)
+        {
+            foreach (var msgRaw in CurrentSession.MensajesRaw)
+            {
+                try
+                {
+                    var json = JsonSerializer.Serialize(msgRaw);
+                    var tipo = msgRaw.TryGetValue("type", out var typeObj)
+                               ? typeObj?.ToString()?.ToLower()
+                               : null;
+
+                    if (tipo == null) continue;
+
+                    MessageBase? msg = tipo switch
+                    {
+                        "text" => JsonSerializer.Deserialize<TextMessage>(json, options),
+                        "asistente" => JsonSerializer.Deserialize<TextMessage>(json, options),
+                        "result" => JsonSerializer.Deserialize<ResultMessage>(json, options),
+                        "error" => JsonSerializer.Deserialize<ErrorMessage>(json, options),
+                        "system" => JsonSerializer.Deserialize<SystemMessage>(json, options),
+                        _ => null
+                    };
+
+                    if (msg != null)
+                        Messages.Add(msg);
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Error al deserializar mensaje: {ex.Message}");
+                }
+            }
+        }
+    }
+
+
 
     private async Task SendMessage(string message)
     {
         if (string.IsNullOrWhiteSpace(message) || isProcessing) return;
 
         isProcessing = true;
-        Messages.Add(new TextMessage
+
+        var userMsg = new TextMessage
             {
-                Content = message,
-                IsUser = true
-            });
+                Mensaje = message,
+                Role = "user"
+            };
+
+        Messages.Add(userMsg);
 
         try
         {
             var resultado = await AssistantService.ConsultarAsync(message);
 
-            if (resultado?.Tipo == "aclaracion" || resultado?.Tipo == "asistente")
+            MessageBase responseMsg = resultado?.Tipo switch
             {
-                Messages.Add(new TextMessage
+                "aclaracion" or "asistente" => new TextMessage
                     {
-                        IsUser = false,
-                        Content = resultado.Mensaje
-                    });
-            }
-            else if (resultado?.Tipo == "resumen")
-            {
-                Messages.Add(new TextMessage
-                    {
-                        IsUser = false,
-                        Content = resultado.Resumen
-                    });
-            }
-            else if (resultado?.Tipo == "system")
-            {
-                Messages.Add(new SystemMessage
+                        Role = "assistant",
+                        Mensaje = resultado.Mensaje
+                    },
+                "resumen" => new TextMessage
+                    {                        
+                        Mensaje = resultado.Resumen
+                    },
+                "system" => new SystemMessage
                     {
                         Mensaje = resultado.Mensaje
-                    });
-            }
-            else
-            {
-                Messages.Add(new ResultMessage
-                    {
-                        IsUser = false,
+                    },
+                _ => new ResultMessage
+                    {                        
                         Resumen = resultado?.Resumen ?? "",
                         Sql = resultado?.Sql ?? "",
                         Resultados = resultado?.Resultados ?? new()
-                    });
-            }
+                    }
+            };
+
+            Messages.Add(responseMsg);
         }
         catch (Exception ex)
         {
             Messages.Add(new ErrorMessage
-                {
-                    IsUser = false,
+                {                    
                     Error = ex.Message
                 });
         }
+
+        // 🧠 Actualizar y guardar sesión
+        // CurrentSession!.Mensajes = Messages;
+        // await ChatHistoryService.SaveChatSessionAsync(CurrentSession, Messages);
 
         isProcessing = false;
         await ScrollToBottom();
@@ -112,7 +177,7 @@
 
     private Dictionary<string, object> GetParameters(MessageBase msg)
     {
-        return new Dictionary<string, object>
+        return new()
             {
                 ["Message"] = msg
             };

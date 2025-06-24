@@ -8,7 +8,7 @@
 
     @if (Sessions == null)
     {
-        <p>Cargando chats...</p>
+        <p>Cargando historial...</p>
     }
     else if (!Sessions.Any())
     {
@@ -20,11 +20,11 @@
             @foreach (var chat in Sessions.OrderByDescending(c => c.Fecha))
             {
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span @onclick="() => OpenChat(chat.Id)" style="cursor: pointer;">
-                        <b>@chat.Titulo</b><br />
-                        <small>@chat.Fecha.ToShortDateString()</small>
-                    </span>
-                    <button class="btn btn-sm btn-danger" @onclick="() => DeleteChat(chat.Id)">🗑️</button>
+                    <div class="chat-title" @onclick="() => OpenChat(chat.Id)" style="cursor: pointer;">
+                        <strong>@chat.Titulo</strong><br />
+                        <small>@chat.Fecha.ToString("g")</small>
+                    </div>
+                    <button class="btn btn-sm btn-outline-danger" title="Eliminar chat" @onclick="() => DeleteChat(chat.Id)">🗑️</button>
                 </li>
             }
         </ul>
@@ -33,6 +33,7 @@
 
 @code {
     private List<ChatSession> Sessions = new();
+    private bool IsLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -43,12 +44,18 @@
     {
         try
         {
+            IsLoading = true;
             Sessions = await ChatService.GetChatHistoryAsync();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ Error cargando historial de chats: {ex.Message}");
+            Console.WriteLine($"❌ Error al cargar el historial: {ex.Message}");
             Sessions = new List<ChatSession>();
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
         }
     }
 
@@ -57,9 +64,9 @@
         Navigation.NavigateTo("/chat-assistant");
     }
 
-    private async Task OpenChat(string chatId)
+    private void OpenChat(string chatId)
     {
-        Navigation.NavigateTo($"/chat-assistant/{chatId}");
+        Navigation.NavigateTo($"/chat/{chatId}");
     }
 
     private async Task DeleteChat(string chatId)
@@ -67,11 +74,11 @@
         try
         {
             await ChatService.DeleteChatSessionAsync(chatId);
-            await LoadHistoryAsync(); // Refrescar lista
+            await LoadHistoryAsync();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ Error al eliminar chat: {ex.Message}");
+            Console.WriteLine($"❌ Error al eliminar el chat: {ex.Message}");
         }
     }
 }
