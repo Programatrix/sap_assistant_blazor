@@ -38,7 +38,7 @@
     private List<MessageBase> Messages { get; set; } = new();
     private ElementReference messagesContainer;
     private bool isProcessing = false;
-       
+
 
     protected override async Task OnParametersSetAsync()
     {
@@ -70,7 +70,8 @@
                 try
                 {
                     var json = JsonSerializer.Serialize(msgRaw);
-                    var tipo = msgRaw.TryGetValue("type", out var typeObj)
+                    var response = JsonSerializer.Deserialize<AssistantResponse>(json, options);
+                    var tipo = msgRaw.TryGetValue("tipo", out var typeObj)
                                ? typeObj?.ToString()?.ToLower()
                                : null;
 
@@ -83,6 +84,7 @@
                         "result" => JsonSerializer.Deserialize<ResultMessage>(json, options),
                         "error" => JsonSerializer.Deserialize<ErrorMessage>(json, options),
                         "system" => JsonSerializer.Deserialize<SystemMessage>(json, options),
+                        "consulta" => JsonSerializer.Deserialize<ResultMessage>(json, options),
                         _ => null
                     };
 

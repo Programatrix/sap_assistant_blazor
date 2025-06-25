@@ -1,4 +1,5 @@
 ﻿using SAPAssistant.Models.Chat;
+using System.Text.Json.Serialization;
 
 namespace SAPAssistant.Models
 {
@@ -14,7 +15,9 @@ namespace SAPAssistant.Models
         public DateTime Fecha { get; set; }
         public string Titulo { get; set; } = "Nuevo Chat";
         public List<Dictionary<string, object>> MensajesRaw { get; set; } = new(); // del backend
-        public List<MessageBase> Mensajes { get; set; } = new(); // lo que usas en UI
+
+        [JsonPropertyName("messages")]
+        public List<AssistantResponse> Messages { get; set; } = new(); // lo que usas en UI
     }
 
     public class Message
