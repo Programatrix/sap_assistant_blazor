@@ -16,7 +16,7 @@ namespace SAPAssistant.Service
             _sessionStorage = sessionStorage;
         }
 
-        public async Task<QueryResponse?> ConsultarAsync(string mensaje)
+        public async Task<QueryResponse?> ConsultarAsync(string mensaje, string chatId)
         {
             var userResult = await _sessionStorage.GetAsync<string>("username");
             var connectionResult = await _sessionStorage.GetAsync<string>("active_connection_id");
@@ -27,11 +27,14 @@ namespace SAPAssistant.Service
             var dbtypeResult = await _sessionStorage.GetAsync<string>("active_db_type");
             string db_type = dbtypeResult.Value ?? throw new Exception("No se ha informado el tipo de base de datos activa");
 
+            if (string.IsNullOrWhiteSpace(chatId))
+                throw new ArgumentException("El chatId no puede estar vacío al enviar un mensaje.", nameof(chatId));
+
             var requestBody = new
             {
                 mensaje,
                 connection_id = connectionId,
-                chat_id = "default",
+                chat_id = chatId,
                 db_type
             };
 

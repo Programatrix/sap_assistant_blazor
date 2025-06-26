@@ -80,6 +80,7 @@
                     MessageBase? msg = tipo switch
                     {
                         "text" => JsonSerializer.Deserialize<TextMessage>(json, options),
+                        "aclaracion" => JsonSerializer.Deserialize<TextMessage>(json, options),
                         "asistente" => JsonSerializer.Deserialize<TextMessage>(json, options),
                         "result" => JsonSerializer.Deserialize<ResultMessage>(json, options),
                         "error" => JsonSerializer.Deserialize<ErrorMessage>(json, options),
@@ -117,7 +118,7 @@
 
         try
         {
-            var resultado = await AssistantService.ConsultarAsync(message);
+            var resultado = await AssistantService.ConsultarAsync(message, CurrentSession!.Id);
 
             MessageBase responseMsg = resultado?.Tipo switch
             {
