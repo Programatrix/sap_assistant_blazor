@@ -1,0 +1,99 @@
+﻿/* ChatHistoryItem - Estilo de cada entrada del historial y su menú */
+
+.chat-item {
+    background-color: #2a2b32;
+    color: #e5e7eb;
+    border-radius: 8px;
+    padding: 6px 12px;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease;
+    min-height: 40px;
+    position: relative;
+}
+
+    .chat-item:hover {
+        background-color: #35363f;
+    }
+
+.chat-title {
+    font-size: 13px;
+    font-weight: 400;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 160px;
+    color: #e5e7eb;
+}
+
+.chat-options {
+    position: relative;
+    display: flex;
+    align-items: center;
+    z-index: 10;
+}
+
+.dots-button {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #aaa;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+    .dots-button:hover {
+        color: #fff;
+        background-color: #444;
+    }
+
+.chat-context-menu {
+    position: absolute;
+    top: 100%;
+    left: 0; /* se expande hacia la derecha del botón */
+    margin-top: 4px;
+    background-color: #343541;
+    border-radius: 10px;
+    padding: 4px 8px;
+    z-index: 10000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    min-width: 160px;
+    white-space: nowrap;
+    animation: fadeIn 0.15s ease-in-out;
+}
+
+    .chat-context-menu button {
+        background: none;
+        border: none;
+        color: #eee;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: background-color 0.2s ease;
+        font-size: 14px;
+    }
+
+        .chat-context-menu button:hover {
+            background-color: #555;
+        }
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -16,18 +16,12 @@
     }
     else
     {
-        <ul class="list-group">
-            @foreach (var chat in Sessions.OrderByDescending(c => c.Fecha))
-            {
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div class="chat-title" @onclick="() => OpenChat(chat.Id)" style="cursor: pointer;">
-                        <strong>@chat.Titulo</strong><br />
-                        <small>@chat.Fecha.ToString("g")</small>
-                    </div>
-                    <button class="btn btn-sm btn-outline-danger" title="Eliminar chat" @onclick="() => DeleteChat(chat.Id)">🗑️</button>
-                </li>
-            }
-        </ul>
+        @foreach (var chat in Sessions.OrderByDescending(c => c.Fecha))
+        {
+            <ChatHistoryItem Chat="chat"
+                             OnOpenChat="OpenChat"
+                             OnDeleteChat="DeleteChat" />
+        }
     }
 </div>
 

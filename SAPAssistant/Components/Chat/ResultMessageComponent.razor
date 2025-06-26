@@ -12,7 +12,7 @@
             @(MostrarSql ? "Ocultar consulta SQL" : "Ver consulta SQL")
         </button>
 
-        @if (M.Resultados.Any())
+        @if (M.Data.Any())
         {
             <button class="export-btn" @onclick="ExportarCsv">⬇️ Exportar CSV</button>
             <button class="copy-table-btn" @onclick="CopiarTabla">📋 Copiar tabla</button>
@@ -37,20 +37,20 @@
         </div>
     }
 
-    @if (M.Resultados.Any())
+    @if (M.Data.Any())
     {
         <h4>📊 Resultados</h4>
         <table class="table">
             <thead>
                 <tr>
-                    @foreach (var col in M.Resultados[0].Keys)
+                    @foreach (var col in M.Data[0].Keys)
                     {
                         <th>@col</th>
                     }
                 </tr>
             </thead>
             <tbody>
-                @foreach (var row in M.Resultados)
+                @foreach (var row in M.Data)
                 {
                     <tr>
                         @foreach (var val in row.Values)
@@ -87,10 +87,10 @@
 
     private async Task CopiarTabla()
     {
-        if (M.Resultados.Count == 0) return;
+        if (M.Data.Count == 0) return;
 
-        var headers = string.Join("\t", M.Resultados[0].Keys);
-        var rows = M.Resultados.Select(row =>
+        var headers = string.Join("\t", M.Data[0].Keys);
+        var rows = M.Data.Select(row =>
             string.Join("\t", row.Values.Select(v => v?.ToString()?.Replace("\t", " ") ?? ""))
         );
 
@@ -107,10 +107,10 @@
 
     private async Task ExportarCsv()
     {
-        if (M.Resultados.Count == 0) return;
+        if (M.Data.Count == 0) return;
 
-        var headers = string.Join(",", M.Resultados[0].Keys.Select(EscapeCsv));
-        var rows = M.Resultados.Select(row =>
+        var headers = string.Join(",", M.Data[0].Keys.Select(EscapeCsv));
+        var rows = M.Data.Select(row =>
             string.Join(",", row.Values.Select(v => EscapeCsv(v?.ToString() ?? "")))
         );
 

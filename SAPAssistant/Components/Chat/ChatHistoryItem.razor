@@ -1,0 +1,31 @@
+﻿@using SAPAssistant.Models
+
+<div class="chat-item">
+    <div class="chat-title" @onclick="() => OnOpenChat.InvokeAsync(Chat.Id)">
+        @Chat.Titulo
+    </div>
+
+    <div class="chat-options">
+        <button class="dots-button" @onclick="ToggleMenu">⋯</button>
+
+        @if (IsMenuOpen)
+        {
+            <div class="chat-context-menu">
+                <button @onclick="() => OnDeleteChat.InvokeAsync(Chat.Id)">🗑 Eliminar</button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public ChatSession Chat { get; set; } = default!;
+    [Parameter] public EventCallback<string> OnOpenChat { get; set; }
+    [Parameter] public EventCallback<string> OnDeleteChat { get; set; }
+
+    private bool IsMenuOpen = false;
+
+    private void ToggleMenu()
+    {
+        IsMenuOpen = !IsMenuOpen;
+    }
+}
