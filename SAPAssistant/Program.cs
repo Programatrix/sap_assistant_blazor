@@ -13,24 +13,25 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor();
+builder.Services.AddServerSideBlazor()
+ .AddCircuitOptions(options => { options.DetailedErrors = true; });
 builder.Services.AddHttpClient();
 
 // API principal
 builder.Services.AddScoped(sp => new HttpClient
 {
-    BaseAddress = new Uri("http://127.0.0.1:8081")
+    BaseAddress = new Uri("http://91.99.139.55:8000")
 });
 
 // Servicios API específicos
 builder.Services.AddHttpClient<ConnectionService>(client =>
 {
-    client.BaseAddress = new Uri("http://127.0.0.1:8081");
+    client.BaseAddress = new Uri("http://91.99.139.55:8000");
 });
 
 builder.Services.AddHttpClient<AssistantService>(client =>
 {
-    client.BaseAddress = new Uri("http://127.0.0.1:8081");
+    client.BaseAddress = new Uri("http://91.99.139.55:8000");
 });
 
 
