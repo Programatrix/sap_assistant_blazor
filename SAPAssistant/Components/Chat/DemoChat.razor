@@ -87,10 +87,11 @@
             else
             {
                 Messages.Add(new ResultMessage
-                    {                       
+                    {
                         Resumen = resultado?.Resumen ?? "",
                         Sql = resultado?.Sql ?? "",
-                        Data = resultado?.Resultados ?? new()
+                        Data = resultado?.Resultados ?? new(),
+                        ViewType = resultado?.ViewType ?? "grid"
                     });
             }
         }
@@ -108,15 +109,20 @@
         await JS.InvokeVoidAsync("chatEnhancer.scrollToBottom", messagesContainer);
     }
 
-    private Type GetComponentType(MessageBase msg) =>
-        msg.Type switch
-        {
-            "Text" => typeof(TextMessageComponent),
-            "Result" => typeof(ResultMessageComponent),
-            "Error" => typeof(ErrorMessageComponent),
-            "system" => typeof(SystemMessageComponent),
-            _ => typeof(TextMessageComponent)
-        };
+    private Type GetComponentType(MessageBase msg)
+        => msg.Type == "Result"
+            ? (((ResultMessage)msg).ViewType?.ToLower()) switch
+            {
+                "cards" => typeof(ResultCardListComponent),
+                _ => typeof(ResultGridComponent)
+            }
+            : msg.Type switch
+            {
+                "Text" => typeof(TextMessageComponent),
+                "Error" => typeof(ErrorMessageComponent),
+                "system" => typeof(SystemMessageComponent),
+                _ => typeof(TextMessageComponent)
+            };
 
     private Dictionary<string, object> GetParameters(MessageBase msg) =>
         new() { ["Message"] = msg };
