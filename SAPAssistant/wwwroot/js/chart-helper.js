@@ -35,7 +35,7 @@
     });
 };
 
-window.drawChart = (canvasId, labels, data) => {
+window.drawChart = (canvasId, labels, data, chartType = 'bar', dotNetHelper = null) => {
     const ctx = document.getElementById(canvasId).getContext('2d');
 
     if (window.resultCharts && window.resultCharts[canvasId]) {
@@ -45,13 +45,28 @@ window.drawChart = (canvasId, labels, data) => {
     window.resultCharts = window.resultCharts || {};
 
     window.resultCharts[canvasId] = new Chart(ctx, {
-        type: 'bar',
+        type: chartType,
         data: {
             labels: labels,
             datasets: [{
+                label: 'Valores',
                 data: data,
-                backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.5)',
+                    'rgba(255, 99, 132, 0.5)',
+                    'rgba(255, 206, 86, 0.5)',
+                    'rgba(75, 192, 192, 0.5)',
+                    'rgba(153, 102, 255, 0.5)',
+                    'rgba(255, 159, 64, 0.5)'
+                ],
+                borderColor: [
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
                 borderWidth: 1
             }]
         },
@@ -59,7 +74,16 @@ window.drawChart = (canvasId, labels, data) => {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false }
+                legend: {
+                    display: chartType !== 'bar' && chartType !== 'line'
+                }
+            },
+            onClick: (event, elements) => {
+                if (elements.length > 0 && dotNetHelper) {
+                    const index = elements[0].index;
+                    const clickedLabel = labels[index];
+                    dotNetHelper.invokeMethodAsync("OnChartLabelClicked", clickedLabel);
+                }
             }
         }
     });

@@ -1,0 +1,145 @@
+﻿@using SAPAssistant.Models.Chat
+@inject IJSRuntime JS
+@implements IDisposable
+
+<div class="chart-controls">
+    <label>
+        Eje X:
+        <select @onchange="OnXChanged" value="@EjeX">
+            @foreach (var col in ColumnasDisponibles)
+            {
+                <option value="@col">@col</option>
+            }
+        </select>
+    </label>
+
+    <label>
+        Eje Y:
+        <select @onchange="OnYChanged" value="@EjeY">
+            @foreach (var col in ColumnasDisponibles)
+            {
+                <option value="@col">@col</option>
+            }
+        </select>
+    </label>
+
+    <label>
+        Tipo:
+        <select @onchange="OnChartTypeChanged" value="@TipoGrafico">
+            <option value="bar">Barra</option>
+            <option value="line">Línea</option>
+            <option value="pie">Pastel</option>
+            <option value="doughnut">Dona</option>
+        </select>
+    </label>
+</div>
+
+<div class="chart-wrapper">
+    <canvas id="@CanvasId"></canvas>
+</div>
+
+@if (!string.IsNullOrEmpty(FiltroActivo))
+{
+    <div class="filtro-activo">
+        Filtro: @FiltroActivo
+        <button @onclick="LimpiarFiltro">✖</button>
+    </div>
+}
+
+@code {
+    [Parameter] public MessageBase Message { get; set; }
+    [Parameter] public EventCallback<string> OnViewTypeChange { get; set; }
+
+    private ResultMessage M => (ResultMessage)Message;
+    private string CanvasId { get; } = $"chart-{Guid.NewGuid()}";
+    private DotNetObjectReference<InteractiveChartComponent> objRef;
+    private string FiltroActivo;
+    private List<Dictionary<string, object>> DataFiltrada;
+
+    private string EjeX;
+    private string EjeY;
+    private string TipoGrafico = "bar";
+    private List<string> ColumnasDisponibles = new();
+
+    protected override void OnInitialized()
+    {
+        DataFiltrada = M.Data;
+        objRef = DotNetObjectReference.Create(this);
+
+        if (DataFiltrada.Any())
+        {
+            ColumnasDisponibles = DataFiltrada[0].Keys.ToList();
+            EjeX = ColumnasDisponibles.ElementAtOrDefault(0);
+            EjeY = ColumnasDisponibles.ElementAtOrDefault(1);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await DibujarGrafico();
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnChartLabelClicked(string label)
+    {
+        FiltroActivo = label;
+        DataFiltrada = M.Data
+            .Where(d => d.ContainsKey(EjeX) && d[EjeX]?.ToString() == label)
+            .ToList();
+        await DibujarGrafico();
+    }
+
+    private async void LimpiarFiltro()
+    {
+        FiltroActivo = null;
+        DataFiltrada = M.Data;
+        await DibujarGrafico();
+    }
+
+    private async Task DibujarGrafico()
+    {
+        var labels = new List<string>();
+        var values = new List<double>();
+
+        if (!string.IsNullOrEmpty(EjeX) && !string.IsNullOrEmpty(EjeY))
+        {
+            foreach (var row in DataFiltrada)
+            {
+                labels.Add(row[EjeX]?.ToString() ?? string.Empty);
+                if (double.TryParse(row[EjeY]?.ToString(), out var v))
+                    values.Add(v);
+                else
+                    values.Add(0);
+            }
+
+            await JS.InvokeVoidAsync("drawChart", CanvasId, labels, values, TipoGrafico, objRef);
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnXChanged(ChangeEventArgs e)
+    {
+        EjeX = e.Value?.ToString();
+        await DibujarGrafico();
+    }
+
+    private async Task OnYChanged(ChangeEventArgs e)
+    {
+        EjeY = e.Value?.ToString();
+        await DibujarGrafico();
+    }
+
+    private async Task OnChartTypeChanged(ChangeEventArgs e)
+    {
+        TipoGrafico = e.Value?.ToString() ?? "bar";
+        await DibujarGrafico();
+    }
+
+    public void Dispose()
+    {
+        objRef?.Dispose();
+    }
+}

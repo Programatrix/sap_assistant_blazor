@@ -35,4 +35,8 @@
     <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.7.6" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Components\NewFolder\" />
+  </ItemGroup>
+
 </Project>
