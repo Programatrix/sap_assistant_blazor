@@ -34,3 +34,33 @@
         }
     });
 };
+
+window.drawChart = (canvasId, labels, data) => {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+
+    if (window.resultCharts && window.resultCharts[canvasId]) {
+        window.resultCharts[canvasId].destroy();
+    }
+
+    window.resultCharts = window.resultCharts || {};
+
+    window.resultCharts[canvasId] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+};
