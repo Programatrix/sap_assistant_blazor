@@ -136,10 +136,11 @@
                         Mensaje = resultado.Mensaje
                     },
                 _ => new ResultMessage
-                    {                        
+                    {
                         Resumen = resultado?.Resumen ?? "",
                         Sql = resultado?.Sql ?? "",
-                        Data = resultado?.Resultados ?? new()
+                        Data = resultado?.Resultados ?? new(),
+                        ViewType = resultado?.ViewType ?? "grid"
                     }
             };
 
@@ -168,10 +169,19 @@
 
     private Type GetComponentType(MessageBase msg)
     {
+        if (msg.Type == "Result")
+        {
+            var view = ((ResultMessage)msg).ViewType?.ToLower();
+            return view switch
+            {
+                "cards" => typeof(ResultCardListComponent),
+                _ => typeof(ResultGridComponent)
+            };
+        }
+
         return msg.Type switch
         {
             "Text" => typeof(TextMessageComponent),
-            "Result" => typeof(ResultMessageComponent),
             "Error" => typeof(ErrorMessageComponent),
             "system" => typeof(SystemMessageComponent),
             _ => typeof(TextMessageComponent)

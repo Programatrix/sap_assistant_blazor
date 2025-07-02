@@ -1,0 +1,58 @@
+@using SAPAssistant.Models.Chat
+@inject IJSRuntime JS
+
+<link href="css/components/ChatMessages/resultmessage.css" rel="stylesheet" />
+
+<div class="resultado-panel">
+    <h3>🧠 Resumen generado</h3>
+    <p>@((MarkupString)M.Resumen)</p>
+
+    <div class="botones-acciones">
+        <button class="toggle-sql-btn" @onclick="() => MostrarSql = !MostrarSql">
+            @(MostrarSql ? "Ocultar consulta SQL" : "Ver consulta SQL")
+        </button>
+    </div>
+
+    @if (MostrarSql)
+    {
+        <div class="sql-block">
+            <button class="copy-btn" @onclick="CopiarSql" title="Copiar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M10 1.5A1.5 1.5 0 0 1 11.5 3v10A1.5 1.5 0 0 1 10 14.5H4A1.5 1.5 0 0 1 2.5 13V4.707a1 1 0 0 1 .293-.707l3.207-3.207a1 1 0 0 1 .707-.293H10zm-1 1H7v2.5a.5.5 0 0 1-.5.5H4v7a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-10A.5.5 0 0 0 9 2.5z" />
+                </svg>
+            </button>
+            <pre>@M.Sql</pre>
+        </div>
+    }
+
+    @if (M.Data.Any())
+    {
+        <div class="card-list">
+            @foreach (var row in M.Data)
+            {
+                <div class="result-card">
+                    @foreach (var kv in row)
+                    {
+                        <div><strong>@kv.Key:</strong> @kv.Value</div>
+                    }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p>No se encontraron resultados.</p>
+    }
+</div>
+
+@code {
+    [Parameter] public MessageBase Message { get; set; }
+    private ResultMessage M => (ResultMessage)Message;
+
+    private bool MostrarSql { get; set; } = false;
+
+    private async Task CopiarSql()
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", M.Sql);
+    }
+}

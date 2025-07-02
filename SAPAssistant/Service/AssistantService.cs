@@ -92,6 +92,14 @@ namespace SAPAssistant.Service
             string? resumen = null;
             string? mensaje = null;
             List<Dictionary<string, object>>? resultados = null;
+            string viewType = "grid";
+
+            if (assistantResponse.Meta != null &&
+                assistantResponse.Meta.TryGetValue("view_type", out var vtObj) &&
+                vtObj != null)
+            {
+                viewType = vtObj.ToString() ?? "grid";
+            }
 
             if (assistantResponse.Data.HasValue)
             {
@@ -128,7 +136,8 @@ namespace SAPAssistant.Service
                 Sql = sql,
                 Resumen = resumen,
                 Mensaje = mensaje,
-                Resultados = resultados
+                Resultados = resultados,
+                ViewType = viewType
             };
         }
     }
