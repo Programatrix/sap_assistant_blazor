@@ -175,6 +175,7 @@
             return view switch
             {
                 "cards" => typeof(ResultCardListComponent),
+                "kpi" => typeof(ResultKpiComponent),
                 _ => typeof(ResultGridComponent)
             };
         }
