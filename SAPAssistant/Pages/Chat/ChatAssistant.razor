@@ -38,6 +38,12 @@
     private List<MessageBase> Messages { get; set; } = new();
     private ElementReference messagesContainer;
     private bool isProcessing = false;
+    private string? preferredViewType;
+
+    protected override async Task OnInitializedAsync()
+    {
+        preferredViewType = await JS.InvokeAsync<string>("viewTypePref.get");
+    }
 
 
     protected override async Task OnParametersSetAsync()
@@ -90,7 +96,13 @@
                     };
 
                     if (msg != null)
+                    {
+                        if (msg is ResultMessage rm && !string.IsNullOrEmpty(preferredViewType))
+                        {
+                            rm.ViewType = preferredViewType;
+                        }
                         Messages.Add(msg);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -140,7 +152,7 @@
                         Resumen = resultado?.Resumen ?? "",
                         Sql = resultado?.Sql ?? "",
                         Data = resultado?.Resultados ?? new(),
-                        ViewType = resultado?.ViewType ?? "grid"
+                        ViewType = preferredViewType ?? resultado?.ViewType ?? "grid"
                     }
             };
 
@@ -192,9 +204,24 @@
 
     private Dictionary<string, object> GetParameters(MessageBase msg)
     {
-        return new()
-            {
-                ["Message"] = msg
-            };
+        var parameters = new Dictionary<string, object>
+        {
+            ["Message"] = msg
+        };
+
+        if (msg is ResultMessage)
+        {
+            parameters["OnViewTypeChange"] = EventCallback.Factory.Create<string>(this, (string vt) => OnViewTypeChanged((ResultMessage)msg, vt));
+        }
+
+        return parameters;
+    }
+
+    private async Task OnViewTypeChanged(ResultMessage msg, string viewType)
+    {
+        msg.ViewType = viewType;
+        preferredViewType = viewType;
+        await JS.InvokeVoidAsync("viewTypePref.set", viewType);
+        StateHasChanged();
     }
 }

@@ -9,6 +9,12 @@
         <button class="toggle-sql-btn" @onclick="() => MostrarSql = !MostrarSql">
             @(MostrarSql ? "Ocultar consulta SQL" : "Ver consulta SQL")
         </button>
+        <select class="view-select" @onchange="ChangeViewType" value="@M.ViewType">
+            <option value="grid">Grid</option>
+            <option value="cards">Cards</option>
+            <option value="kpi">KPI</option>
+            <option value="chart">Chart</option>
+        </select>
     </div>
 
     @if (MostrarSql)
@@ -30,6 +36,7 @@
 
 @code {
     [Parameter] public MessageBase Message { get; set; }
+    [Parameter] public EventCallback<string> OnViewTypeChange { get; set; }
     private ResultMessage M => (ResultMessage)Message;
 
     private bool MostrarSql { get; set; }
@@ -64,5 +71,12 @@
     private async Task CopiarSql()
     {
         await JS.InvokeVoidAsync("navigator.clipboard.writeText", M.Sql);
+    }
+
+    private async Task ChangeViewType(ChangeEventArgs e)
+    {
+        var newType = e.Value?.ToString() ?? "grid";
+        M.ViewType = newType;
+        await OnViewTypeChange.InvokeAsync(newType);
     }
 }
