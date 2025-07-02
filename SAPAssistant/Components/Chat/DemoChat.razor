@@ -114,6 +114,7 @@
             ? (((ResultMessage)msg).ViewType?.ToLower()) switch
             {
                 "cards" => typeof(ResultCardListComponent),
+                "kpi" => typeof(ResultKpiComponent),
                 _ => typeof(ResultGridComponent)
             }
             : msg.Type switch

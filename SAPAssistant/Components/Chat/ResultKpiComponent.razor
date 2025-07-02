@@ -1,0 +1,32 @@
+@using SAPAssistant.Models.Chat
+
+<link href="css/components/ChatMessages/resultmessage.css" rel="stylesheet" />
+
+<div class="resultado-panel">
+    <h3>🧠 Resumen generado</h3>
+    <p>@((MarkupString)M.Resumen)</p>
+
+    @if (M.Data.Any())
+    {
+        <div class="kpi-list">
+            @foreach (var row in M.Data)
+            {
+                <div class="kpi-item">
+                    @foreach (var kv in row)
+                    {
+                        <div><strong>@kv.Key:</strong> @kv.Value</div>
+                    }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p>No se encontraron resultados.</p>
+    }
+</div>
+
+@code {
+    [Parameter] public MessageBase Message { get; set; }
+    private ResultMessage M => (ResultMessage)Message;
+}
