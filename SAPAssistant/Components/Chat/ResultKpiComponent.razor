@@ -4,6 +4,14 @@
 <div class="resultado-panel">
     <h3>🧠 Resumen generado</h3>
     <p>@((MarkupString)M.Resumen)</p>
+    <div class="botones-acciones">
+        <select class="view-select" @onchange="ChangeViewType" value="@M.ViewType">
+            <option value="grid">Grid</option>
+            <option value="cards">Cards</option>
+            <option value="kpi">KPI</option>
+            <option value="chart">Chart</option>
+        </select>
+    </div>
 
     @if (M.Data.Any())
     {
@@ -27,5 +35,13 @@
 
 @code {
     [Parameter] public MessageBase Message { get; set; }
+    [Parameter] public EventCallback<string> OnViewTypeChange { get; set; }
     private ResultMessage M => (ResultMessage)Message;
+
+    private async Task ChangeViewType(ChangeEventArgs e)
+    {
+        var newType = e.Value?.ToString() ?? "grid";
+        M.ViewType = newType;
+        await OnViewTypeChange.InvokeAsync(newType);
+    }
 }

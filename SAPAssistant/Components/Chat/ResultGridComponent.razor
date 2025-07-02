@@ -16,6 +16,12 @@
             <button class="export-btn" @onclick="ExportarCsv">⬇️ Exportar CSV</button>
             <button class="copy-table-btn" @onclick="CopiarTabla">📋 Copiar tabla</button>
         }
+        <select class="view-select" @onchange="ChangeViewType" value="@M.ViewType">
+            <option value="grid">Grid</option>
+            <option value="cards">Cards</option>
+            <option value="kpi">KPI</option>
+            <option value="chart">Chart</option>
+        </select>
     </div>
 
     @if (MostrarSql)
@@ -69,6 +75,7 @@
 
 @code {
     [Parameter] public MessageBase Message { get; set; }
+    [Parameter] public EventCallback<string> OnViewTypeChange { get; set; }
     private ResultMessage M => (ResultMessage)Message;
 
     private bool MostrarSql { get; set; } = false;
@@ -129,5 +136,12 @@
             return $"\"{input}\"";
         }
         return input;
+    }
+
+    private async Task ChangeViewType(ChangeEventArgs e)
+    {
+        var newType = e.Value?.ToString() ?? "grid";
+        M.ViewType = newType;
+        await OnViewTypeChange.InvokeAsync(newType);
     }
 }
