@@ -1,0 +1,64 @@
+﻿@using SAPAssistant.Models.Chart
+
+<div class="chart-config-container">
+    <h4 class="chart-config-title">📊 Configurar gráfico</h4>
+
+    <div class="form-row">
+        <label for="selectX">Eje X (Categoría):</label>
+        <select id="selectX" @bind="SelectedX">
+            @foreach (var col in Columns)
+            {
+                <option value="@col">@col</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="selectY">Eje Y (Valor):</label>
+        <select id="selectY" @bind="SelectedY">
+            @foreach (var col in Columns)
+            {
+                <option value="@col">@col</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="chartType">Tipo de gráfico:</label>
+        <select id="chartType" @bind="SelectedChartType">
+            <option value="bar">Barra</option>
+            <option value="line">Línea</option>
+            <option value="pie">Tarta</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <button class="btn-generar" @onclick="Confirm">🎨 Generar gráfico</button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public List<Dictionary<string, object>> Data { get; set; }
+    [Parameter] public EventCallback<ChartConfig> OnChartConfigured { get; set; }
+
+    private string SelectedX;
+    private string SelectedY;
+    private string SelectedChartType = "bar";
+
+    private List<string> Columns => Data?.FirstOrDefault()?.Keys.ToList() ?? new();
+
+    private async Task Confirm()
+    {
+        if (string.IsNullOrEmpty(SelectedX) || string.IsNullOrEmpty(SelectedY))
+            return;
+
+        var config = new ChartConfig
+            {
+                XAxis = SelectedX,
+                YAxis = SelectedY,
+                ChartType = SelectedChartType
+            };
+
+        await OnChartConfigured.InvokeAsync(config);
+    }
+}

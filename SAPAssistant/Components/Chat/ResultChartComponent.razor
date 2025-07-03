@@ -1,3 +1,4 @@
+@using SAPAssistant.Models.Chart
 @using SAPAssistant.Models.Chat
 @inject IJSRuntime JS
 
@@ -25,16 +26,32 @@
         </div>
     }
 
-    <InteractiveChartComponent Message="Message"
-                               OnViewTypeChange="OnViewTypeChange" />
+    @if (M.ViewType == "chart")
+    {
+        @if (Config == null)
+        {
+            <SAPAssistant.Components.Chart.ChartConfigurator Data="M.Data"
+                                                             OnChartConfigured="HandleChartConfigured" />
+        }
+        else
+        {
+            <InteractiveChartComponent Data="M.Data"
+                                       Config="Config" />
+        }
+    }
+    else
+    {
+        <!-- Aquí podrías mostrar el grid/cards/kpi si lo deseas -->
+    }
 </div>
 
 @code {
     [Parameter] public MessageBase Message { get; set; }
     [Parameter] public EventCallback<string> OnViewTypeChange { get; set; }
-    private ResultMessage M => (ResultMessage)Message;
 
+    private ResultMessage M => (ResultMessage)Message;
     private bool MostrarSql { get; set; }
+    private ChartConfig? Config;
 
     private async Task CopiarSql()
     {
@@ -45,6 +62,19 @@
     {
         var newType = e.Value?.ToString() ?? "grid";
         M.ViewType = newType;
+
+        // Resetear la configuración del gráfico si se cambia de vista
+        if (newType != "chart")
+        {
+            Config = null;
+        }
+
         await OnViewTypeChange.InvokeAsync(newType);
+    }
+
+    private Task HandleChartConfigured(ChartConfig config)
+    {
+        Config = config;
+        return Task.CompletedTask;
     }
 }

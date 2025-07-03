@@ -1,0 +1,48 @@
+﻿.chart-config-container {
+    background-color: #1e1e1e;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-top: 1rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.chart-config-title {
+    font-size: 1.2rem;
+    color: #00d1b2;
+    margin-bottom: 1rem;
+}
+
+.form-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+    .form-row label {
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #ddd;
+    }
+
+    .form-row select {
+        padding: 0.5rem;
+        border-radius: 6px;
+        border: 1px solid #444;
+        background-color: #2e2e2e;
+        color: white;
+    }
+
+.btn-generar {
+    padding: 0.6rem 1.2rem;
+    background-color: #00d1b2;
+    border: none;
+    border-radius: 6px;
+    color: black;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+    .btn-generar:hover {
+        background-color: #00b89c;
+    }
