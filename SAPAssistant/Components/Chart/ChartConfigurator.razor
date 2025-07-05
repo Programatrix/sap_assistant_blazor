@@ -1,55 +1,63 @@
-﻿@using SAPAssistant.Models.Chart
+﻿@using MudBlazor
+@using SAPAssistant.Models.Chart
 
-<div class="chart-config-container">
-    <h4 class="chart-config-title">📊 Configurar gráfico</h4>
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6" Class="mb-4">
+            <MudIcon Icon="@Icons.Material.Filled.Settings" Class="me-2" />
+            Configurar gráfico
+        </MudText>
 
-    <div class="form-row">
-        <label for="selectX">Eje X (Categoría):</label>
-        <select id="selectX" @bind="SelectedX">
+        <MudSelect T="string" Label="Eje X (Categoría)" @bind-Value="SelectedX" FullWidth="true" Dense="true" Variant="Variant.Outlined">
             @foreach (var col in Columns)
             {
-                <option value="@col">@col</option>
+                <MudSelectItem Value="@col">@col</MudSelectItem>
             }
-        </select>
-    </div>
+        </MudSelect>
 
-    <div class="form-row">
-        <label for="selectY">Eje Y (Valor):</label>
-        <select id="selectY" @bind="SelectedY">
+        <MudSelect T="string" Label="Eje Y (Valor)" @bind-Value="SelectedY" FullWidth="true" Dense="true" Variant="Variant.Outlined">
             @foreach (var col in Columns)
             {
-                <option value="@col">@col</option>
+                <MudSelectItem Value="@col">@col</MudSelectItem>
             }
-        </select>
-    </div>
+        </MudSelect>
 
-    <div class="form-row">
-        <label for="chartType">Tipo de gráfico:</label>
-        <select id="chartType" @bind="SelectedChartType">
-            <option value="bar">Barra</option>
-            <option value="line">Línea</option>
-            <option value="pie">Tarta</option>
-        </select>
-    </div>
+        <MudSelect T="ChartType" Label="Tipo de gráfico" @bind-Value="SelectedChartType" FullWidth="true" Dense="true" Variant="Variant.Outlined">
+            <MudSelectItem Value="ChartType.Bar">Barras</MudSelectItem>
+            <MudSelectItem Value="ChartType.Line">Líneas</MudSelectItem>
+            <MudSelectItem Value="ChartType.Pie">Tarta</MudSelectItem>
+        </MudSelect>
+    </DialogContent>
 
-    <div class="form-row">
-        <button class="btn-generar" @onclick="Confirm">🎨 Generar gráfico</button>
-    </div>
-</div>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Color="Color.Default">Cancelar</MudButton>
+        <MudButton OnClick="Submit" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Check">Generar gráfico</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+
     [Parameter] public List<Dictionary<string, object>> Data { get; set; }
-    [Parameter] public EventCallback<ChartConfig> OnChartConfigured { get; set; }
 
     private string SelectedX;
     private string SelectedY;
-    private string SelectedChartType = "bar";
+    private ChartType SelectedChartType = ChartType.Bar;
 
     private List<string> Columns => Data?.FirstOrDefault()?.Keys.ToList() ?? new();
 
-    private async Task Confirm()
+    protected override void OnInitialized()
     {
-        if (string.IsNullOrEmpty(SelectedX) || string.IsNullOrEmpty(SelectedY))
+        if (Columns.Count >= 2)
+        {
+            SelectedX = Columns[0];
+            SelectedY = Columns[1];
+        }
+        SelectedChartType = ChartType.Bar;
+    }
+    private void Submit()
+    {
+        if (string.IsNullOrWhiteSpace(SelectedX) || string.IsNullOrWhiteSpace(SelectedY))
             return;
 
         var config = new ChartConfig
@@ -59,6 +67,8 @@
                 ChartType = SelectedChartType
             };
 
-        await OnChartConfigured.InvokeAsync(config);
+        MudDialog.Close(DialogResult.Ok(config));
     }
+
+    private void Cancel() => MudDialog.Cancel();
 }

@@ -81,12 +81,24 @@
                 values.Add(0);
         }
 
-        await JS.InvokeVoidAsync("drawChart", CanvasId, labels, values, Config.ChartType, objRef);
+        string chartTypeString = GetChartTypeString(Config.ChartType);
+        await JS.InvokeVoidAsync("drawChart", CanvasId, labels, values, chartTypeString, objRef);
     }
 
     public void Dispose()
     {
         objRef?.Dispose();
     }
+    private string GetChartTypeString(ChartType chartType)
+    {
+        return chartType switch
+        {
+            ChartType.Bar => "bar",
+            ChartType.Line => "line",
+            ChartType.Pie => "pie",
+            _ => "bar" // Valor por defecto si llega algo inesperado
+        };
+    }
+
 }
 

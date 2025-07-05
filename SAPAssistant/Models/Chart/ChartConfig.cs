@@ -1,10 +1,12 @@
-﻿namespace SAPAssistant.Models.Chart
+﻿using MudBlazor;
+
+namespace SAPAssistant.Models.Chart
 {
     public class ChartConfig
     {
         public string XAxis { get; set; }
         public string YAxis { get; set; }
-        public string ChartType { get; set; }
+        public ChartType ChartType { get; set; }
     }
 
 }

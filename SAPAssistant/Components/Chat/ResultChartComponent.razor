@@ -1,6 +1,10 @@
+@using SAPAssistant.Components.Chart
 @using SAPAssistant.Models.Chart
 @using SAPAssistant.Models.Chat
 @inject IJSRuntime JS
+@inject IDialogService DialogService
+@using MudBlazor
+@layout TestLayaout
 
 <div class="resultado-panel">
     <h3>🧠 Resumen generado</h3>
@@ -30,8 +34,9 @@
     {
         @if (Config == null)
         {
-            <SAPAssistant.Components.Chart.ChartConfigurator Data="M.Data"
-                                                             OnChartConfigured="HandleChartConfigured" />
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenChartConfigurator">
+                Configurar gráfico
+            </MudButton>
         }
         else
         {
@@ -72,9 +77,21 @@
         await OnViewTypeChange.InvokeAsync(newType);
     }
 
-    private Task HandleChartConfigured(ChartConfig config)
+    private async Task OpenChartConfigurator()
     {
-        Config = config;
-        return Task.CompletedTask;
+        var parameters = new DialogParameters
+            {
+                ["Data"] = M.Data
+            };
+
+        IDialogReference result = await DialogService.ShowAsync<ChartConfigurator>("Test gráfico", parameters);
+
+        var response = await result.Result;
+
+        if (response is not null && !response.Canceled && response.Data is ChartConfig config)
+        {
+            Config = config;
+        }
+
     }
 }

@@ -1,48 +1,23 @@
-﻿.chart-config-container {
-    background-color: #1e1e1e;
-    padding: 1.5rem;
-    border-radius: 10px;
-    margin-top: 1rem;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+﻿/* === Estilo para ChartConfigurator === */
+.chart-dialog {
+    background-color: #1e1e2f; /* Fondo oscuro elegante */
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    min-width: 360px;
+    max-width: 460px;
+    color: #ffffff;
+    animation: fadeIn 0.3s ease-in-out;
 }
 
-.chart-config-title {
-    font-size: 1.2rem;
-    color: #00d1b2;
-    margin-bottom: 1rem;
-}
-
-.form-row {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 1rem;
-}
-
-    .form-row label {
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-        color: #ddd;
+@keyframes fadeIn {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
     }
 
-    .form-row select {
-        padding: 0.5rem;
-        border-radius: 6px;
-        border: 1px solid #444;
-        background-color: #2e2e2e;
-        color: white;
+    to {
+        transform: translateY(0);
+        opacity: 1;
     }
-
-.btn-generar {
-    padding: 0.6rem 1.2rem;
-    background-color: #00d1b2;
-    border: none;
-    border-radius: 6px;
-    color: black;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s;
 }
-
-    .btn-generar:hover {
-        background-color: #00b89c;
-    }
