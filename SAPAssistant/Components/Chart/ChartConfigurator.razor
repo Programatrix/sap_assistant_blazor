@@ -39,6 +39,7 @@
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
 
     [Parameter] public List<Dictionary<string, object>> Data { get; set; }
+    [Parameter] public ChartConfig? InitialConfig { get; set; }
 
     private string SelectedX;
     private string SelectedY;
@@ -48,13 +49,14 @@
 
     protected override void OnInitialized()
     {
-        if (Columns.Count >= 2)
+        if (InitialConfig != null)
         {
-            SelectedX = Columns[0];
-            SelectedY = Columns[1];
+            SelectedX = InitialConfig.XAxis;
+            SelectedY = InitialConfig.YAxis;
+            SelectedChartType = InitialConfig.ChartType;
         }
-        SelectedChartType = ChartType.Bar;
     }
+
     private void Submit()
     {
         if (string.IsNullOrWhiteSpace(SelectedX) || string.IsNullOrWhiteSpace(SelectedY))
@@ -72,3 +74,4 @@
 
     private void Cancel() => MudDialog.Cancel();
 }
+

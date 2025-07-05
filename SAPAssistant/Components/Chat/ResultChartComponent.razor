@@ -40,13 +40,15 @@
         }
         else
         {
+            <div class="d-flex gap-2 align-items-center mb-3">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenChartConfigurator">
+                    Reconfigurar gráfico
+                </MudButton>
+            </div>
+
             <InteractiveChartComponent Data="M.Data"
                                        Config="Config" />
         }
-    }
-    else
-    {
-        <!-- Aquí podrías mostrar el grid/cards/kpi si lo deseas -->
     }
 </div>
 
@@ -66,9 +68,15 @@
     private async Task ChangeViewType(ChangeEventArgs e)
     {
         var newType = e.Value?.ToString() ?? "grid";
+
+        // Si ya es chart, forzamos el refresco
+        if (newType == "chart" && M.ViewType == "chart")
+        {
+            Config = null;
+        }
+
         M.ViewType = newType;
 
-        // Resetear la configuración del gráfico si se cambia de vista
         if (newType != "chart")
         {
             Config = null;
@@ -81,17 +89,17 @@
     {
         var parameters = new DialogParameters
             {
-                ["Data"] = M.Data
+                ["Data"] = M.Data,
+                ["InitialConfig"] = Config
             };
 
-        IDialogReference result = await DialogService.ShowAsync<ChartConfigurator>("Test gráfico", parameters);
-
+        IDialogReference result = await DialogService.ShowAsync<ChartConfigurator>("Configurar gráfico", parameters);
         var response = await result.Result;
 
         if (response is not null && !response.Canceled && response.Data is ChartConfig config)
         {
             Config = config;
+            StateHasChanged(); // Forzar renderizado para que pase el nuevo config al gráfico
         }
-
     }
 }
