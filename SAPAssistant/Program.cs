@@ -8,6 +8,7 @@ using SAPAssistant.Service;
 using SAPAssistant.Security.Policies;
 using Microsoft.AspNetCore.Authorization;
 using SAPAssistant.Exceptions;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +44,7 @@ builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddSingleton<DashboardService>();
 builder.Services.AddSingleton<NotificationService>();
 builder.Services.AddScoped<ChatHistoryService>();
+builder.Services.AddMudServices();
 
 
 // ✅ Política de conexión activa

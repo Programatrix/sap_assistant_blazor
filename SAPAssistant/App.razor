@@ -1,5 +1,8 @@
 ﻿@using SAPAssistant.Exceptions
 <CascadingAuthenticationState>
+    <MudDialogProvider />
+    <MudSnackbarProvider /> <!-- Si usas snackbars (opcional) -->
+    <MudPopoverProvider />
     <Router AppAssembly="@typeof(App).Assembly" PreferExactMatches="@true">
         <Found Context="routeData">
             <RouteView RouteData="@routeData" DefaultLayout="@typeof(PublicLayout)" />
