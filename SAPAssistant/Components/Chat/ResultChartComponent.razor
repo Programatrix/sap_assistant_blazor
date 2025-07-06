@@ -61,8 +61,12 @@
 
             @if (!string.IsNullOrEmpty(SelectedXAxis) && !string.IsNullOrEmpty(SelectedYAxis))
             {
-                <InteractiveChartComponent Data="M.Data"
-                                           Config="new ChartConfig { ChartType = SelectedChartType, XAxis = SelectedXAxis, YAxis = SelectedYAxis }" />
+                <h3 class="chart-title">Gráfico generado</h3>
+                <hr class="chart-separator" />
+                <div class="chart-area">
+                    <InteractiveChartComponent Data="M.Data"
+                                               Config="new ChartConfig { ChartType = SelectedChartType, XAxis = SelectedXAxis, YAxis = SelectedYAxis }" />
+                </div>
             }
             else
             {
