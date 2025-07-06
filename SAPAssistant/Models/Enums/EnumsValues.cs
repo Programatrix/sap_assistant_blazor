@@ -6,4 +6,12 @@
         Line,
         Pie
     }
+    public enum ViewType
+    {
+        Grid,
+        Cards,
+        KPI,
+        Chart
+    }
+
 }

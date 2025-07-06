@@ -1,0 +1,109 @@
+﻿/* Panel de configuración de gráfico */
+.chart-config-panel {
+    margin-top: 1rem;
+    background-color: #1f1f1f;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid #333;
+}
+
+.chart-config-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+    .chart-config-form label {
+        font-weight: bold;
+        margin-bottom: 0.2rem;
+        color: #cfcfcf;
+    }
+
+    .chart-config-form select {
+        padding: 0.4rem;
+        border-radius: 6px;
+        background-color: #2c2c2c;
+        color: #fff;
+        border: 1px solid #444;
+        font-size: 0.95rem;
+        appearance: none;
+        background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='14' viewBox='0 0 24 24' width='14' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+        background-repeat: no-repeat;
+        background-position: right 0.6rem center;
+        background-size: 14px;
+    }
+
+        .chart-config-form select:focus {
+            outline: none;
+            border-color: #00c2a8;
+            box-shadow: 0 0 0 2px #00c2a880;
+        }
+
+    .chart-config-form option {
+        background-color: #2a2a2a;
+        color: #fff;
+    }
+
+/* Texto de advertencia */
+.warning-text {
+    color: #f0ad4e;
+    font-style: italic;
+}
+
+/* Botones superiores */
+.botones-acciones {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Botón de ver SQL */
+.toggle-sql-btn {
+    background-color: #00c2a8;
+    color: white;
+    border: none;
+    padding: 0.45rem 0.9rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+    .toggle-sql-btn:hover {
+        background-color: #00b49a;
+    }
+
+/* Selector de tipo de vista (Chart, Grid, KPI, etc.) */
+.view-select {
+    background-color: #2c2c2c;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 0.45rem 2.2rem 0.45rem 0.6rem;
+    font-size: 0.95rem;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 0.6rem center;
+    background-size: 14px;
+    cursor: pointer;
+    min-width: 140px;
+    transition: background-color 0.2s ease;
+}
+
+    .view-select:hover {
+        background-color: #383838;
+    }
+
+    .view-select:focus {
+        outline: none;
+        border-color: #00c2a8;
+        box-shadow: 0 0 0 2px #00c2a880;
+    }
+
+    .view-select option {
+        background-color: #2a2a2a;
+        color: #fff;
+    }

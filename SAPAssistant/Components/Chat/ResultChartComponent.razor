@@ -2,8 +2,6 @@
 @using SAPAssistant.Models.Chart
 @using SAPAssistant.Models.Chat
 @inject IJSRuntime JS
-@inject IDialogService DialogService
-@using MudBlazor
 @layout TestLayaout
 
 <div class="resultado-panel">
@@ -32,23 +30,45 @@
 
     @if (M.ViewType == "chart")
     {
-        @if (Config == null)
-        {
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenChartConfigurator">
-                Configurar gráfico
-            </MudButton>
-        }
-        else
-        {
-            <div class="d-flex gap-2 align-items-center mb-3">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenChartConfigurator">
-                    Reconfigurar gráfico
-                </MudButton>
+        <div class="chart-config-panel">
+            <div class="chart-config-form">
+                <label>Tipo de gráfico:</label>
+                <select @onchange="OnChartTypeChanged">
+                    <option value="">Selecciona...</option>
+                    <option value="bar" selected="@IsSelectedChartType(ChartType.Bar)">Barras</option>
+                    <option value="line" selected="@IsSelectedChartType(ChartType.Line)">Líneas</option>
+                    <option value="pie" selected="@IsSelectedChartType(ChartType.Pie)">Torta</option>
+                </select>
+
+                <label>Eje X:</label>
+                <select @bind="SelectedXAxis">
+                    <option value="">Selecciona...</option>
+                    @foreach (var column in AvailableColumns)
+                    {
+                        <option value="@column">@column</option>
+                    }
+                </select>
+
+                <label>Eje Y:</label>
+                <select @bind="SelectedYAxis">
+                    <option value="">Selecciona...</option>
+                    @foreach (var column in AvailableColumns)
+                    {
+                        <option value="@column">@column</option>
+                    }
+                </select>
             </div>
 
-            <InteractiveChartComponent Data="M.Data"
-                                       Config="Config" />
-        }
+            @if (!string.IsNullOrEmpty(SelectedXAxis) && !string.IsNullOrEmpty(SelectedYAxis))
+            {
+                <InteractiveChartComponent Data="M.Data"
+                                           Config="new ChartConfig { ChartType = SelectedChartType, XAxis = SelectedXAxis, YAxis = SelectedYAxis }" />
+            }
+            else
+            {
+                <div class="warning-text">Completa los campos para generar el gráfico.</div>
+            }
+        </div>
     }
 </div>
 
@@ -58,7 +78,12 @@
 
     private ResultMessage M => (ResultMessage)Message;
     private bool MostrarSql { get; set; }
-    private ChartConfig? Config;
+
+    private ChartType SelectedChartType = ChartType.Bar;
+    private string? SelectedXAxis;
+    private string? SelectedYAxis;
+
+    private List<string> AvailableColumns => M.Data.FirstOrDefault()?.Keys.ToList() ?? new();
 
     private async Task CopiarSql()
     {
@@ -69,37 +94,30 @@
     {
         var newType = e.Value?.ToString() ?? "grid";
 
-        // Si ya es chart, forzamos el refresco
-        if (newType == "chart" && M.ViewType == "chart")
+        if (newType == "chart")
         {
-            Config = null;
+            SelectedChartType = ChartType.Bar;
+            SelectedXAxis = null;
+            SelectedYAxis = null;
         }
 
         M.ViewType = newType;
-
-        if (newType != "chart")
-        {
-            Config = null;
-        }
-
         await OnViewTypeChange.InvokeAsync(newType);
     }
 
-    private async Task OpenChartConfigurator()
+    private void OnChartTypeChanged(ChangeEventArgs e)
     {
-        var parameters = new DialogParameters
-            {
-                ["Data"] = M.Data,
-                ["InitialConfig"] = Config
-            };
-
-        IDialogReference result = await DialogService.ShowAsync<ChartConfigurator>("Configurar gráfico", parameters);
-        var response = await result.Result;
-
-        if (response is not null && !response.Canceled && response.Data is ChartConfig config)
+        var value = e.Value?.ToString()?.ToLower() ?? "";
+        SelectedChartType = value switch
         {
-            Config = config;
-            StateHasChanged(); // Forzar renderizado para que pase el nuevo config al gráfico
-        }
+            "bar" => ChartType.Bar,
+            "line" => ChartType.Line,
+            "pie" => ChartType.Pie,
+            _ => ChartType.Bar
+        };
     }
+
+    private string IsSelectedChartType(ChartType type)
+        => SelectedChartType == type ? "selected" : null;
 }
+
