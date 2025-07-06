@@ -1,0 +1,96 @@
+﻿.resultado-panel {
+    background-color: #1e1e1e;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 255, 213, 0.1);
+}
+
+    .resultado-panel h3 {
+        color: #00ffd5;
+        margin-bottom: 0.5rem;
+    }
+
+    .resultado-panel p {
+        margin-bottom: 1.5rem;
+        color: #ccc;
+    }
+
+.botones-acciones {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1.2rem;
+}
+
+.toggle-sql-btn {
+    background-color: #00ffd5;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #000;
+    transition: background-color 0.3s;
+}
+
+    .toggle-sql-btn:hover {
+        background-color: #00cbb3;
+    }
+
+.view-select {
+    padding: 0.4rem 0.6rem;
+    background-color: #2a2a2a;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 6px;
+}
+
+.sql-block {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow-x: auto;
+}
+
+.copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: #00ffd5;
+    cursor: pointer;
+}
+
+.card-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: flex-start;
+}
+
+.result-card {
+    flex: 1 1 calc(33.33% - 1rem); /* 3 por fila, con margen */
+    max-width: calc(33.33% - 1rem);
+}
+
+
+    .result-card:hover {
+        transform: scale(1.02);
+    }
+
+    .result-card div {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 0.3rem;
+        font-size: 0.95rem;
+        color: #ddd;
+    }
+
+        .result-card div strong {
+            color: #00ffd5;
+        }

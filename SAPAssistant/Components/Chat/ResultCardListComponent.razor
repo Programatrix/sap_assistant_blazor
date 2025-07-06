@@ -38,7 +38,10 @@
                 <div class="result-card">
                     @foreach (var kv in row)
                     {
-                        <div><strong>@kv.Key:</strong> @kv.Value</div>
+                        <div>
+                            @GetIconForKey(kv.Key)
+                            <strong>@kv.Key:</strong> @kv.Value
+                        </div>
                     }
                 </div>
             }
@@ -68,4 +71,14 @@
         M.ViewType = newType;
         await OnViewTypeChange.InvokeAsync(newType);
     }
+
+    private string GetIconForKey(string key) => key switch
+    {
+        "DocNum" => "🧾 ",
+        "CardCode" => "🧍 ",
+        "DocDate" => "📅 ",
+        "DocTotal" => "💰 ",
+        _ => ""
+    };
+
 }
