@@ -88,7 +88,7 @@
                     {
                         "text" => JsonSerializer.Deserialize<TextMessage>(json, options),
                         "aclaracion" => JsonSerializer.Deserialize<TextMessage>(json, options),
-                        "asistente" => JsonSerializer.Deserialize<TextMessage>(json, options),
+                        "assistant" => JsonSerializer.Deserialize<TextMessage>(json, options),
                         "result" => JsonSerializer.Deserialize<ResultMessage>(json, options),
                         "error" => JsonSerializer.Deserialize<ErrorMessage>(json, options),
                         "system" => JsonSerializer.Deserialize<SystemMessage>(json, options),
@@ -135,7 +135,7 @@
 
             MessageBase responseMsg = resultado?.Tipo switch
             {
-                "aclaracion" or "asistente" => new TextMessage
+                "aclaracion" or "assistant" => new TextMessage
                     {
                         Role = "assistant",
                         Mensaje = resultado.Mensaje

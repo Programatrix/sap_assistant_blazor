@@ -1,6 +1,7 @@
 @page "/demochat"
 @layout DemoChatLayaout
 @using Microsoft.AspNetCore.Components.Web
+@using SAPAssistant.Components.Chart.NewFolder
 @using SAPAssistant.Components.Chat
 @using SAPAssistant.Models.Chat
 @using SAPAssistant.Service
@@ -118,7 +119,7 @@
             {
                 "cards" => typeof(ResultCardListComponent),
                 "kpi" => typeof(ResultKpiComponent),
-                "chart" => typeof(ResultChartComponent),
+                "chart" => typeof(ChartResultCard),
                 _ => typeof(ResultGridComponent)
             }
             : msg.Type switch
