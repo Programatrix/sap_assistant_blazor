@@ -4,24 +4,24 @@
 @attribute [AllowAnonymous]
 @layout PublicLayout
 
-<div class="login-page">
-    <div class="login-wrapper">
-        <h1 class="login-title">Iniciar Sesión</h1>
+<div class="flex-center">
+    <div class="card">
+        <h1 class="text-center mb-6 text-2xl font-semibold">Iniciar Sesión</h1>
 
         <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
-            <div class="form-container">
+            <div class="flex flex-col gap-4">
                 <!-- Usuario -->
-                <label class="text-left w-full text-sm mb-1 text-gray-300">Usuario *</label>
+                <label class="text-sm text-left">Usuario *</label>
                 <InputText class="@GetInputClass(userNameError)"
                            @bind-Value="loginModel.Username"
                            @oninput="ValidateFields"
                            placeholder="Introduce tu usuario" />
 
                 <!-- Contraseña -->
-                <label class="text-left w-full text-sm mb-1 text-gray-300">Contraseña *</label>
+                <label class="text-sm text-left">Contraseña *</label>
                 <div class="password-wrapper">
                     <InputText @bind-Value="loginModel.Password"
                                @oninput="ValidateFields"
@@ -46,7 +46,7 @@
 
                 <!-- Botón de Login -->
                 <button type="submit"
-                        class="login-btn"
+                        class="button-primary"
                         disabled="@(!CanSubmit || IsLoading)">
                     Entrar
                 </button>
@@ -117,7 +117,7 @@
     private RenderFragment EyeIcon => builder =>
     {
         builder.AddMarkupContent(0, @"
-            <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white' width='20' height='20'>
+            <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor' width='20' height='20'>
                 <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2'
                       d='M15 12a3 3 0 11-6 0 3 3 0 016 0z' />
                 <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2'

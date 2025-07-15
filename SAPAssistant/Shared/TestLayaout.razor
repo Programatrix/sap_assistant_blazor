@@ -1,0 +1,17 @@
+﻿@inherits LayoutComponentBase
+@using MudBlazor
+
+<MudThemeProvider>
+    <MudDialogProvider />
+    <MudSnackbarProvider />
+
+    <MudLayout>
+        <MudAppBar Color="Color.Primary">
+            <MudText Typo="Typo.h6">Mi App</MudText>
+        </MudAppBar>
+
+        <MudMainContent>
+            @Body
+        </MudMainContent>
+    </MudLayout>
+</MudThemeProvider>

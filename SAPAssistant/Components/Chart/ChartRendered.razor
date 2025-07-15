@@ -1,0 +1,48 @@
+﻿@using SAPAssistant.Models.Chart
+@using MudBlazor
+@using MudBlazor.Charts
+
+@if (ChartConfig == null || string.IsNullOrWhiteSpace(ChartConfig.XAxis) || string.IsNullOrWhiteSpace(ChartConfig.YAxis))
+{
+    <MudText Color="Color.Error" Typo="Typo.subtitle2">Configuración de gráfico no válida.</MudText>
+}
+else
+{
+    @switch (ChartConfig.ChartType)
+    {
+        case ChartType.Bar:
+            <MudChart ChartType="ChartType.Bar" Labels="@Labels" Datasets="@Datasets" />
+            break;
+        case ChartType.Line:
+            <MudChart ChartType="ChartType.Line" Labels="@Labels" Datasets="@Datasets" />
+            break;
+        case ChartType.Pie:
+            <MudChart ChartType="ChartType.Pie" Labels="@Labels" Datasets="@SingleDataset" />
+            break;
+    }
+}
+
+@code {
+    [Parameter] public ChartConfig ChartConfig { get; set; }
+    [Parameter] public List<Dictionary<string, object>> Data { get; set; }
+
+    private string[] Labels => Data.Select(d => d[ChartConfig.XAxis]?.ToString()).ToArray();
+
+    private ChartSeries[] Datasets => new[]
+    {
+        new ChartSeries
+        {
+            Name = ChartConfig.YAxis,
+            Data = Data.Select(d => ConvertToDouble(d[ChartConfig.YAxis])).ToArray()
+        }
+    };
+
+    private double[] SingleDataset => Data.Select(d => ConvertToDouble(d[ChartConfig.YAxis])).ToArray();
+
+    private double ConvertToDouble(object value)
+    {
+        if (value == null) return 0;
+        double.TryParse(value.ToString(), out var result);
+        return result;
+    }
+}

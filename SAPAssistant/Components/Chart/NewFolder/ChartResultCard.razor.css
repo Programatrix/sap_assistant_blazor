@@ -1,0 +1,30 @@
+﻿.chart-result-card {
+    border: 1px solid #3c3c3c;
+    background-color: #1e1e1e;
+}
+
+.summary-box {
+    background-color: #262626;
+    border: 1px solid #3c3c3c;
+}
+
+.sql-box {
+    background-color: #121212;
+    border: 1px solid #3c3c3c;
+    border-radius: 6px;
+}
+
+.sql-text {
+    color: #c0c0c0;
+    font-family: Consolas, monospace;
+    font-size: 0.9rem;
+}
+
+.result-card {
+    background-color: #1b1b1b; /* Más oscuro que el fondo base */
+    border-radius: 12px;
+    margin-top: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    border: 1px solid #333; /* línea sutil para separación */
+}
+

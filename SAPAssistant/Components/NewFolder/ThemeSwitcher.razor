@@ -1,0 +1,13 @@
+﻿@inject IJSRuntime JS
+
+<div class="flex-center" style="gap: 1rem;">
+    <button class="button-primary" @onclick="@(() => SetTheme("dark"))">🌙 Dark</button>
+    <button class="button-primary" @onclick="@(() => SetTheme("light"))">☀️ Light</button>
+</div>
+
+@code {
+    async Task SetTheme(string theme)
+    {
+        await JS.InvokeVoidAsync("setTheme", theme);
+    }
+}

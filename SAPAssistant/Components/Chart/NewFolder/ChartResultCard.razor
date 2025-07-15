@@ -1,0 +1,132 @@
+﻿@using SAPAssistant.Components.Chart
+@using SAPAssistant.Models.Chart
+@using SAPAssistant.Models.Chat
+@using SAPAssistant.Models.Enums
+@inject IJSRuntime JS
+@inject IDialogService DialogService
+@using MudBlazor
+@layout TestLayaout
+
+<MudPaper Class="result-card p-4">
+    <MudStack Direction="Column" Spacing="2">
+
+        <!-- Título y acción -->
+        <MudStack Direction="Row" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.h5">🧠 Resumen generado</MudText>
+
+            <MudButton Variant="Variant.Text" OnClick="() => MostrarSql = !MostrarSql">
+                @(MostrarSql ? "Ocultar consulta SQL" : "Ver consulta SQL")
+            </MudButton>
+        </MudStack>
+
+        <!-- Resumen -->
+        <MudText Typo="Typo.body1" Class="mb-2">
+            @((MarkupString)M.Resumen)
+        </MudText>
+
+        <MudDivider />
+
+        <!-- Selector con enum -->
+        <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
+            <MudText Typo="Typo.caption">Vista</MudText>
+            <MudSelect T="ViewType" Value="@ViewTypeEnum" ValueChanged="OnViewTypeChangeEnum" Label="Vista" Dense="true">
+                <MudSelectItem Value="ViewType.Grid">Grid</MudSelectItem>
+                <MudSelectItem Value="ViewType.Cards">Cards</MudSelectItem>
+                <MudSelectItem Value="ViewType.KPI">KPI</MudSelectItem>
+                <MudSelectItem Value="ViewType.Chart">Chart</MudSelectItem>
+            </MudSelect>
+        </MudStack>
+
+        <!-- SQL -->
+        @if (MostrarSql)
+        {
+            <MudPaper Class="p-2 mt-2" Style="background-color: #1e1e1e;">
+                <MudStack Direction="Row" Justify="Justify.FlexEnd">
+                    <MudIconButton Icon="@Icons.Material.Filled.ContentCopy"
+                                   OnClick="CopiarSql"
+                                   Title="Copiar SQL" />
+                </MudStack>
+                <pre>@M.Sql</pre>
+            </MudPaper>
+        }
+
+        <!-- Gráfico -->
+        @if (ViewTypeEnum == ViewType.Chart)
+        {
+            @if (Config == null)
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenChartConfigurator">
+                    Configurar gráfico
+                </MudButton>
+            }
+            else
+            {
+                <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1" Class="mt-3">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenChartConfigurator">
+                        Reconfigurar gráfico
+                    </MudButton>
+                </MudStack>
+
+                <InteractiveChartComponent Data="M.Data" Config="Config" />
+            }
+        }
+    </MudStack>
+</MudPaper>
+
+
+@code {
+    [Parameter] public MessageBase Message { get; set; }
+    [Parameter] public EventCallback<string> OnViewTypeChange { get; set; }
+
+    private ResultMessage M => (ResultMessage)Message;
+    private bool MostrarSql { get; set; }
+    private ChartConfig? Config;
+
+    private async Task CopiarSql()
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", M.Sql);
+    }
+
+    // Enum auxiliar para el MudSelect
+    private ViewType ViewTypeEnum
+    {
+        get => Enum.TryParse<ViewType>(M.ViewType, true, out var result) ? result : ViewType.Grid;
+        set => M.ViewType = value.ToString().ToLower(); // mantiene compatibilidad con string original
+    }
+
+    private async Task OnViewTypeChangeEnum(ViewType newType)
+    {
+        if (newType == ViewType.Chart && M.ViewType == "chart")
+        {
+            Config = null;
+        }
+
+        M.ViewType = newType.ToString().ToLower();
+
+        if (newType != ViewType.Chart)
+        {
+            Config = null;
+        }
+
+        await OnViewTypeChange.InvokeAsync(M.ViewType); // notifica al padre como string
+    }
+
+    private async Task OpenChartConfigurator()
+    {
+        var parameters = new DialogParameters
+            {
+                ["Data"] = M.Data,
+                ["InitialConfig"] = Config
+            };
+
+        IDialogReference result = await DialogService.ShowAsync<ChartConfigurator>("Configurar gráfico", parameters);
+        var response = await result.Result;
+
+        if (response is not null && !response.Canceled && response.Data is ChartConfig config)
+        {
+            Config = config;
+            StateHasChanged(); // Forzar renderizado para que pase el nuevo config al gráfico
+        }
+    }
+}
+

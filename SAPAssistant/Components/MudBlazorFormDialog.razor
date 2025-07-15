@@ -1,0 +1,74 @@
+﻿@using MudBlazor
+@using SAPAssistant.Models.Chart
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6" Class="mb-4">
+            <MudIcon Icon="@Icons.Material.Filled.Settings" Class="me-2" />
+            Configurar gráfico
+        </MudText>
+
+        <MudSelect T="string" Label="Eje X (Categoría)" @bind-Value="SelectedX" FullWidth="true" Dense="true" Variant="Variant.Outlined">
+            @foreach (var col in Columns)
+            {
+                <MudSelectItem Value="@col">@col</MudSelectItem>
+            }
+        </MudSelect>
+
+        <MudSelect T="string" Label="Eje Y (Valor)" @bind-Value="SelectedY" FullWidth="true" Dense="true" Variant="Variant.Outlined">
+            @foreach (var col in Columns)
+            {
+                <MudSelectItem Value="@col">@col</MudSelectItem>
+            }
+        </MudSelect>
+
+        <MudSelect T="ChartType" Label="Tipo de gráfico" @bind-Value="SelectedChartType" FullWidth="true" Dense="true" Variant="Variant.Outlined">
+            <MudSelectItem Value="ChartType.Bar">Barras</MudSelectItem>
+            <MudSelectItem Value="ChartType.Line">Líneas</MudSelectItem>
+            <MudSelectItem Value="ChartType.Pie">Tarta</MudSelectItem>
+        </MudSelect>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Cancel" Color="Color.Default">Cancelar</MudButton>
+        <MudButton OnClick="Submit" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Check">Generar gráfico</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public List<Dictionary<string, object>> Data { get; set; }
+
+    private string SelectedX;
+    private string SelectedY;
+    private ChartType SelectedChartType = ChartType.Bar;
+
+    private List<string> Columns => Data?.FirstOrDefault()?.Keys.ToList() ?? new();
+
+    protected override void OnInitialized()
+    {
+        if (Columns.Count >= 2)
+        {
+            SelectedX = Columns[0];
+            SelectedY = Columns[1];
+        }
+    }
+
+    private void Submit()
+    {
+        if (string.IsNullOrWhiteSpace(SelectedX) || string.IsNullOrWhiteSpace(SelectedY))
+            return;
+
+        var config = new ChartConfig
+        {
+            XAxis = SelectedX,
+            YAxis = SelectedY,
+            ChartType = SelectedChartType
+        };
+
+        MudDialog.Close(DialogResult.Ok(config));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

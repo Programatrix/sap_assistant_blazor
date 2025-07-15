@@ -6,15 +6,15 @@
 @inject ProtectedSessionStorage SessionStorage
 @inject NavigationManager Navigation
 
-<div class="connection-manager">
-    <h3>Mis conexiones</h3>
+<div class="card card-wide">
+    <h3 class="text-xl font-semibold mb-4">Mis conexiones</h3>
 
     @if (!string.IsNullOrEmpty(ErrorAlCargar))
     {
-        <div class="mensaje-error">
+        <div class="alert-error mb-4">
             @ErrorAlCargar
             <br />
-            <button class="retry-button" @onclick="RecargarConexiones" disabled="@IsActivating">
+            <button class="button-secondary mt-2" @onclick="RecargarConexiones" disabled="@IsActivating">
                 🔄 Reintentar
             </button>
         </div>
@@ -25,71 +25,77 @@
     }
     else
     {
-        <table class="conn-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Host</th>
-                    <th>Puerto</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var conn in Connections)
-                {
+        <div class="overflow-x-auto">
+            <table class="table">
+                <thead>
                     <tr>
-                        <td>@conn.ConnectionId</td>
-                        <td>@conn.Host</td>
-                        <td>@conn.Port</td>
-                        <td>
-                            @if (conn.IsActive)
-                            {
-                                <span><span class="checkmark">✔</span> Activa</span>
-                            }
-                            else
-                            {
-                                <span class="estado-inactivo">—</span>
-                            }
-                        </td>
-                        <td class="acciones">
-                            <button class="edit-button" @onclick="() => EditarConexion(conn)" disabled="@IsActivating">Editar</button>
-                            @if (!conn.IsActive)
-                            {
-                                <button class="icon-button" title="Usar esta conexión" @onclick="() => SetActive(conn)" disabled="@IsActivating">
-                                    @if (IsActivating && ActivatingConnectionId == conn.ConnectionId)
-                                    {
-                                        <span class="spinner-border"></span>
-                                    }
-                                    else
-                                    {
-                                        <span class="material-icons">check_circle</span>
-                                    }
-                                </button>
-                            }
-                        </td>
+                        <th>ID</th>
+                        <th>Host</th>
+                        <th>Puerto</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var conn in Connections)
+                    {
+                        <tr>
+                            <td>@conn.ConnectionId</td>
+                            <td>@conn.Host</td>
+                            <td>@conn.Port</td>
+                            <td>
+                                @if (conn.IsActive)
+                                {
+                                    <span class="text-green-500">✔ Activa</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="flex gap-2">
+                                    <button class="button-secondary" @onclick="() => EditarConexion(conn)" disabled="@IsActivating">
+                                        Editar
+                                    </button>
+                                    @if (!conn.IsActive)
+                                    {
+                                        <button class="icon-button" title="Usar esta conexión" @onclick="() => SetActive(conn)" disabled="@IsActivating">
+                                            @if (IsActivating && ActivatingConnectionId == conn.ConnectionId)
+                                            {
+                                                <span class="spinner-border"></span>
+                                            }
+                                            else
+                                            {
+                                                <span class="material-icons text-green-500">check_circle</span>
+                                            }
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
 
-        <div class="new-conn-container">
-            <button class="new-conn-btn" @onclick="NuevaConexion" disabled="@IsActivating">
-                <span class="material-icons">add</span>
-                Nueva conexión
+        <div class="mt-6 text-right">
+            <button class="button-primary" @onclick="NuevaConexion" disabled="@IsActivating">
+                <span class="material-icons align-middle">add</span>
+                <span class="ml-1">Nueva conexión</span>
             </button>
         </div>
 
         @if (MostrarMensaje)
         {
-            <div class="mensaje-activacion">
+            <div class="alert-success mt-4">
                 ✅ Conexión activada correctamente
             </div>
         }
 
         @if (MostrarError)
         {
-            <div class="mensaje-error">
+            <div class="alert-error mt-4">
                 ❌ No se pudo validar la conexión. Verifica los datos.
             </div>
         }
@@ -155,8 +161,7 @@
         StateHasChanged();
 
         try
-        {           
-                       
+        {
             var isValid = await ConnectionService.ValidateConnectionAsync(connection.ConnectionId);
 
             if (!isValid)
@@ -164,13 +169,12 @@
                 MostrarError = true;
                 StateHasChanged();
                 await Task.Delay(3000);
-                MostrarError = false;                
+                MostrarError = false;
                 return;
             }
 
             await SessionStorage.SetAsync("active_connection_id", connection.ConnectionId);
             await SessionStorage.SetAsync("active_db_type", connection.db_type);
-           
 
             foreach (var c in Connections)
                 c.IsActive = c.ConnectionId == connection.ConnectionId;

@@ -1,0 +1,182 @@
+﻿/* ====== THEME BASE ====== */
+:root[data-theme="dark"] {
+    --bg: #1e1e24;
+    --card: #2b2b35;
+    --text: #f0f0f0;
+    --border: #3b3b3f;
+    --primary: #2563eb;
+    --primary-gradient: linear-gradient(90deg, #3b82f6, #2563eb);
+    --input-bg: #262631;
+    --input-placeholder: #888;
+    --shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    --error-color: #e53e3e;
+    --font-family: 'Segoe UI', sans-serif;
+}
+
+:root[data-theme="light"] {
+    --bg: #f4f4f4;
+    --card: #ffffff;
+    --text: #1a1a1a;
+    --border: #d1d5db;
+    --primary: #2563eb;
+    --primary-gradient: linear-gradient(90deg, #60a5fa, #3b82f6);    
+    --input-placeholder: #aaa;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --error-color: #e53e3e;
+    --font-family: 'Segoe UI', sans-serif;
+    --input-bg: #f0f0f0; /* antes era #ffffff */
+}
+
+/* ====== GLOBAL STYLES ====== */
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-family);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* ====== REUSABLE CLASSES ====== */
+.card {
+    background: var(--card);
+    color: var(--text);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 2rem;
+    text-align: center;
+    max-width: 400px;
+    margin: auto;
+}
+    .card.card-wide {        
+        text-align: left;
+        max-width: 90%;
+        width: 85%;
+    }
+
+
+.input {
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    width: 100%;
+    font-size: 1rem;
+    outline: none;
+    margin-bottom: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+    .input::placeholder {
+        color: var(--input-placeholder);
+    }
+
+    .input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    }
+
+.input-error {
+    border-color: var(--error-color);
+    box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.3);
+}
+
+.button-primary {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    max-width: 300px;
+    transition: background 0.3s, transform 0.1s, box-shadow 0.3s;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+    margin-top: 1rem;
+}
+
+    .button-primary:hover {
+        background: linear-gradient(135deg, var(--primary), #1e40af);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+    }
+
+    .button-primary:active {
+        transform: scale(0.97);
+    }
+
+/* ====== HELPERS ====== */
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.toggle-password-icon {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .toggle-password-icon svg {
+        width: 20px;
+        height: 20px;
+        color: var(--text); /* cambia según el tema */
+        transition: color 0.3s;
+    }
+
+    .toggle-password-icon:hover svg {
+        color: var(--primary);
+    }
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(30, 30, 30, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.spinner-large {
+    animation: spin 1s linear infinite;
+    width: 60px;
+    height: 60px;
+}
+
+    .spinner-large .path {
+        stroke: var(--primary);
+        stroke-linecap: round;
+    }
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
