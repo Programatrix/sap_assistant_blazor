@@ -8,26 +8,28 @@
 @inject ConnectionService ConnectionService
 @inject ProtectedSessionStorage SessionStorage
 
-<h2>🔗 Selecciona una conexión activa</h2>
-<p>Necesitas una conexión activa para usar el asistente.</p>
+<div class="conexiones-wrapper">
+    <h2>🔗 Selecciona una conexión activa</h2>
+    <p>Necesitas una conexión activa para usar el asistente.</p>
 
-<ConectionManager OnConnectionActivated="HandleConnectionActivated" EsModal="false" />
+    <ConectionManager OnConnectionActivated="HandleConnectionActivated" EsModal="false" />
 
-@if (MostrarAviso)
-{
-    <div class="mensaje-error">
-        ⚠️ La conexión previamente activa ya no es válida.
-    </div>
-}
+    @if (MostrarAviso)
+    {
+        <div class="mensaje-error mt-4">
+            ⚠️ La conexión previamente activa ya no es válida.
+        </div>
+    }
 
-@if (HayConexionActiva)
-{
-    <div style="margin-top: 2rem;">
-        <button class="btn btn-primary" @onclick="VolverHome">
-            ✅ Volver al inicio
-        </button>
-    </div>
-}
+    @if (HayConexionActiva)
+    {
+        <div class="volver-btn">
+            <button class="btn btn-primary" @onclick="VolverHome">
+                ✅ Volver al inicio
+            </button>
+        </div>
+    }
+</div>
 
 @code {
     private bool HayConexionActiva = false;
@@ -40,7 +42,6 @@
             var result = await SessionStorage.GetAsync<string>("active_connection_id");
             if (result.Success && !string.IsNullOrEmpty(result.Value))
             {
-
                 var isValid = await ConnectionService.ValidateConnectionAsync(result.Value);
                 if (isValid)
                 {

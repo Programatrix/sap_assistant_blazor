@@ -93,24 +93,12 @@
     margin-top: 1rem;
 }
 
-.new-conn-btn {
-    background: var(--primary-gradient);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 0.75rem 1.5rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: filter 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 14px;
-}
 
-    .new-conn-btn:hover {
-        filter: brightness(1.1);
-    }
+.card-wide .button-primary {
+    width: auto;
+    max-width: none;
+    padding: 0.6rem 1rem;
+}
 
 /* === MENSAJES === */
 .mensaje-activacion,
@@ -158,6 +146,9 @@
     animation: spin 0.6s linear infinite;
     display: inline-block;
     vertical-align: middle;
+}
+.card.card-wide {
+    margin-top: 3rem; /* o lo que te parezca cómodo */
 }
 
 @keyframes spin {

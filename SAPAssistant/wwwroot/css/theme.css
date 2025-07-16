@@ -46,10 +46,10 @@ body {
     max-width: 400px;
     margin: auto;
 }
-    .card.card-wide {        
+    .card.card-wide {
         text-align: left;
-        max-width: 90%;
-        width: 85%;
+        max-width: 1024px;
+        width: 90%;
     }
 
 
@@ -170,6 +170,13 @@ body {
         stroke: var(--primary);
         stroke-linecap: round;
     }
+
+.simple-layout {       
+    font-family: var(--font-family);
+    min-height: 100vh;
+    padding: 2rem;    
+}
+
 
 @keyframes spin {
     0% {

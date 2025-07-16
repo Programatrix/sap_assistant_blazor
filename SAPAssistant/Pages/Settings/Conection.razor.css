@@ -8,7 +8,31 @@
     border: 1px solid #ebccd1;
 }
 
-button.btn {
-    padding: 0.5rem 1rem;
-    font-weight: bold;
+.conexiones-wrapper {
+    max-width: 1280px;
+    width: 100%;
+    padding: 0 2rem;
+    margin: 3rem auto;
+    text-align: left;
+}
+
+    .conexiones-wrapper h2 {
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .conexiones-wrapper p {
+        margin-bottom: 2rem;
+        color: var(--text);
+    }
+
+    .conexiones-wrapper .button-primary {
+        width: auto;
+        padding: 0.6rem 1.25rem;
+    }
+
+/* === BOTÓN “Volver al inicio” === */
+.volver-btn {
+    margin-top: 2.5rem;
+    margin-left: 2rem; /* alineado con el padding lateral del contenido */
 }
