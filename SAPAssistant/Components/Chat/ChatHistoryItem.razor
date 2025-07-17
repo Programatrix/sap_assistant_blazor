@@ -1,5 +1,4 @@
 ﻿@using SAPAssistant.Models
-
 @inject IJSRuntime JS
 
 <div class="chat-item" @onclick="AbrirChat">
@@ -11,6 +10,9 @@
         @if (IsMenuOpen)
         {
             <div class="chat-context-menu" id="@MenuId">
+                <button @onclick="Renombrar">✏ Renombrar</button>
+                <button @onclick="Compartir">🔗 Compartir</button>
+                <button @onclick="Archivar">🗃 Archivar</button>
                 <button @onclick="() => OnDeleteChat.InvokeAsync(Chat.Id)">🗑 Eliminar</button>
             </div>
         }
@@ -35,6 +37,7 @@
     private async Task ToggleMenu()
     {
         IsMenuOpen = !IsMenuOpen;
+
         if (IsMenuOpen)
         {
             await JS.InvokeVoidAsync("ClickOutsideHelper.register", MenuId, DotNetObjectReference.Create(this));
@@ -45,4 +48,9 @@
     {
         await OnOpenChat.InvokeAsync(Chat.Id);
     }
+
+    // Acciones adicionales simuladas (puedes implementar lógica real luego)
+    private void Renombrar() => Console.WriteLine($"Renombrar {Chat.Titulo}");
+    private void Compartir() => Console.WriteLine($"Compartir {Chat.Titulo}");
+    private void Archivar() => Console.WriteLine($"Archivar {Chat.Titulo}");
 }

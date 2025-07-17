@@ -1,17 +1,17 @@
 ﻿/* ChatHistoryItem - Estilo de cada entrada del historial y su menú */
-
 .chat-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     background-color: var(--card);
     color: var(--text);
     border-radius: 8px;
     padding: 6px 12px;
     margin-bottom: 6px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    cursor: pointer;
     transition: background-color 0.2s ease;
-    min-height: 40px;
-    position: relative;
+    min-height: 44px;
 }
 
     .chat-item:hover {
@@ -19,13 +19,12 @@
     }
 
 .chat-title {
-    font-size: 13px;
-    font-weight: 400;
+    font-size: 14px;
+    font-weight: 500;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    max-width: 160px;
-    color: var(--text);
+    flex: 1;
     user-select: none;
 }
 
@@ -33,7 +32,9 @@
     position: relative;
     display: flex;
     align-items: center;
-    z-index: 10;
+    justify-content: center;
+    margin-left: 8px;
+    z-index: 1;
 }
 
 .dots-button {
@@ -42,59 +43,65 @@
     font-size: 18px;
     color: var(--input-placeholder);
     cursor: pointer;
-    padding: 4px 8px;
+    padding: 4px 6px;
     border-radius: 8px;
     transition: background-color 0.2s ease, color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
 }
 
     .dots-button:hover {
-        color: var(--text);
         background-color: var(--border);
+        color: var(--primary);
     }
 
+/* Menú contextual */
 .chat-context-menu {
     position: absolute;
-    top: 100%;
-    left: 0;
-    margin-top: 4px;
+    top: 50%;
+    left: 100%;
+    transform: translateY(-50%);
+    margin-left: 8px;
     background-color: var(--card);
-    border-radius: 10px;
-    padding: 4px 8px;
-    z-index: 10000;
-    box-shadow: var(--shadow);
     border: 1px solid var(--border);
-    min-width: 160px;
-    white-space: nowrap;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    min-width: 180px;
+    padding: 4px 0;
     animation: fadeIn 0.15s ease-in-out;
+    z-index: 999;
 }
 
     .chat-context-menu button {
-        background: none;
-        border: none;
-        color: var(--text);
+        all: unset;
         display: flex;
         align-items: center;
-        gap: 6px;
-        padding: 6px 10px;
-        width: 100%;
-        text-align: left;
-        cursor: pointer;
-        border-radius: 8px;
-        transition: background-color 0.2s ease;
+        justify-content: flex-start;
+        gap: 8px;
+        padding: 8px 12px;
         font-size: 14px;
+        color: var(--text);
+        cursor: pointer;
+        border-radius: 6px;
+        width: calc(85% - 12px); /* reduce ancho para que no toque bordes */
+        margin: 0 6px; /* centrado visual del hover */
+        transition: background-color 0.2s ease, color 0.2s ease;
     }
 
         .chat-context-menu button:hover {
             background-color: var(--input-bg);
+            color: var(--primary);
         }
+
+
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(-5px);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
     }
 }
