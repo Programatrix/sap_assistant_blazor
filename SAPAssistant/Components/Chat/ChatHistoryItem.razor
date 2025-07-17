@@ -1,5 +1,7 @@
 ﻿@using SAPAssistant.Models
 
+@inject IJSRuntime JS
+
 <div class="chat-item" @onclick="AbrirChat">
     <div class="chat-title">@Chat.Titulo</div>
 
@@ -8,7 +10,7 @@
 
         @if (IsMenuOpen)
         {
-            <div class="chat-context-menu">
+            <div class="chat-context-menu" id="@MenuId">
                 <button @onclick="() => OnDeleteChat.InvokeAsync(Chat.Id)">🗑 Eliminar</button>
             </div>
         }
@@ -21,14 +23,26 @@
     [Parameter] public EventCallback<string> OnDeleteChat { get; set; }
 
     private bool IsMenuOpen = false;
+    private string MenuId => $"menu-{Chat.Id}";
+
+    [JSInvokable]
+    public void CloseMenu()
+    {
+        IsMenuOpen = false;
+        StateHasChanged();
+    }
+
+    private async Task ToggleMenu()
+    {
+        IsMenuOpen = !IsMenuOpen;
+        if (IsMenuOpen)
+        {
+            await JS.InvokeVoidAsync("ClickOutsideHelper.register", MenuId, DotNetObjectReference.Create(this));
+        }
+    }
 
     private async Task AbrirChat()
     {
         await OnOpenChat.InvokeAsync(Chat.Id);
-    }
-
-    private void ToggleMenu()
-    {
-        IsMenuOpen = !IsMenuOpen;
     }
 }

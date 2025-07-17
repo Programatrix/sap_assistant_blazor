@@ -1,8 +1,8 @@
 ﻿/* ChatHistoryItem - Estilo de cada entrada del historial y su menú */
 
 .chat-item {
-    background-color: #2a2b32;
-    color: #e5e7eb;
+    background-color: var(--card);
+    color: var(--text);
     border-radius: 8px;
     padding: 6px 12px;
     margin-bottom: 6px;
@@ -15,7 +15,7 @@
 }
 
     .chat-item:hover {
-        background-color: #35363f;
+        background-color: var(--input-bg);
     }
 
 .chat-title {
@@ -25,7 +25,7 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     max-width: 160px;
-    color: #e5e7eb;
+    color: var(--text);
     user-select: none;
 }
 
@@ -40,7 +40,7 @@
     background: none;
     border: none;
     font-size: 18px;
-    color: #aaa;
+    color: var(--input-placeholder);
     cursor: pointer;
     padding: 4px 8px;
     border-radius: 8px;
@@ -48,20 +48,21 @@
 }
 
     .dots-button:hover {
-        color: #fff;
-        background-color: #444;
+        color: var(--text);
+        background-color: var(--border);
     }
 
 .chat-context-menu {
     position: absolute;
     top: 100%;
-    left: 0; /* se expande hacia la derecha del botón */
+    left: 0;
     margin-top: 4px;
-    background-color: #343541;
+    background-color: var(--card);
     border-radius: 10px;
     padding: 4px 8px;
     z-index: 10000;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
     min-width: 160px;
     white-space: nowrap;
     animation: fadeIn 0.15s ease-in-out;
@@ -70,7 +71,7 @@
     .chat-context-menu button {
         background: none;
         border: none;
-        color: #eee;
+        color: var(--text);
         display: flex;
         align-items: center;
         gap: 6px;
@@ -84,9 +85,8 @@
     }
 
         .chat-context-menu button:hover {
-            background-color: #555;
+            background-color: var(--input-bg);
         }
-
 @keyframes fadeIn {
     from {
         opacity: 0;
