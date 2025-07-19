@@ -12,11 +12,18 @@
     cursor: pointer;
     transition: background-color 0.2s ease;
     min-height: 44px;
+    border: 2px solid transparent;
 }
 
     .chat-item:hover {
         background-color: var(--input-bg);
     }
+
+    .chat-item.active {        
+        border: 2px solid var(--primary);
+        background-color: var(--input-bg);
+    }
+
 
 .chat-title {
     font-size: 14px;

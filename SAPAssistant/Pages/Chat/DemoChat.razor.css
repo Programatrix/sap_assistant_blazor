@@ -1,13 +1,4 @@
-﻿.chat-content-full {
-    display: flex;
-    flex-direction: column;
-    height: 100vh; /* ✅ Toda la ventana de visualización */
-    background-color: #1e1e2f;
-    color: #e0e0e0;
-    padding: 0 20px;
-    overflow: hidden;
-}
-
+﻿
 /* Mensajes */
 .messages {
     flex-grow: 1;

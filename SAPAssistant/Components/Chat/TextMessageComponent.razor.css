@@ -1,0 +1,73 @@
+﻿.chat-message {
+    display: flex;
+    flex-direction: column;
+    margin: 12px 0;
+    background: transparent !important; /* 🔧 sin fondo externo */
+    box-shadow: none !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+    /* Alineación */
+    .chat-message.user {
+        align-items: flex-end;
+    }
+
+    .chat-message.assistant {
+        align-items: flex-start;
+    }
+
+/* Estilo de la burbuja */
+.message-content {
+    max-width: 60%;
+    background-color: var(--card); /* ✅ fondo según tema */
+    color: var(--text);
+    padding: 12px 18px;
+    border-radius: 18px;
+    word-wrap: break-word;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* Usuario */
+.chat-message.user .message-content {
+    width: auto;
+    max-width: 100%;
+    background-color: var(--user-bubble);
+    color: var(--user-text);
+    border: 1px solid var(--border);
+}
+
+/* Asistente: sin borde, sin envoltorio adicional */
+.chat-message.assistant .message-content {
+    background-color: var(--card);
+    border: none;
+}
+
+/* Acciones del asistente */
+.message-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.chat-message.assistant:hover .message-actions {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.message-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #bbb;
+    font-size: 1.1rem;
+    transition: color 0.3s ease;
+}
+
+    .message-actions button:hover {
+        color: #fff;
+    }

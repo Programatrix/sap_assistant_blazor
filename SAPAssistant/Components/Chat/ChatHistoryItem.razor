@@ -1,7 +1,7 @@
 ﻿@using SAPAssistant.Models
 @inject IJSRuntime JS
 
-<div class="chat-item" @onclick="AbrirChat">
+<div class="chat-item @(IsMenuOpen ? "active" : "")" @onclick="AbrirChat">
     <div class="chat-title">@Chat.Titulo</div>
 
     <div class="chat-options" @onclick:stopPropagation>
@@ -49,7 +49,6 @@
         await OnOpenChat.InvokeAsync(Chat.Id);
     }
 
-    // Acciones adicionales simuladas (puedes implementar lógica real luego)
     private void Renombrar() => Console.WriteLine($"Renombrar {Chat.Titulo}");
     private void Compartir() => Console.WriteLine($"Compartir {Chat.Titulo}");
     private void Archivar() => Console.WriteLine($"Archivar {Chat.Titulo}");

@@ -1,10 +1,26 @@
 ﻿@using SAPAssistant.Models.Chat
 
+<div class="chat-message @(M.IsUser ? "user" : "assistant")">
+    <div class="message-content">
+        @M.Mensaje
+    </div>
+
+    @if (!M.IsUser)
+    {
+        <div class="message-actions">
+            <SAPAssistant.Components.Shared.CopyButton Text="@M.Mensaje" />
+            <button @onclick="() => RateMessage(true)">👍</button>
+            <button @onclick="() => RateMessage(false)">👎</button>
+        </div>
+    }
+</div>
+
 @code {
     [Parameter] public MessageBase Message { get; set; }
     private TextMessage M => (TextMessage)Message;
-}
 
-<div class="chat-message @(M.IsUser ? "user" : "bot")">
-    @M.Mensaje
-</div>
+    private void RateMessage(bool isPositive)
+    {
+        Console.WriteLine($"Valorado como: {(isPositive ? "👍" : "👎")}");
+    }
+}

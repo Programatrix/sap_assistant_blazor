@@ -11,6 +11,10 @@
     --shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
     --error-color: #e53e3e;
     --font-family: 'Segoe UI', sans-serif;
+    --user-bubble: #f9f9f9;
+    --user-text: #111;
+    --assistant-bubble: #2b2b35; /* o var(--card) si prefieres */
+    --assistant-text: var(--text);
 }
 
 :root[data-theme="light"] {
@@ -19,12 +23,16 @@
     --text: #1a1a1a;
     --border: #d1d5db;
     --primary: #2563eb;
-    --primary-gradient: linear-gradient(90deg, #60a5fa, #3b82f6);    
+    --primary-gradient: linear-gradient(90deg, #60a5fa, #3b82f6);
     --input-placeholder: #aaa;
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     --error-color: #e53e3e;
     --font-family: 'Segoe UI', sans-serif;
     --input-bg: #f0f0f0; /* antes era #ffffff */
+    --user-bubble: #e5e7eb;
+    --user-text: #111;
+    --assistant-bubble: #ffffff; /* o var(--card) */
+    --assistant-text: var(--text);
 }
 
 /* ====== GLOBAL STYLES ====== */
@@ -189,6 +197,19 @@ body {
         transform: translateY(0);
     }
 }
+
+.copy-button {
+    background: none;
+    border: none;
+    color: #bbb;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+    .copy-button:hover {
+        color: #fff;
+    }
 
 
 @keyframes spin {

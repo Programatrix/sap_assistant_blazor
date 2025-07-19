@@ -9,6 +9,7 @@
   <ItemGroup>
     <Content Remove="Pages\Assistant.razor" />
     <Content Remove="Pages\Dashboard.razor" />
+    <Content Remove="wwwroot\css\site.css" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,6 +18,7 @@
     <None Remove="Components\Conection\ConectionManager.css" />
     <None Remove="Pages\Assistant.razor.css" />
     <None Remove="Pages\Chat\ChatAssistant.razor.css" />
+    <None Remove="Pages\Chat\ChatMessage.razor.css" />
     <None Remove="Pages\Dashboard.razor.css" />
     <None Remove="Shared\DemoChatLayaout.razor.css" />
   </ItemGroup>

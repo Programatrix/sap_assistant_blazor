@@ -3,20 +3,55 @@
     display: flex;
 }
 
+    /* Estilo para mensajes del usuario */
     .chat-message.user .message-content {
         margin-left: auto;
         background-color: #00bfa6;
         color: #fff;
     }
 
+    /* Estilo para mensajes del asistente */
     .chat-message.assistant .message-content {
         margin-right: auto;
         background-color: #3a3a4d;
     }
 
+/* Contenedor del mensaje */
 .message-content {
+    position: relative;
     padding: 12px 18px;
     border-radius: 18px;
     max-width: 60%;
     word-wrap: break-word;
 }
+
+/* Acciones: copiar, pulgar arriba y abajo */
+.message-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    font-size: 1rem;
+}
+
+/* Mostrar acciones solo al hacer hover sobre mensajes del asistente */
+.chat-message.assistant .message-content:hover .message-actions {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Botones de acción */
+.message-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #bbb;
+    font-size: 1.1rem;
+    transition: color 0.3s ease;
+}
+
+    .message-actions button:hover {
+        color: #fff;
+    }
