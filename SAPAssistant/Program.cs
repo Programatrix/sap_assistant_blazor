@@ -49,6 +49,7 @@ builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddScoped<DashboardService>();
+builder.Services.AddSingleton<KpiCatalogService>();
 builder.Services.AddSingleton<NotificationService>();
 builder.Services.AddScoped<ChatHistoryService>();
 builder.Services.AddMudServices();
