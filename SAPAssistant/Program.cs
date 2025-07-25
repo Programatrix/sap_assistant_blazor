@@ -12,27 +12,34 @@ using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"]
+                 ?? Environment.GetEnvironmentVariable("API_BASE_URL")
+                 ?? "http://127.0.0.1:8081";
+
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor()
  .AddCircuitOptions(options => { options.DetailedErrors = true; });
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("Default", client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
 
 // API principal
 builder.Services.AddScoped(sp => new HttpClient
 {
-    BaseAddress = new Uri("http://127.0.0.1:8081")
+    BaseAddress = new Uri(apiBaseUrl)
 });
 
 // Servicios API específicos
 builder.Services.AddHttpClient<ConnectionService>(client =>
 {
-    client.BaseAddress = new Uri("http://127.0.0.1:8081");
+    client.BaseAddress = new Uri(apiBaseUrl);
 });
 
 builder.Services.AddHttpClient<AssistantService>(client =>
 {
-    client.BaseAddress = new Uri("http://127.0.0.1:8081");
+    client.BaseAddress = new Uri(apiBaseUrl);
 });
 
 
