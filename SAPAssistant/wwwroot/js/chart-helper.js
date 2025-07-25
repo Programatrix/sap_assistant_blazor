@@ -88,3 +88,14 @@ window.drawChart = (canvasId, labels, data, chartType = 'bar', dotNetHelper = nu
         }
     });
 };
+
+window.destroyChart = (canvasId) => {
+    if (window.resultCharts && window.resultCharts[canvasId]) {
+        window.resultCharts[canvasId].destroy();
+        delete window.resultCharts[canvasId];
+    }
+    if (window.miniCharts && window.miniCharts[canvasId]) {
+        window.miniCharts[canvasId].destroy();
+        delete window.miniCharts[canvasId];
+    }
+};
