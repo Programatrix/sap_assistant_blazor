@@ -1,0 +1,25 @@
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.catalog-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.catalog-card .btn-add {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    background-color: #3498db;
+    color: white;
+    cursor: pointer;
+}
+
+.catalog-card .btn-add:hover {
+    background-color: #2980b9;
+}
