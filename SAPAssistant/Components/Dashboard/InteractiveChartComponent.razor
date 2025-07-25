@@ -97,6 +97,7 @@
 
     public void Dispose()
     {
+        JS.InvokeVoidAsync("destroyChart", CanvasId);
         objRef?.Dispose();
     }
 }
