@@ -4,9 +4,9 @@
 @attribute [Authorize]
 @layout AssistantLayout
 
-@inject DashboardService DashboardService
 @inject KpiCatalogService KpiCatalogService
-@inject IJSRuntime JSRuntime
+@inject UserDashboardService UserDashboardService
+@inject DashboardService DashboardService
 
 <h1>Catálogo de KPIs</h1>
 
@@ -16,17 +16,12 @@
 }
 else
 {
-    <div class="catalog-grid">
+    <div class="dashboard-grid">
         @foreach (var card in Catalog)
         {
             <div class="catalog-card">
-                <h3>@card.Title</h3>
-                @if (card.ChartData != null && card.ChartData.Any())
-                {
-                    <canvas id="@GetCanvasId(card)" style="width:100%;height:60px;"></canvas>
-                }
-                <p>@card.Description</p>
-                <button @onclick="() => AddToDashboard(card)">Añadir a mis dashboards</button>
+                <DashboardCardWrapper Card="card" />
+                <button class="btn-add" @onclick="() => AddToDashboard(card)">Añadir a mis dashboards</button>
             </div>
         }
     </div>
@@ -62,21 +57,6 @@ else
         };
 
         DashboardService.KPIs.Add(copy);
-    }
-
-    private string GetCanvasId(DashboardCardModel card) => $"catalogChart-{card.Id}";
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            foreach (var card in Catalog)
-            {
-                if (card.ChartData != null && card.ChartData.Any())
-                {
-                    await JSRuntime.InvokeVoidAsync("drawMiniChart", GetCanvasId(card), card.ChartData);
-                }
-            }
-        }
+        await UserDashboardService.AddKpiAsync(copy);
     }
 }
