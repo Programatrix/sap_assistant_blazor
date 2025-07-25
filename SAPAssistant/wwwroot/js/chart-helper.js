@@ -1,5 +1,10 @@
-﻿window.drawMiniChart = (canvasId, chartData) => {
-    const ctx = document.getElementById(canvasId).getContext('2d');
+window.drawMiniChart = (canvasId, chartData) => {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) {
+        console.error(`Canvas with id '${canvasId}' not found.`);
+        return;
+    }
+    const ctx = canvas.getContext('2d');
 
     if (window.miniCharts && window.miniCharts[canvasId]) {
         window.miniCharts[canvasId].destroy();
@@ -36,7 +41,12 @@
 };
 
 window.drawChart = (canvasId, labels, data, chartType = 'bar', dotNetHelper = null) => {
-    const ctx = document.getElementById(canvasId).getContext('2d');
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) {
+        console.error(`Canvas with id '${canvasId}' not found.`);
+        return;
+    }
+    const ctx = canvas.getContext('2d');
 
     if (window.resultCharts && window.resultCharts[canvasId]) {
         window.resultCharts[canvasId].destroy();
