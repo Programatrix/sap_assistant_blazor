@@ -1,0 +1,80 @@
+@page "/dashboard/catalog"
+@attribute [Authorize]
+@layout AssistantLayout
+
+@inject DashboardService DashboardService
+@inject KpiCatalogService KpiCatalogService
+@inject IJSRuntime JSRuntime
+
+<h1>Catálogo de KPIs</h1>
+
+@if (Catalog == null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <div class="catalog-grid">
+        @foreach (var card in Catalog)
+        {
+            <div class="catalog-card">
+                <h3>@card.Title</h3>
+                @if (card.ChartData != null && card.ChartData.Any())
+                {
+                    <canvas id="@GetCanvasId(card)" style="width:100%;height:60px;"></canvas>
+                }
+                <p>@card.Description</p>
+                <button @onclick="() => AddToDashboard(card)">Añadir a mis dashboards</button>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<DashboardCardModel> Catalog = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Catalog = await KpiCatalogService.LoadCatalogAsync();
+    }
+
+    private async Task AddToDashboard(DashboardCardModel card)
+    {
+        var copy = new DashboardCardModel
+        {
+            Id = Guid.NewGuid(),
+            Title = card.Title,
+            Value = card.Value,
+            Description = card.Description,
+            IsFixed = card.IsFixed,
+            TypeLabel = card.TypeLabel,
+            TypeIcon = card.TypeIcon,
+            CardType = card.CardType,
+            Variation = card.Variation,
+            ChartData = card.ChartData != null ? new List<double>(card.ChartData) : null,
+            SqlQuery = card.SqlQuery,
+            SuggestedChart = card.SuggestedChart,
+            DrillDownLevels = card.DrillDownLevels.ToArray(),
+            PromptOrigin = card.PromptOrigin,
+            Category = card.Category
+        };
+
+        DashboardService.KPIs.Add(copy);
+    }
+
+    private string GetCanvasId(DashboardCardModel card) => $"catalogChart-{card.Id}";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            foreach (var card in Catalog)
+            {
+                if (card.ChartData != null && card.ChartData.Any())
+                {
+                    await JSRuntime.InvokeVoidAsync("drawMiniChart", GetCanvasId(card), card.ChartData);
+                }
+            }
+        }
+    }
+}
