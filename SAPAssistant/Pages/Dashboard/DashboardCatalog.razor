@@ -20,8 +20,22 @@ else
         @foreach (var card in Catalog)
         {
             <div class="catalog-card">
+                <div class="kpi-header">
+                    @if (!string.IsNullOrEmpty(card.TypeLabel))
+                    {
+                        <span class="kpi-label">@card.TypeLabel</span>
+                    }
+                    <h3>@card.Title</h3>
+                </div>
+
                 <DashboardCardWrapper Card="card" />
-                <button class="btn-add" @onclick="() => AddToDashboard(card)">Añadir a mis dashboards</button>
+
+                @if (!string.IsNullOrWhiteSpace(card.Description))
+                {
+                    <p class="kpi-description">@card.Description</p>
+                }
+
+                <button class="btn-add" @onclick="() => AddToDashboard(card)">+ Añadir a mis dashboards</button>
             </div>
         }
     </div>
@@ -38,23 +52,23 @@ else
     private async Task AddToDashboard(DashboardCardModel card)
     {
         var copy = new DashboardCardModel
-        {
-            Id = Guid.NewGuid(),
-            Title = card.Title,
-            Value = card.Value,
-            Description = card.Description,
-            IsFixed = card.IsFixed,
-            TypeLabel = card.TypeLabel,
-            TypeIcon = card.TypeIcon,
-            CardType = card.CardType,
-            Variation = card.Variation,
-            ChartData = card.ChartData != null ? new List<double>(card.ChartData) : null,
-            SqlQuery = card.SqlQuery,
-            SuggestedChart = card.SuggestedChart,
-            DrillDownLevels = card.DrillDownLevels.ToArray(),
-            PromptOrigin = card.PromptOrigin,
-            Category = card.Category
-        };
+            {
+                Id = Guid.NewGuid(),
+                Title = card.Title,
+                Value = card.Value,
+                Description = card.Description,
+                IsFixed = card.IsFixed,
+                TypeLabel = card.TypeLabel,
+                TypeIcon = card.TypeIcon,
+                CardType = card.CardType,
+                Variation = card.Variation,
+                ChartData = card.ChartData != null ? new List<double>(card.ChartData) : null,
+                SqlQuery = card.SqlQuery,
+                SuggestedChart = card.SuggestedChart,
+                DrillDownLevels = card.DrillDownLevels.ToArray(),
+                PromptOrigin = card.PromptOrigin,
+                Category = card.Category
+            };
 
         DashboardService.KPIs.Add(copy);
         await UserDashboardService.AddKpiAsync(copy);
