@@ -1,6 +1,6 @@
 ﻿[
   {
-    "Id": "ventas_dia",
+    "Id": "a3283173-9130-426f-9338-9d9e44582a8e",
     "Title": "Ventas del Día",
     "Value": "",
     "Description": "Total de ventas realizadas hoy.",
@@ -17,7 +17,7 @@
     "Category": "Ventas"
   },
   {
-    "Id": "stock_bajo",
+    "Id": "5c6767e2-994f-40a6-83e5-df6b65ad5707",
     "Title": "Stock Crítico",
     "Value": "",
     "Description": "Productos con stock por debajo del mínimo.",
@@ -34,7 +34,7 @@
     "Category": "Stock"
   },
   {
-    "Id": "pedidos_pendientes",
+    "Id": "edbe0f93-3c6a-4c7c-819a-2e978e3bc0bb",
     "Title": "Pedidos Pendientes",
     "Value": "",
     "Description": "Pedidos abiertos aún no entregados.",
@@ -51,7 +51,7 @@
     "Category": "Ventas"
   },
   {
-    "Id": "top_clientes",
+    "Id": "1c72bfe0-10fd-4f13-a7e1-0a6bc2d9a917",
     "Title": "Top Clientes por Ventas",
     "Value": "",
     "Description": "Clientes con mayor volumen de compras este mes.",
@@ -68,7 +68,7 @@
     "Category": "Ventas"
   },
   {
-    "Id": "ventas_ultimos_dias",
+    "Id": "ed3794d1-61cf-4488-b97c-2e4f3d1cbd31",
     "Title": "Ventas Últimos 7 Días",
     "Value": "",
     "Description": "Tendencia diaria de ventas.",

@@ -10,6 +10,7 @@
     <Content Remove="Pages\Assistant.razor" />
     <Content Remove="Pages\Dashboard.razor" />
     <Content Remove="wwwroot\css\site.css" />
+    <Content Remove="wwwroot\data\kpis_catalog.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,6 +28,10 @@
     <Content Include="Components\Chat\DemoChat.razor.css" />
     <Content Include="Components\Chat\ErrorMessageComponent.razor.css" />
     <Content Include="Shared\DemoChatLayaout.razor.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="wwwroot\data\kpis_catalog.json" />
   </ItemGroup>
 
   <ItemGroup>

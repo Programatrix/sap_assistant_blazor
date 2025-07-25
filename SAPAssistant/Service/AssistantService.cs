@@ -127,7 +127,7 @@ namespace SAPAssistant.Service
             if (tipo == "resumen" && assistantResponse.Tool == "GenerarResumenDesdeDatos")
                 resumen = assistantResponse.Mensaje;
 
-            if (tipo == "aclaracion" || tipo == "system" || tipo == "assistant")
+            if (tipo == "aclaracion" || tipo == "system" || tipo == "assistant" || tipo == "consulta")
                 mensaje = assistantResponse.Mensaje;
 
             return new QueryResponse
