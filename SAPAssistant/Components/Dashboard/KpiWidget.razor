@@ -1,0 +1,10 @@
+﻿@using SAPAssistant.Models
+<div class="kpi-widget">
+    <h4>@Widget.Title</h4>
+    <p><strong>Consulta SQL:</strong></p>
+    <pre>@Widget.Sql</pre>
+</div>
+
+@code {
+    [Parameter] public DashboardWidgetModel Widget { get; set; } = new();
+}

@@ -1,0 +1,81 @@
+﻿@using SAPAssistant.Models
+@inject IJSRuntime JS
+
+<div class="dashboard-canvas">
+    @foreach (var widget in Widgets)
+    {
+        <div class="widget-draggable"
+             data-id="@widget.Id"
+             data-x="@widget.X"
+             data-y="@widget.Y"
+             style="transform: translate(@widget.Xpx, @widget.Ypx)">
+            <div class="widget-card">
+                <div class="widget-header">
+                    <strong>@widget.Title</strong>
+                    <span class="widget-actions">
+                        <button @onclick="() => OnEditWidget.InvokeAsync(widget)">✏️</button>
+                        <button @onclick="() => OnRemoveWidget.InvokeAsync(widget)">🗑️</button>
+                    </span>
+                </div>
+                <div class="widget-body">
+                    @RenderWidgetBody(widget)
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<DashboardWidgetModel> Widgets { get; set; } = new();
+    [Parameter] public EventCallback<DashboardWidgetModel> OnEditWidget { get; set; }
+    [Parameter] public EventCallback<DashboardWidgetModel> OnRemoveWidget { get; set; }
+
+    private static DashboardCanvas? _instance;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _instance = this;
+            await JS.InvokeVoidAsync("initializeDraggableWidgets");
+        }
+    }
+
+    [JSInvokable]
+    public static Task UpdateWidgetPosition(string id, double x, double y)
+    {
+        var widget = _instance?.Widgets.FirstOrDefault(w => w.Id == id);
+        if (widget is not null)
+        {
+            widget.X = x;
+            widget.Y = y;
+        }
+        return Task.CompletedTask;
+    }
+
+    private RenderFragment RenderWidgetBody(DashboardWidgetModel widget) => builder =>
+    {
+        switch (widget.Type.ToLower())
+        {
+            case "kpi":
+                builder.AddContent(0, $"🔢 Valor KPI: 123");
+                break;
+            case "chart":
+                builder.AddContent(1, $"📊 Gráfico: (demo)");
+                break;
+            case "table":
+                builder.AddMarkupContent(2, @"
+                    <table class='widget-table'>
+                        <thead><tr><th>Col 1</th><th>Col 2</th></tr></thead>
+                        <tbody>
+                            <tr><td>A</td><td>100</td></tr>
+                            <tr><td>B</td><td>200</td></tr>
+                        </tbody>
+                    </table>");
+                break;
+            default:
+                builder.AddContent(3, $"🧩 Widget: {widget.Type}");
+                break;
+        }
+    };
+}

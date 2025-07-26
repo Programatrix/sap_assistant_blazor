@@ -1,0 +1,24 @@
+﻿@using SAPAssistant.Models
+
+<div class="widget table-widget">
+    <h4>@Widget.Title</h4>
+
+    <table>
+        <thead>
+            <tr><th>Columna 1</th><th>Columna 2</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Dato A</td><td>Valor A</td></tr>
+            <tr><td>Dato B</td><td>Valor B</td></tr>
+        </tbody>
+    </table>
+
+    <p class="sql-preview">
+        <strong>Consulta:</strong><br />
+        <code>@Widget.Sql</code>
+    </p>
+</div>
+
+@code {
+    [Parameter] public DashboardWidgetModel Widget { get; set; } = new();
+}

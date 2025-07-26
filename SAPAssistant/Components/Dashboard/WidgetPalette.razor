@@ -1,0 +1,24 @@
+﻿<div class="widget-palette">
+    <h3>Componentes disponibles</h3>
+
+    @foreach (var item in widgets)
+    {
+        <div class="widget-button" @onclick="() => OnAdd.InvokeAsync(item.Type)">
+            <span class="icon">@item.Icon</span> @item.Label
+        </div>
+    }
+</div>
+
+@code {
+    private record WidgetItem(string Type, string Label, string Icon);
+
+    private List<WidgetItem> widgets = new()
+    {
+        new("chart", "Gráfico", "📊"),
+        new("kpi", "Indicador KPI", "📈"),
+        new("table", "Tabla de datos", "📋"),
+        new("text", "Bloque de texto", "📝")
+    };
+
+    [Parameter] public EventCallback<string> OnAdd { get; set; }
+}

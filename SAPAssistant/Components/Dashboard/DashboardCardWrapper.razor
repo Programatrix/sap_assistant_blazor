@@ -1,20 +1,24 @@
 ﻿@using SAPAssistant.Models
+@using Microsoft.AspNetCore.Components
 
 @switch (Card.CardType)
 {
     case DashboardCardType.ValueOnly:
-        <DashboardCardValue Card="Card" />
+        <DashboardCardValue Card="Card" ShowTitle="ShowTitle" />
         break;
     case DashboardCardType.Comparative:
-        <DashboardCardComparative Card="Card" />
+        <DashboardCardComparative Card="Card" ShowTitle="ShowTitle" />
         break;
     case DashboardCardType.MiniChart:
-        <DashboardCardMiniChart Card="Card" />
+        <DashboardCardMiniChart Card="Card" ShowTitle="ShowTitle" />
         break;
     default:
         <div class="dashboard-card error-card">
-            <h2>Tipo de tarjeta desconocido</h2>
-            <p>Por favor revisa la configuración del KPI.</p>
+            @if (ShowTitle)
+            {
+                <h2>@Card.Title</h2>
+            }
+            <p>Tipo de tarjeta desconocido. Por favor revisa la configuración del KPI.</p>
         </div>
         break;
 }
@@ -22,4 +26,7 @@
 @code {
     [Parameter]
     public DashboardCardModel Card { get; set; } = default!;
+
+    [Parameter]
+    public bool ShowTitle { get; set; } = true;
 }

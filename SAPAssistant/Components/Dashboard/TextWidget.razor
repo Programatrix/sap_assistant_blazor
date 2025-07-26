@@ -1,0 +1,9 @@
+﻿@using SAPAssistant.Models
+<div class="text-widget">
+    <h4>@Widget.Title</h4>
+    <p>Este es un bloque de texto simple.</p>
+</div>
+
+@code {
+    [Parameter] public DashboardWidgetModel Widget { get; set; } = new();
+}

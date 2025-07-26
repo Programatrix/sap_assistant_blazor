@@ -8,34 +8,76 @@
 @inject UserDashboardService UserDashboardService
 @inject DashboardService DashboardService
 
-<h1>Catálogo de KPIs</h1>
+<h1 class="catalog-title">Catálogo de KPIs</h1>
 
 @if (Catalog == null)
 {
-    <p>Cargando...</p>
+    <div class="loading">Cargando KPIs...</div>
 }
 else
 {
+    <div class="kpi-filtros">
+        <input type="text" placeholder="Buscar KPIs..." @bind="searchTerm" />
+
+        <div class="tipo-filtro">
+            <label><input type="checkbox" @bind="showFijos" /> Fijos</label>
+            <label><input type="checkbox" @bind="showIA" /> Inteligencia Artificial</label>
+        </div>
+
+        <div class="categoria-filtro">
+            @foreach (var cat in CategoriasUnicas)
+            {
+                <label>
+                    <input type="checkbox" value="@cat" @onchange="ToggleCategoria" checked="@CategoriasActivas.Contains(cat)" />
+                    @cat
+                </label>
+            }
+        </div>
+    </div>
+
+    @if (!CatalogFiltrado.Any())
+    {
+        <div class="empty-message">
+            <p>😕 No se encontraron KPIs con esos filtros.</p>
+        </div>
+    }
+
     <div class="dashboard-grid">
-        @foreach (var card in Catalog)
+        @foreach (var card in CatalogFiltrado)
         {
             <div class="catalog-card">
                 <div class="kpi-header">
                     @if (!string.IsNullOrEmpty(card.TypeLabel))
                     {
-                        <span class="kpi-label">@card.TypeLabel</span>
+                        <span class="kpi-label">📊 @card.TypeLabel</span>
                     }
                     <h3>@card.Title</h3>
                 </div>
 
-                <DashboardCardWrapper Card="card" />
+                <DashboardCardWrapper Card="card" ShowTitle="false" />
+
+                @if (card.Variation.HasValue)
+                {
+                    <span class="variation-indicator @(card.Variation > 0 ? "up" : "down")">
+                        @(card.Variation > 0 ? "↑" : "↓") @($"{Math.Abs(card.Variation.Value):0.#}%")
+                    </span>
+                }
 
                 @if (!string.IsNullOrWhiteSpace(card.Description))
                 {
                     <p class="kpi-description">@card.Description</p>
                 }
 
-                <button class="btn-add" @onclick="() => AddToDashboard(card)">+ Añadir a mis dashboards</button>
+                <div class="card-footer">
+                    @if (DashboardService.KPIs.Any(k => k.Id == card.Id))
+                    {
+                        <button class="btn-added" disabled>✓ Añadido</button>
+                    }
+                    else
+                    {
+                        <button class="btn-add" @onclick="() => AddToDashboard(card)">➕ Añadir a mis dashboards</button>
+                    }
+                </div>
             </div>
         }
     </div>
@@ -43,10 +85,56 @@ else
 
 @code {
     private List<DashboardCardModel> Catalog = new();
+    private string searchTerm = "";
+    private bool showFijos = true;
+    private bool showIA = true;
+    private HashSet<string> CategoriasActivas = new();
+
+    private IEnumerable<string> CategoriasUnicas => Catalog
+        .Select(c => c.Category)
+        .Where(c => !string.IsNullOrWhiteSpace(c))
+        .Distinct();
+
+    private IEnumerable<DashboardCardModel> CatalogFiltrado => Catalog
+        .Where(k => FiltroTexto(k) && FiltroTipo(k) && FiltroCategoria(k));
 
     protected override async Task OnInitializedAsync()
     {
         Catalog = await KpiCatalogService.LoadCatalogAsync();
+        CategoriasActivas = Catalog
+            .Select(k => k.Category)
+            .Where(c => !string.IsNullOrWhiteSpace(c))
+            .ToHashSet();
+    }
+
+    private bool FiltroTexto(DashboardCardModel kpi)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm)) return true;
+        var txt = searchTerm.ToLower();
+        return (kpi.Title?.ToLower().Contains(txt) ?? false)
+            || (kpi.Description?.ToLower().Contains(txt) ?? false)
+            || (kpi.Category?.ToLower().Contains(txt) ?? false);
+    }
+
+    private bool FiltroTipo(DashboardCardModel kpi)
+    {
+        return (kpi.IsFixed && showFijos) || (!kpi.IsFixed && showIA);
+    }
+
+    private bool FiltroCategoria(DashboardCardModel kpi)
+    {
+        return string.IsNullOrWhiteSpace(kpi.Category) || CategoriasActivas.Contains(kpi.Category);
+    }
+
+    private void ToggleCategoria(ChangeEventArgs e)
+    {
+        var cat = e.Value?.ToString();
+        if (string.IsNullOrEmpty(cat)) return;
+
+        if (CategoriasActivas.Contains(cat))
+            CategoriasActivas.Remove(cat);
+        else
+            CategoriasActivas.Add(cat);
     }
 
     private async Task AddToDashboard(DashboardCardModel card)

@@ -1,0 +1,72 @@
+﻿@page "/dashboard/editor"
+@using SAPAssistant.Models
+@using System.Text.Json
+
+<div class="editor-container">
+    <div class="left-panel">
+        <WidgetPalette OnAdd="AddWidget" />
+    </div>
+
+    <div class="right-panel">
+        <DashboardCanvas Widgets="@Widgets"
+                         OnEditWidget="EditWidget"
+                         OnRemoveWidget="RemoveWidget" />
+    </div>
+</div>
+
+<WidgetEditorModal @bind-Visible="IsEditorOpen"
+                   Widget="SelectedWidget"
+                   OnSave="UpdateWidget" />
+
+<button class="btn-save" @onclick="SaveDashboard">💾 Guardar Dashboard</button>
+
+@code {
+    private List<DashboardWidgetModel> Widgets = new();
+    private bool IsEditorOpen = false;
+    private DashboardWidgetModel? SelectedWidget;
+
+    private void AddWidget(string type)
+    {
+        var newWidget = new DashboardWidgetModel
+            {
+                Id = Guid.NewGuid().ToString(),
+                Type = type,
+                Title = $"Nuevo {type}",
+                Sql = "",
+                Size = "medium",
+                X = 50,
+                Y = 50
+            };
+
+        Widgets.Add(newWidget);
+        SelectedWidget = newWidget;
+        IsEditorOpen = true;
+    }
+
+    private void EditWidget(DashboardWidgetModel widget)
+    {
+        SelectedWidget = widget;
+        IsEditorOpen = true;
+    }
+
+    private void UpdateWidget(DashboardWidgetModel updated)
+    {
+        var index = Widgets.FindIndex(w => w.Id == updated.Id);
+        if (index >= 0)
+            Widgets[index] = updated;
+
+        IsEditorOpen = false;
+    }
+
+    private void RemoveWidget(DashboardWidgetModel widget)
+    {
+        Widgets.RemoveAll(w => w.Id == widget.Id);
+    }
+
+    private void SaveDashboard()
+    {
+        var json = JsonSerializer.Serialize(new { components = Widgets });
+        Console.WriteLine(json);
+    }
+}
+

@@ -18,7 +18,10 @@
         </div>
     </div>
 
-    <h2>@Card.Title</h2>
+    @if (ShowTitle)
+    {
+        <h2>@Card.Title</h2>
+    }
 
     @if (Card.IsLoading)
     {
@@ -28,7 +31,13 @@
     }
     else
     {
-        <p class="big-number">@Card.Value</p>
+        <p class="big-number">
+            @Card.Value
+            @if (!string.IsNullOrWhiteSpace(Card.Unit))
+            {
+                <span class="unit-label">@Card.Unit</span>
+            }
+        </p>
 
         @if (Card.ChartData != null && Card.ChartData.Any())
         {
@@ -39,11 +48,25 @@
     }
 
     <p class="card-description">@Card.Description</p>
+
+    <div class="card-meta">
+        @if (DateTime.MinValue != Card.LastUpdated)
+        {
+            <span class="updated-at">🕒 @Card.LastUpdated</span>
+        }
+        @if (Card.Popularity > 0)
+        {
+            <span class="popularity">👥 @Card.Popularity usuarios</span>
+        }
+    </div>
 </div>
 
 @code {
     [Parameter]
     public DashboardCardModel Card { get; set; } = default!;
+
+    [Parameter]
+    public bool ShowTitle { get; set; } = true;
 
     [Inject]
     private DashboardService DashboardService { get; set; } = default!;
@@ -52,7 +75,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && Card.ChartData != null && Card.ChartData.Any())
+        if (firstRender && Card.ChartData?.Any() == true)
         {
             await JSRuntime.InvokeVoidAsync("drawMiniChart", CanvasId, Card.ChartData);
         }

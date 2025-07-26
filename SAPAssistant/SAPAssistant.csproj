@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\Dashboard\DashboardWidget.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="Pages\Assistant.razor" />
     <Content Remove="Pages\Dashboard.razor" />
     <Content Remove="wwwroot\css\site.css" />

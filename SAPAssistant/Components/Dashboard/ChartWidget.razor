@@ -1,0 +1,10 @@
+﻿@using SAPAssistant.Models
+<div class="chart-widget">
+    <h4>@Widget.Title</h4>
+    <p><strong>Tipo de gráfico:</strong> @Widget.ChartType</p>
+    <pre>@Widget.Sql</pre>
+</div>
+
+@code {
+    [Parameter] public DashboardWidgetModel Widget { get; set; } = new();
+}

@@ -1,0 +1,43 @@
+﻿@using SAPAssistant.Models
+@if (Visible && Widget != null)
+{
+    <div class="modal">
+        <h3>Editar componente</h3>
+
+        <input @bind="Widget.Title" placeholder="Título" class="input" />
+
+        @if (Widget.Type == "chart")
+        {
+            <select @bind="Widget.ChartType" class="input">
+                <option value="bar">Barras</option>
+                <option value="line">Líneas</option>
+                <option value="pie">Torta</option>
+            </select>
+        }
+
+        <textarea @bind="Widget.Sql" placeholder="Consulta SQL" rows="6" class="textarea"></textarea>
+
+        <div class="modal-actions">
+            <button @onclick="Save" class="btn btn-primary">Guardar</button>
+            <button @onclick="Cancel" class="btn btn-secondary">Cancelar</button>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public DashboardWidgetModel Widget { get; set; } = new();
+    [Parameter] public EventCallback<DashboardWidgetModel> OnSave { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+
+    private async Task Save()
+    {
+        await OnSave.InvokeAsync(Widget);
+        await VisibleChanged.InvokeAsync(false);
+    }
+
+    private async Task Cancel()
+    {
+        await VisibleChanged.InvokeAsync(false);
+    }
+}
