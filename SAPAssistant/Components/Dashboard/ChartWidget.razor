@@ -1,10 +1,42 @@
 ﻿@using SAPAssistant.Models
+@using SAPAssistant.Models.Chart
+
 <div class="chart-widget">
     <h4>@Widget.Title</h4>
-    <p><strong>Tipo de gráfico:</strong> @Widget.ChartType</p>
-    <pre>@Widget.Sql</pre>
+
+    @if (string.IsNullOrEmpty(Widget.ChartType) || string.IsNullOrEmpty(Widget.XAxis) || string.IsNullOrEmpty(Widget.YAxis))
+    {
+        <p class="warning-text">⚠️ Este widget no tiene configuración completa.</p>
+    }
+    else if (Widget.Data == null || !Widget.Data.Any())
+    {
+        <p class="warning-text">📭 Sin datos disponibles para graficar.</p>
+    }
+    else
+    {
+        <SAPAssistant.Components.Chart.InteractiveChartComponent Data="Widget.Data"
+                                   Config="GetChartConfig()" />
+    }
 </div>
 
 @code {
     [Parameter] public DashboardWidgetModel Widget { get; set; } = new();
+
+    private ChartConfig GetChartConfig() => new()
+    {
+        ChartType = ParseChartType(Widget.ChartType),
+        XAxis = Widget.XAxis,
+        YAxis = Widget.YAxis
+    };
+
+    private ChartType ParseChartType(string type)
+    {
+        return type?.ToLower() switch
+        {
+            "bar" => ChartType.Bar,
+            "line" => ChartType.Line,
+            "pie" => ChartType.Pie,
+            _ => ChartType.Bar
+        };
+    }
 }

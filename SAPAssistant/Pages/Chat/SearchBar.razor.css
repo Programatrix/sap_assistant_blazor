@@ -8,21 +8,21 @@
 
 .search-input {
     width: 100%;
-    padding: 1.4rem calc(5rem + 6px) 1.4rem 1.5rem; /* Calculamos espacio para el botón + scrollbar */
-    border-radius: 2.5rem;
+    padding: 0.6rem 3.2rem 0.6rem 1rem; /* menos padding vertical, suficiente para diseño elegante */
+    border-radius: 2rem;
     background-color: #2e2e2e;
     color: #fff;
     border: 1px solid #444;
     outline: none;
     font-size: 1rem;
     resize: none;
-    overflow-y: auto; /* ✅ Compatible y correcto */
-    line-height: 1.5;
-    max-height: 200px;
+    overflow-y: auto;
+    line-height: 1.4;
+    max-height: 150px;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
     box-sizing: border-box;
+    min-height: 2.5rem;
 }
-
 
     .search-input::placeholder {
         color: #aaa;
@@ -36,14 +36,14 @@
 
 .search-button {
     position: absolute;
-    right: 2rem; /* Separación adecuada del borde */
+    right: 1rem;
     top: 50%;
     transform: translateY(-50%);
     background: #fff;
     border: none;
     cursor: pointer;
-    width: 2.2rem;
-    height: 2.2rem;
+    width: 2rem;
+    height: 2rem;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -57,7 +57,7 @@
         background-color: #f0f0f0;
     }
 
-/* Scrollbar Estilizado */
+/* Scrollbar estilizado */
 .search-input::-webkit-scrollbar {
     width: 6px;
 }

@@ -1,0 +1,116 @@
+﻿@using SAPAssistant.Models
+@using SAPAssistant.Models.Chart
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<div class="widget-editor-overlay">
+    <div class="widget-editor">
+        <h3>Editar Widget</h3>
+
+        <label>Título:</label>
+        <input type="text" @bind="Widget.Title" class="input" />
+
+        <label>Tipo de gráfico:</label>
+        <select @bind="Widget.ChartType" class="input">
+            <option value="bar">Barras</option>
+            <option value="line">Líneas</option>
+            <option value="pie">Tarta</option>
+        </select>
+
+        <label>Consulta SQL o lenguaje natural:</label>
+        <textarea @bind="Widget.Sql" rows="4" class="input"></textarea>
+
+        <button @onclick="EjecutarConsulta" disabled="@IsLoading">Cargar datos</button>
+
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <p class="error">@ErrorMessage</p>
+        }
+
+        @if (Widget.Data?.Any() == true)
+        {
+            <label>Eje X:</label>
+            <select @bind="Widget.XAxis" class="input">
+                @foreach (var col in Widget.Data.First().Keys)
+                {
+                    <option value="@col">@col</option>
+                }
+            </select>
+
+            <label>Eje Y:</label>
+            <select @bind="Widget.YAxis" class="input">
+                @foreach (var col in Widget.Data.First().Keys)
+                {
+                    <option value="@col">@col</option>
+                }
+            </select>
+
+            @if (!string.IsNullOrWhiteSpace(Widget.XAxis) && !string.IsNullOrWhiteSpace(Widget.YAxis))
+            {
+                <InteractiveChartComponent Data="Widget.Data" Config="new ChartConfig
+                {
+                    ChartType = ParseChartType(Widget.ChartType),
+                    XAxis = Widget.XAxis,
+                    YAxis = Widget.YAxis
+                }" />
+            }
+        }
+
+        <div class="editor-actions">
+            <button @onclick="Guardar" disabled="@(!PuedeGuardar)">Guardar</button>
+            <button @onclick="Cancelar">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public DashboardWidgetModel Widget { get; set; } = new();
+    [Parameter] public EventCallback<DashboardWidgetModel> OnSave { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private bool IsLoading = false;
+    private string ErrorMessage;
+
+    private async Task EjecutarConsulta()
+    {
+        IsLoading = true;
+        ErrorMessage = "";
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/assistant/query", new { prompt = Widget.Sql });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                ErrorMessage = "Error al ejecutar la consulta.";
+                return;
+            }
+
+            Widget.Data = await response.Content.ReadFromJsonAsync<List<Dictionary<string, object>>>();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private bool PuedeGuardar =>
+        Widget.Data?.Any() == true &&
+        !string.IsNullOrWhiteSpace(Widget.XAxis) &&
+        !string.IsNullOrWhiteSpace(Widget.YAxis);
+
+    private async Task Guardar() => await OnSave.InvokeAsync(Widget);
+    private async Task Cancelar() => await OnClose.InvokeAsync();
+
+    private ChartType ParseChartType(string type) => type.ToLower() switch
+    {
+        "bar" => ChartType.Bar,
+        "line" => ChartType.Line,
+        "pie" => ChartType.Pie,
+        _ => ChartType.Bar
+    };
+}

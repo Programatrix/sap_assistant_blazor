@@ -21,8 +21,8 @@
     <None Remove="Components\Chat\DemoChat.razor.css" />
     <None Remove="Components\Chat\ErrorMessageComponent.razor.css" />
     <None Remove="Components\Conection\ConectionManager.css" />
+    <None Remove="Components\Dashboard\DashboardEditor.razor~RF1520c87.TMP" />
     <None Remove="Pages\Assistant.razor.css" />
-    <None Remove="Pages\Chat\ChatAssistant.razor.css" />
     <None Remove="Pages\Chat\ChatMessage.razor.css" />
     <None Remove="Pages\Dashboard.razor.css" />
     <None Remove="Shared\DemoChatLayaout.razor.css" />

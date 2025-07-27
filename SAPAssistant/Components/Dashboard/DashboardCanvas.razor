@@ -13,7 +13,7 @@
                 <div class="widget-header">
                     <strong>@widget.Title</strong>
                     <span class="widget-actions">
-                        <button @onclick="() => OnEditWidget.InvokeAsync(widget)">✏️</button>
+                        <button @onclick="() => EditarWidget(widget)">✏️</button>
                         <button @onclick="() => OnRemoveWidget.InvokeAsync(widget)">🗑️</button>
                     </span>
                 </div>
@@ -25,12 +25,22 @@
     }
 </div>
 
+@if (MostrarEditor && WidgetEnEdicion is not null)
+{
+    <SAPAssistant.Components.Chart.ChartWidgetEditor Widget="WidgetEnEdicion"
+                       OnClose="CerrarEditor"
+                       OnSave="GuardarWidgetEditado" />
+}
+
 @code {
     [Parameter] public List<DashboardWidgetModel> Widgets { get; set; } = new();
     [Parameter] public EventCallback<DashboardWidgetModel> OnEditWidget { get; set; }
     [Parameter] public EventCallback<DashboardWidgetModel> OnRemoveWidget { get; set; }
 
     private static DashboardCanvas? _instance;
+
+    private bool MostrarEditor { get; set; } = false;
+    private DashboardWidgetModel WidgetEnEdicion { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -60,11 +70,15 @@
             case "kpi":
                 builder.AddContent(0, $"🔢 Valor KPI: 123");
                 break;
+
             case "chart":
-                builder.AddContent(1, $"📊 Gráfico: (demo)");
+                builder.OpenComponent<ChartWidget>(1);
+                builder.AddAttribute(2, "Widget", widget);
+                builder.CloseComponent();
                 break;
+
             case "table":
-                builder.AddMarkupContent(2, @"
+                builder.AddMarkupContent(3, @"
                     <table class='widget-table'>
                         <thead><tr><th>Col 1</th><th>Col 2</th></tr></thead>
                         <tbody>
@@ -73,9 +87,30 @@
                         </tbody>
                     </table>");
                 break;
+
             default:
-                builder.AddContent(3, $"🧩 Widget: {widget.Type}");
+                builder.AddContent(4, $"🧩 Widget: {widget.Type}");
                 break;
         }
     };
+
+    private void EditarWidget(DashboardWidgetModel widget)
+    {
+        WidgetEnEdicion = widget;
+        MostrarEditor = true;
+    }
+
+    private void CerrarEditor()
+    {
+        MostrarEditor = false;
+        WidgetEnEdicion = null;
+    }
+
+    private void GuardarWidgetEditado(DashboardWidgetModel updatedWidget)
+    {
+        // Como la referencia al widget original ya está actualizada, solo refrescamos
+        MostrarEditor = false;
+        WidgetEnEdicion = null;
+        StateHasChanged();
+    }
 }

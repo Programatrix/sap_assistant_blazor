@@ -56,7 +56,7 @@ namespace SAPAssistant.Service
                 mensaje,
                 modo_demo = true,
                 chat_id = "demo",
-                db_type = "HANA" // o tu valor demo por defecto
+                db_type = "HANA"
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, "/assistant/demo")
@@ -73,8 +73,22 @@ namespace SAPAssistant.Service
 
             if (!response.IsSuccessStatusCode)
             {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Error en la API: {error}");
+                var errorText = await response.Content.ReadAsStringAsync();
+
+                try
+                {
+                    using var doc = JsonDocument.Parse(errorText);
+                    var root = doc.RootElement;
+
+                    if (root.TryGetProperty("message", out var msg))
+                    {
+                        throw new Exception(msg.GetString() ?? "Error desconocido del servidor");
+                    }
+                }
+                catch
+                {
+                    throw new Exception("Ocurrió un error al comunicarse con el asistente.");
+                }
             }
 
             var assistantResponse = await response.Content.ReadFromJsonAsync<AssistantResponse>();
@@ -141,6 +155,4 @@ namespace SAPAssistant.Service
             };
         }
     }
-
 }
-
