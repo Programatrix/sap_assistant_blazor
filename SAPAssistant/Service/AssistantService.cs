@@ -80,15 +80,30 @@ namespace SAPAssistant.Service
                     using var doc = JsonDocument.Parse(errorText);
                     var root = doc.RootElement;
 
-                    if (root.TryGetProperty("message", out var msg))
+                    if (root.TryGetProperty("message", out var msgElement))
                     {
-                        throw new Exception(msg.GetString() ?? "Error desconocido del servidor");
+                        var message = msgElement.GetString() ?? "Error desconocido del servidor";
+
+                        if (root.TryGetProperty("code", out var codeElement))
+                        {
+                            var code = codeElement.GetString();
+                            throw new Exception($"{message} (Código: {code})");
+                        }
+
+                        throw new Exception(message);
                     }
+
+                    throw new Exception("Respuesta de error no reconocida del asistente.");
                 }
-                catch
+                catch (JsonException)
                 {
-                    throw new Exception("Ocurrió un error al comunicarse con el asistente.");
+                    throw new Exception("Ocurrió un error al interpretar la respuesta del asistente.");
                 }
+                catch (Exception ex)
+                {
+                    throw new Exception("Ocurrió un error al comunicarse con el asistente. " + ex.Message);
+                }
+
             }
 
             var assistantResponse = await response.Content.ReadFromJsonAsync<AssistantResponse>();

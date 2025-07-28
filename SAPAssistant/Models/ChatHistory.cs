@@ -19,11 +19,6 @@ namespace SAPAssistant.Models
         [JsonPropertyName("messages")]
         public List<AssistantResponse> Messages { get; set; } = new(); // lo que usas en UI
     }
-
-    public class Message
-    {
-        public string Content { get; set; } = string.Empty;
-        public bool IsUser { get; set; }
-    }
+       
 
 }

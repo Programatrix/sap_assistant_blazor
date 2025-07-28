@@ -2,7 +2,7 @@
 {
     public class ErrorMessage : MessageBase
     {
-        public string Error { get; set; } = string.Empty;
+        public string Mensaje { get; set; } = string.Empty;
         public override string Type => "Error";
     }
 }
