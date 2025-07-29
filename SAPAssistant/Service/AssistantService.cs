@@ -9,165 +9,241 @@ namespace SAPAssistant.Service
     {
         private readonly HttpClient _http;
         private readonly ProtectedSessionStorage _sessionStorage;
+        private readonly ILogger<AssistantService> _logger;
 
-        public AssistantService(HttpClient http, ProtectedSessionStorage sessionStorage)
+        public AssistantService(HttpClient http,
+                              ProtectedSessionStorage sessionStorage,
+                              ILogger<AssistantService> logger)
         {
             _http = http;
             _sessionStorage = sessionStorage;
+            _logger = logger;
         }
 
         public async Task<QueryResponse?> ConsultarAsync(string mensaje, string chatId)
         {
-            var userResult = await _sessionStorage.GetAsync<string>("username");
-            var connectionResult = await _sessionStorage.GetAsync<string>("active_connection_id");
-            var username = userResult.Value ?? throw new Exception("Usuario no encontrado en sesión.");
-            var connectionId = connectionResult.Value ?? throw new Exception("Conexión activa no encontrada.");
-            var ipResult = await _sessionStorage.GetAsync<string>("remote_url");
-            string remote_ip = ipResult.Value ?? throw new Exception("No se ha podido recuperar la remote_ip asociada al usuario");
-            var dbtypeResult = await _sessionStorage.GetAsync<string>("active_db_type");
-            string db_type = dbtypeResult.Value ?? throw new Exception("No se ha informado el tipo de base de datos activa");
-
-            if (string.IsNullOrWhiteSpace(chatId))
-                throw new ArgumentException("El chatId no puede estar vacío al enviar un mensaje.", nameof(chatId));
-
-            var requestBody = new
+            try
             {
-                mensaje,
-                connection_id = connectionId,
-                chat_id = chatId,
-                db_type
-            };
+                var userResult = await _sessionStorage.GetAsync<string>("username");
+                var connectionResult = await _sessionStorage.GetAsync<string>("active_connection_id");
+                var ipResult = await _sessionStorage.GetAsync<string>("remote_url");
+                var dbtypeResult = await _sessionStorage.GetAsync<string>("active_db_type");
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "/assistant/message")
+                var username = userResult.Value ?? throw new AssistantException("Usuario no autenticado", "UNAUTHENTICATED");
+                var connectionId = connectionResult.Value ?? throw new AssistantException("No hay conexión activa", "NO_ACTIVE_CONNECTION");
+                var remoteIp = ipResult.Value ?? throw new AssistantException("Configuración remota faltante", "MISSING_REMOTE_IP");
+                var dbType = dbtypeResult.Value ?? throw new AssistantException("Tipo de base de datos no especificado", "MISSING_DB_TYPE");
+
+                if (string.IsNullOrWhiteSpace(chatId))
+                    throw new AssistantException("ID de chat inválido", "INVALID_CHAT_ID");
+
+                var request = new HttpRequestMessage(HttpMethod.Post, "/assistant/message")
+                {
+                    Content = JsonContent.Create(new
+                    {
+                        mensaje,
+                        connection_id = connectionId,
+                        chat_id = chatId,
+                        db_type = dbType
+                    })
+                };
+
+                request.Headers.Add("X-User-Id", username);
+                request.Headers.Add("x-remote-ip", remoteIp);
+
+                return await SendAndParseAsync(request);
+            }
+            catch (AssistantException)
             {
-                Content = JsonContent.Create(requestBody)
-            };
-
-            request.Headers.Add("X-User-Id", username);
-            request.Headers.Add("x-remote-ip", remote_ip);
-
-            return await SendAndParseAsync(request);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error inesperado en ConsultarAsync");
+                throw new AssistantException("Error interno del cliente", "CLIENT_ERROR");
+            }
         }
 
         public async Task<QueryResponse?> ConsultarDemoAsync(string mensaje)
         {
-            var requestBody = new
+            try
             {
-                mensaje,
-                modo_demo = true,
-                chat_id = "demo",
-                db_type = "HANA"
-            };
+                var request = new HttpRequestMessage(HttpMethod.Post, "/assistant/demo")
+                {
+                    Content = JsonContent.Create(new
+                    {
+                        mensaje,
+                        modo_demo = true,
+                        chat_id = "demo",
+                        db_type = "HANA"
+                    })
+                };
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "/assistant/demo")
+                return await SendAndParseAsync(request);
+            }
+            catch (Exception ex)
             {
-                Content = JsonContent.Create(requestBody)
-            };
-
-            return await SendAndParseAsync(request);
+                _logger.LogError(ex, "Error en ConsultarDemoAsync");
+                throw new AssistantException("Error en modo demo", "DEMO_ERROR");
+            }
         }
 
         private async Task<QueryResponse?> SendAndParseAsync(HttpRequestMessage request)
         {
-            var response = await _http.SendAsync(request);
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                var errorText = await response.Content.ReadAsStringAsync();
+                var response = await _http.SendAsync(request);
 
-                try
+                if (!response.IsSuccessStatusCode)
                 {
-                    using var doc = JsonDocument.Parse(errorText);
-                    var root = doc.RootElement;
-
-                    if (root.TryGetProperty("message", out var msgElement))
-                    {
-                        var message = msgElement.GetString() ?? "Error desconocido del servidor";
-
-                        if (root.TryGetProperty("code", out var codeElement))
-                        {
-                            var code = codeElement.GetString();
-                            throw new Exception($"{message} (Código: {code})");
-                        }
-
-                        throw new Exception(message);
-                    }
-
-                    throw new Exception("Respuesta de error no reconocida del asistente.");
-                }
-                catch (JsonException)
-                {
-                    throw new Exception("Ocurrió un error al interpretar la respuesta del asistente.");
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception("Ocurrió un error al comunicarse con el asistente. " + ex.Message);
+                    await HandleErrorResponse(response);
                 }
 
+                var assistantResponse = await response.Content.ReadFromJsonAsync<AssistantResponse>();
+
+                if (assistantResponse == null)
+                {
+                    throw new AssistantException("Respuesta inválida del servidor", "INVALID_RESPONSE");
+                }
+
+                return MapToQueryResponse(assistantResponse);
             }
+            catch (AssistantException)
+            {
+                throw;
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Error al parsear JSON");
+                throw new AssistantException("Error en formato de respuesta", "RESPONSE_FORMAT_ERROR");
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "Error de conexión");
+                throw new AssistantException("Error de conexión con el servidor", "CONNECTION_ERROR");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error inesperado");
+                throw new AssistantException("Error interno", "INTERNAL_ERROR");
+            }
+        }
 
-            var assistantResponse = await response.Content.ReadFromJsonAsync<AssistantResponse>();
+        private async Task HandleErrorResponse(HttpResponseMessage response)
+        {
+            var errorText = await response.Content.ReadAsStringAsync();
+            var requestId = GetRequestId(response);
 
-            if (assistantResponse == null)
-                throw new Exception("No se pudo interpretar la respuesta del asistente.");
+            try
+            {
+                using var doc = JsonDocument.Parse(errorText);
+                var root = doc.RootElement;
 
-            return MapToQueryResponse(assistantResponse);
+                if (root.TryGetProperty("error", out var errorObj))
+                {
+                    var message = errorObj.GetProperty("message").GetString() ?? "Error del servidor";
+                    var code = errorObj.GetProperty("code").GetString() ?? "SERVER_ERROR";
+                    throw new AssistantException(message, code, requestId);
+                }
+
+                throw new AssistantException(errorText, "UNKNOWN_ERROR", requestId);
+            }
+            catch (JsonException)
+            {
+                throw new AssistantException($"Error del servidor: {errorText}", "SERVER_ERROR", requestId);
+            }
+        }
+
+        private string? GetRequestId(HttpResponseMessage response)
+        {
+            return response.Headers.TryGetValues("X-Request-ID", out var values)
+                   ? values.FirstOrDefault()
+                   : null;
         }
 
         private static QueryResponse MapToQueryResponse(AssistantResponse assistantResponse)
         {
-            var tipo = assistantResponse.Tipo ?? "system";
-            string? sql = assistantResponse.Sql;
-            string? resumen = null;
-            string? mensaje = null;
-            List<Dictionary<string, object>>? resultados = null;
-            string viewType = "grid";
-
-            if (assistantResponse.Meta != null &&
-                assistantResponse.Meta.TryGetValue("view_type", out var vtObj) &&
-                vtObj != null)
+            try
             {
-                viewType = vtObj.ToString() ?? "grid";
-            }
+                var tipo = assistantResponse.Tipo ?? "system";
+                string? sql = assistantResponse.Sql;
+                string? resumen = null;
+                string? mensaje = null;
+                List<Dictionary<string, object>>? resultados = null;
+                string viewType = "grid";
 
-            if (assistantResponse.Data.HasValue)
-            {
-                var data = assistantResponse.Data.Value;
-
-                switch (data.ValueKind)
+                if (assistantResponse.Meta != null &&
+                    assistantResponse.Meta.TryGetValue("view_type", out var vtObj) &&
+                    vtObj != null)
                 {
-                    case JsonValueKind.Object:
-                        if (data.TryGetProperty("sql", out var sqlElement))
-                            sql = sqlElement.GetString();
-
-                        if (data.TryGetProperty("resultado", out var resultadoElement) &&
-                            resultadoElement.ValueKind == JsonValueKind.Array)
-                        {
-                            resultados = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(resultadoElement.GetRawText());
-                        }
-                        break;
-
-                    case JsonValueKind.Array:
-                        resultados = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(data.GetRawText());
-                        break;
+                    viewType = vtObj.ToString() ?? "grid";
                 }
+
+                if (assistantResponse.Data.HasValue)
+                {
+                    var data = assistantResponse.Data.Value;
+
+                    switch (data.ValueKind)
+                    {
+                        case JsonValueKind.Object:
+                            if (data.TryGetProperty("sql", out var sqlElement))
+                                sql = sqlElement.GetString();
+
+                            if (data.TryGetProperty("resultado", out var resultadoElement) &&
+                                resultadoElement.ValueKind == JsonValueKind.Array)
+                            {
+                                resultados = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(resultadoElement.GetRawText());
+                            }
+                            break;
+
+                        case JsonValueKind.Array:
+                            resultados = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(data.GetRawText());
+                            break;
+                    }
+                }
+
+                if (tipo == "resumen" && assistantResponse.Tool == "GenerarResumenDesdeDatos")
+                    resumen = assistantResponse.Mensaje;
+
+                if (tipo == "aclaracion" || tipo == "system" || tipo == "assistant" || tipo == "consulta")
+                    mensaje = assistantResponse.Mensaje;
+
+                return new QueryResponse
+                {
+                    Tipo = tipo,
+                    Sql = sql,
+                    Resumen = resumen,
+                    Mensaje = mensaje,
+                    Resultados = resultados,
+                    ViewType = viewType
+                };
             }
-
-            if (tipo == "resumen" && assistantResponse.Tool == "GenerarResumenDesdeDatos")
-                resumen = assistantResponse.Mensaje;
-
-            if (tipo == "aclaracion" || tipo == "system" || tipo == "assistant" || tipo == "consulta")
-                mensaje = assistantResponse.Mensaje;
-
-            return new QueryResponse
+            catch (Exception ex)
             {
-                Tipo = tipo,
-                Sql = sql,
-                Resumen = resumen,
-                Mensaje = mensaje,
-                Resultados = resultados,
-                ViewType = viewType
-            };
+                throw new AssistantException($"Error al mapear respuesta: {ex.Message}", "RESPONSE_MAPPING_ERROR");
+            }
+        }
+    }
+
+    public class AssistantException : Exception
+    {
+        public string ErrorCode { get; }
+        public string? RequestId { get; }
+        public string? DocumentationUrl { get; }
+
+        public AssistantException(string message, string errorCode,
+                                string? requestId = null,
+                                string? documentationUrl = null)
+            : base(message)
+        {
+            ErrorCode = errorCode;
+            RequestId = requestId;
+            DocumentationUrl = documentationUrl;
+        }
+
+        public override string ToString()
+        {
+            return $"[{ErrorCode}] {Message} (RequestId: {RequestId})";
         }
     }
 }
