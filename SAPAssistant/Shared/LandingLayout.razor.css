@@ -1,0 +1,57 @@
+﻿/* Marca */
+.brand-hover {
+    color: #0d6efd;
+    transition: color 0.3s ease;
+    text-decoration: none;
+}
+
+    .brand-hover:hover {
+        color: #0a58ca; /* Azul más oscuro al hover */
+    }
+
+/* Icono */
+.brand-icon path {
+    fill: #0d6efd;
+    transition: transform 0.3s ease, fill 0.3s ease;
+    transform-origin: bottom;
+}
+
+.brand-hover:hover .brand-icon path {
+    transform: scaleY(1.2);
+    fill: #0a58ca;
+}
+
+/* Links del menú */
+.nav-link {
+    font-weight: 500;
+    margin-left: 1rem;
+    position: relative;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+    .nav-link:focus,
+    .nav-link:active {
+        outline: none;
+        box-shadow: none;
+        background: transparent !important;
+    }
+
+    .nav-link::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: #0d6efd;
+        transition: width 0.3s ease;
+    }
+
+    .nav-link:hover {
+        color: #0d6efd;
+    }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }

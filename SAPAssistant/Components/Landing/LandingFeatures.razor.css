@@ -1,0 +1,52 @@
+﻿/* ===== Sección de Características ===== */
+#caracteristicas {
+    background-color: #f8f9fa;
+    padding-top: 4rem;
+    padding-bottom: 5rem;
+}
+
+    #caracteristicas h2 {
+        font-weight: 700;
+    }
+
+/* ===== Tarjetas ===== */
+.feature-card {
+    border: none;
+    border-radius: 1rem;
+    text-align: center;
+    padding: 2rem 1.5rem;
+    background: white;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
+}
+
+    .feature-card .card-title {
+        font-weight: 600;
+        margin-top: 1rem;
+    }
+
+    .feature-card .card-text {
+        font-size: 0.95rem;
+        color: #555;
+    }
+
+    /* ===== Hover Effects ===== */
+    .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 22px rgba(0, 0, 0, 0.15);
+        border: 1px solid #0d6efd;
+    }
+
+.icon-hover {
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover .icon-hover {
+    transform: scale(1.15);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+    #caracteristicas .feature-card {
+        margin-bottom: 1rem;
+    }
+}

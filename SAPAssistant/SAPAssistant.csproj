@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="wwwroot\assets\img\hero-dashboard.png" />
     <None Remove="Components\Chat\ErrorMessageComponent.razor.css" />
     <None Remove="Components\Conection\ConectionManager.css" />
     <None Remove="Components\Dashboard\DashboardEditor.razor~RF1520c87.TMP" />
@@ -31,6 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="wwwroot\assets\img\hero-dashboard.png" />
     <EmbeddedResource Include="wwwroot\data\kpis_catalog.json" />
   </ItemGroup>
 

@@ -1,0 +1,53 @@
+﻿/* ==== Casos de Uso ==== */
+.caso-card {
+    background: #fff;
+    border-radius: 0.75rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+    border: 2px solid transparent; /* Base sin borde visible */
+}
+
+    .caso-card .icon {
+        transition: transform 0.3s ease, color 0.3s ease;
+        font-size: 2.5rem;
+        color: #0d6efd;
+    }
+
+    /* Hover principal */
+    .caso-card:hover {
+        transform: translateY(-5px) rotateX(3deg) rotateY(-3deg);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+        border: 2px solid #0d6efd; /* Borde azul */
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12), 0 0 20px rgba(13, 110, 253, 0.4); /* Glow azul */
+    }
+
+        /* Hover sobre el icono */
+        .caso-card:hover .icon {
+            transform: scale(1.15);
+            color: #0a58ca; /* Azul más oscuro */
+        }
+
+    /* Títulos y párrafos */
+    .caso-card h5 {
+        margin-top: 0.5rem;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+    }
+
+    .caso-card p {
+        font-size: 0.95rem;
+        color: #555;
+    }
+
+/* Ajuste del contenedor */
+#casos {
+    background-color: #f8f9fa;
+    padding: 4rem 0;
+}
+
+.casos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}

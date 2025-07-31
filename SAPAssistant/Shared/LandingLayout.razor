@@ -1,0 +1,40 @@
+﻿@inherits LayoutComponentBase
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3">
+    <div class="container">
+        <!-- Logo con ícono SVG -->
+        <a class="navbar-brand fw-bold d-flex align-items-center brand-hover" href="/">
+            <!-- Ícono SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28"
+                 viewBox="0 0 24 24" class="me-2 brand-icon">
+                <path d="M3 17h2v-7H3v7zm4 0h2v-4H7v4zm4 0h2V7h-2v10zm4 0h2V4h-2v13zm4 0h2v-9h-2v9z" />
+            </svg>
+            <span>SAP B1 Assistant</span>
+        </a>
+
+        <!-- Botón hamburguesa en móvil -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Menú de navegación -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="#caracteristicas">Características</a></li>
+                <li class="nav-item"><a class="nav-link" href="#casos">Casos de Uso</a></li>
+                <li class="nav-item"><a class="nav-link" href="#testimonios">Testimonios</a></li>
+                <li class="nav-item"><a class="nav-link" href="#playground">Playground</a></li>
+                <li class="nav-item"><a class="nav-link" href="#contacto">Contacto</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Secciones -->
+<SAPAssistant.Components.Landing.LandingHero />
+<SAPAssistant.Components.Landing.LandingFeatures />
+<SAPAssistant.Components.Landing.LandingUseCases />
+<SAPAssistant.Components.Landing.LandingTestimonios />
+<SAPAssistant.Components.Landing.LandingPlayGround />
+<SAPAssistant.Components.Landing.LandingContact />

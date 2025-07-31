@@ -1,7 +1,0 @@
-﻿.landing-layout {
-    min-height: 100vh;
-    overflow-x: hidden;
-    background-color: white;
-    display: flex;
-    flex-direction: column;
-}

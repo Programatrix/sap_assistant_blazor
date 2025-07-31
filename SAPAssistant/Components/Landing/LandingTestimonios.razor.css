@@ -1,0 +1,11 @@
+﻿#testimonios blockquote {
+    font-size: 1.1rem;
+    font-style: italic;
+    color: #555;
+    max-width: 600px;
+}
+
+#testimonios img {
+    object-fit: cover;
+    border: 3px solid #0d6efd;
+}

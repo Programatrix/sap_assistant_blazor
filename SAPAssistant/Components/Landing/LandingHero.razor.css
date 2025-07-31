@@ -1,0 +1,33 @@
+﻿.landing-hero {
+    min-height: 90vh;
+    background: linear-gradient(90deg, #4f46e5 0%, #06b6d4 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+    .landing-hero h1,
+    .landing-hero p {
+        color: #fff;
+    }
+
+    /* Imagen del Hero */
+    .landing-hero img {
+        max-width: 900px;
+        width: 100%;
+        animation: fadeInUp 1s ease-in-out;
+    }
+
+/* Animación de aparición */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

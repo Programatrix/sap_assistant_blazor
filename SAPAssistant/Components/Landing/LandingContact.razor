@@ -1,0 +1,73 @@
+﻿@page "/contacto"
+@using System.ComponentModel.DataAnnotations
+
+<section id="contacto" class="py-5 bg-light">
+    <div class="container">
+        <h2 class="fw-bold text-center mb-4">Contáctanos</h2>
+        <p class="text-center text-muted mb-5">
+            ¿Tienes dudas, comentarios o deseas más información? Déjanos tu mensaje y te responderemos lo antes posible.
+        </p>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <EditForm Model="@contactModel" OnValidSubmit="@EnviarFormulario">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <InputText id="nombre" class="form-control" @bind-Value="contactModel.Nombre" />
+                        <ValidationMessage For="@(() => contactModel.Nombre)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Correo electrónico</label>
+                        <InputText id="email" class="form-control" @bind-Value="contactModel.Email" />
+                        <ValidationMessage For="@(() => contactModel.Email)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="mensaje" class="form-label">Mensaje</label>
+                        <InputTextArea id="mensaje" class="form-control" rows="5" @bind-Value="contactModel.Mensaje" />
+                        <ValidationMessage For="@(() => contactModel.Mensaje)" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        Enviar Mensaje
+                    </button>
+
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success mt-3">@successMessage</div>
+                    }
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    private ContactModel contactModel = new();
+    private string successMessage = string.Empty;
+
+    private void EnviarFormulario()
+    {
+        // Aquí podrías conectarlo a un backend o enviar un email
+        successMessage = "¡Gracias por tu mensaje! Te responderemos pronto.";
+        contactModel = new(); // Reinicia el formulario
+    }
+
+    public class ContactModel
+    {
+        [Required(ErrorMessage = "El nombre es obligatorio")]
+        public string Nombre { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "El correo es obligatorio")]
+        [EmailAddress(ErrorMessage = "Correo inválido")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "El mensaje es obligatorio")]
+        public string Mensaje { get; set; } = string.Empty;
+    }
+}
+

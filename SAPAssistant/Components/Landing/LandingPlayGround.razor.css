@@ -1,0 +1,79 @@
+﻿/* Fondo con degradado */
+body {
+    background: linear-gradient(135deg, #f0f2f5, #e6ebf1);
+}
+
+/* Contenedor del chat */
+.card-chat {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    padding: 30px;
+    width: 100%;
+    max-width: 500px;
+}
+
+/* Área de mensajes */
+.chat-container {
+    height: 350px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Burbujas */
+.chat-bubble {
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    max-width: 80%;
+    animation: fadeIn 0.3s ease-in;
+    text-align: left;
+}
+
+    .chat-bubble.user {
+        background-color: #0d6efd;
+        color: white;
+        align-self: flex-end;
+        margin-left: auto;
+        border-radius: 15px 15px 0 15px;
+    }
+
+    .chat-bubble.bot {
+        background-color: #f1f3f5;
+        color: #212529;
+        align-self: flex-start;
+        margin-right: auto;
+        border-radius: 15px 15px 15px 0;
+    }
+
+/* Input y botón */
+.input-group {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+}
+
+.btn-primary {
+    border-radius: 0 10px 10px 0;
+    transition: 0.2s;
+}
+
+    .btn-primary:hover {
+        background-color: #0b5ed7;
+    }
+
+/* Animación */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
