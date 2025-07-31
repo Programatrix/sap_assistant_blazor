@@ -15,37 +15,51 @@
         color: #6c757d;
     }
 
-    /* Inputs y TextArea */
-    #contacto .form-control {
-        border-radius: 8px;
-        padding: 12px 15px;
-        font-size: 1rem;
-        border: 1px solid #ced4da;
-        transition: all 0.3s ease;
+/* Widget contenedor */
+.contact-widget {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .contact-widget:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
     }
 
-        #contacto .form-control:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 5px rgba(13, 110, 253, 0.3);
-        }
+/* Inputs y TextArea */
+#contacto .form-control {
+    border-radius: 8px;
+    padding: 12px 15px;
+    font-size: 1rem;
+    border: 1px solid #ced4da;
+    transition: all 0.3s ease;
+}
 
-    /* Botón principal */
-    #contacto .btn-primary {
-        background-color: #0d6efd;
-        border: none;
-        border-radius: 8px;
-        padding: 12px;
-        font-size: 1.1rem;
-        transition: all 0.3s ease;
+    #contacto .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 5px rgba(13, 110, 253, 0.3);
     }
 
-        #contacto .btn-primary:hover {
-            background-color: #0b5ed7;
-            transform: translateY(-1px);
-        }
+/* Botón principal */
+#contacto .btn-primary {
+    background-color: #0d6efd;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
 
-    /* Mensaje de éxito */
-    #contacto .alert-success {
-        border-radius: 8px;
-        font-size: 0.95rem;
+    #contacto .btn-primary:hover {
+        background-color: #0b5ed7;
+        transform: translateY(-1px);
     }
+
+/* Mensaje de éxito */
+#contacto .alert-success {
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
