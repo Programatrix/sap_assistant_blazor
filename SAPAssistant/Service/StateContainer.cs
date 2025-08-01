@@ -1,4 +1,4 @@
-using System;
+using CommunityToolkit.Mvvm.ComponentModel;
 using SAPAssistant.Models;
 
 namespace SAPAssistant.Service
@@ -6,32 +6,15 @@ namespace SAPAssistant.Service
     /// <summary>
     /// Contenedor de estado compartido entre componentes y servicios.
     /// </summary>
-    public class StateContainer
+    public partial class StateContainer : ObservableObject
     {
-        public LoginResponse? AuthenticatedUser { get; private set; }
-        public ConnectionDTO? ActiveConnection { get; private set; }
-        public ChatSession? CurrentChat { get; private set; }
+        [ObservableProperty]
+        private LoginResponse? authenticatedUser;
 
-        public event Action? OnChange;
+        [ObservableProperty]
+        private ConnectionDTO? activeConnection;
 
-        public void SetUser(LoginResponse? user)
-        {
-            AuthenticatedUser = user;
-            NotifyStateChanged();
-        }
-
-        public void SetConnection(ConnectionDTO? connection)
-        {
-            ActiveConnection = connection;
-            NotifyStateChanged();
-        }
-
-        public void SetChat(ChatSession? chat)
-        {
-            CurrentChat = chat;
-            NotifyStateChanged();
-        }
-
-        private void NotifyStateChanged() => OnChange?.Invoke();
+        [ObservableProperty]
+        private ChatSession? currentChat;
     }
 }

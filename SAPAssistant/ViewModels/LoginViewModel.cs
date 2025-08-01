@@ -57,7 +57,7 @@ public partial class LoginViewModel : BaseViewModel
 
             if (result.Success)
             {
-                _stateContainer.SetUser(result.Data);
+                _stateContainer.AuthenticatedUser = result.Data;
                 _navigation.NavigateTo("/");
             }
             else
