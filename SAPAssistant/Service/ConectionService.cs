@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using SAPAssistant.Exceptions;
 using SAPAssistant.Mapper;
+using Microsoft.Extensions.Logging;
 
 namespace SAPAssistant.Service
 {
@@ -10,11 +11,15 @@ namespace SAPAssistant.Service
     {
         private readonly HttpClient _http;
         private readonly ProtectedSessionStorage _sessionStorage;
+        private readonly ILogger<ConnectionService> _logger;
 
-        public ConnectionService(HttpClient http, ProtectedSessionStorage sessionStorage)
+        public ConnectionService(HttpClient http,
+                                 ProtectedSessionStorage sessionStorage,
+                                 ILogger<ConnectionService> logger)
         {
             _http = http;
             _sessionStorage = sessionStorage;
+            _logger = logger;
         }
 
         public async Task<ResultMessage<List<ConnectionDTO>>> GetConnectionsAsync()
@@ -61,7 +66,7 @@ namespace SAPAssistant.Service
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error al obtener conexiones: {ex.Message}");
+                _logger.LogError(ex, "Error al obtener conexiones");
                 return ResultMessage<List<ConnectionDTO>>.Fail("Error inesperado al obtener las conexiones.", "UNEXPECTED-ERROR");
             }
         }
@@ -139,12 +144,21 @@ namespace SAPAssistant.Service
                 request.Headers.Add("x-remote-ip", remoteIp);
 
                 var response = await _http.SendAsync(request);
-                var errorContent = await response.Content.ReadAsStringAsync();
-                return response.IsSuccessStatusCode;
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Error al validar conexión {ConnectionId}: {StatusCode} - {ErrorContent}",
+                                     connectionId,
+                                     response.StatusCode,
+                                     errorContent);
+                    return false;
+                }
+
+                return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error al validar conexión {connectionId}: {ex.Message}");
+                _logger.LogError(ex, "Error al validar conexión {ConnectionId}", connectionId);
                 return false;
             }
         }
