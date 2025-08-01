@@ -1,28 +1,23 @@
-﻿@page "/"
+@page "/"
 @page "/chat/{chatId}"
 @layout ChatLayout
 @using Microsoft.AspNetCore.Components.Web
 @using SAPAssistant.Components.Chat
 @using SAPAssistant.Models.Chat
-@using SAPAssistant.Service
-@using SAPAssistant.Models
-@using System.Text.Json
-@inject IJSRuntime JS
-@inject AssistantService AssistantService
-@inject ChatHistoryService ChatHistoryService
-
+@using SAPAssistant.ViewModels
+@inject ChatViewModel VM
 
 <div class="chat-content-full">
-    <div class="messages" @ref="messagesContainer">
-        @foreach (var msg in Messages)
+    <div class="messages" @ref="VM.MessagesContainer">
+        @foreach (var msg in VM.Messages)
         {
-            <DynamicComponent Type="@GetComponentType(msg)" Parameters="GetParameters(msg)" />
+            <DynamicComponent Type="@VM.GetComponentType(msg)" Parameters="VM.GetParameters(this, msg)" />
         }
     </div>
 
     <div class="input-area">
-        <SearchBar @bind-SearchText="UserInput" OnSearch="SendMessage" Disabled="isProcessing" />
-        @if (isProcessing)
+        <SearchBar @bind-SearchText="VM.UserInput" OnSearch="VM.SendMessage" Disabled="VM.IsProcessing" />
+        @if (VM.IsProcessing)
         {
             <div class="loading-spinner">⌛ Procesando...</div>
         }
@@ -30,200 +25,10 @@
 </div>
 
 @code {
-
-    private bool isProcessing = false;
-    private string? preferredViewType;
-    private ElementReference messagesContainer;
-    private ChatSession? CurrentSession { get; set; }
-    private string UserInput { get; set; } = string.Empty;
-    private List<MessageBase> Messages { get; set; } = new();
-
     [Parameter]
     public string? chatId { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        preferredViewType = await JS.InvokeAsync<string>("viewTypePref.get");
-    }
+    protected override async Task OnInitializedAsync() => await VM.OnInitializedAsync();
 
-
-    protected override async Task OnParametersSetAsync()
-    {
-        var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
-
-        Messages.Clear(); // Limpiar mensajes anteriores
-
-        if (!string.IsNullOrWhiteSpace(chatId))
-        {
-            CurrentSession = await ChatHistoryService.GetChatSessionAsync(chatId);
-        }
-        else
-        {
-            CurrentSession = new ChatSession
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Fecha = DateTime.Now,
-                    Titulo = "Nuevo chat"
-                };
-        }
-
-        if (CurrentSession?.MensajesRaw != null)
-        {
-            foreach (var msgRaw in CurrentSession.MensajesRaw)
-            {
-                try
-                {
-                    var json = JsonSerializer.Serialize(msgRaw);
-                    var response = JsonSerializer.Deserialize<AssistantResponse>(json, options);
-                    var tipo = msgRaw.TryGetValue("tipo", out var typeObj)
-                               ? typeObj?.ToString()?.ToLower()
-                               : null;
-
-                    if (tipo == null) continue;
-
-                    MessageBase? msg = tipo switch
-                    {
-                        "text" => JsonSerializer.Deserialize<TextMessage>(json, options),
-                        "aclaracion" => JsonSerializer.Deserialize<TextMessage>(json, options),
-                        "assistant" => JsonSerializer.Deserialize<TextMessage>(json, options),
-                        "result" => JsonSerializer.Deserialize<ResultMessage>(json, options),
-                        "error" => JsonSerializer.Deserialize<ErrorMessage>(json, options),
-                        "system" => JsonSerializer.Deserialize<SystemMessage>(json, options),
-                        "consulta" => JsonSerializer.Deserialize<ResultMessage>(json, options),
-                        _ => null
-                    };
-
-                    if (msg != null)
-                    {
-                        if (msg is ResultMessage rm && !string.IsNullOrEmpty(preferredViewType))
-                        {
-                            rm.ViewType = preferredViewType;
-                        }
-                        Messages.Add(msg);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"Error al deserializar mensaje: {ex.Message}");
-                }
-            }
-        }
-
-    }
-
-
-
-    private async Task SendMessage(string message)
-    {
-        if (string.IsNullOrWhiteSpace(message) || isProcessing) return;
-
-        isProcessing = true;
-
-        var userMsg = new TextMessage
-            {
-                Mensaje = message,
-                Role = "user"
-            };
-
-        Messages.Add(userMsg);
-
-        try
-        {
-            var resultado = await AssistantService.ConsultarAsync(message, CurrentSession!.Id);
-
-            MessageBase responseMsg = resultado?.Tipo switch
-            {
-                "aclaracion" or "assistant" => new TextMessage
-                    {
-                        Role = "assistant",
-                        Mensaje = resultado.Mensaje
-                    },
-                "resumen" => new TextMessage
-                    {                        
-                        Mensaje = resultado.Resumen
-                    },
-                "system" => new SystemMessage
-                    {
-                        Mensaje = resultado.Mensaje
-                    },
-                _ => new ResultMessage
-                    {
-                        Resumen = resultado?.Resumen ?? "",
-                        Sql = resultado?.Sql ?? "",
-                        Data = resultado?.Resultados ?? new(),
-                        ViewType = preferredViewType ?? resultado?.ViewType ?? "grid"
-                    }
-            };
-
-            Messages.Add(responseMsg);
-        }
-        catch (Exception ex)
-        {
-            Messages.Add(new ErrorMessage
-                {                    
-                    Mensaje = ex.Message
-                });
-        }
-
-        // 🧠 Actualizar y guardar sesión
-        // CurrentSession!.Mensajes = Messages;
-        // await ChatHistoryService.SaveChatSessionAsync(CurrentSession, Messages);
-
-        isProcessing = false;
-        await ScrollToBottom();
-    }
-
-    private async Task ScrollToBottom()
-    {
-        await JS.InvokeVoidAsync("chatEnhancer.scrollToBottom", messagesContainer);
-    }
-
-    private Type GetComponentType(MessageBase msg)
-    {
-        if (msg.Type == "Result")
-        {
-            var view = ((ResultMessage)msg).ViewType?.ToLower();
-            return view switch
-            {
-                "cards" => typeof(ResultCardListComponent),
-                "kpi" => typeof(ResultKpiComponent),
-                "chart" => typeof(ResultChartComponent),
-                _ => typeof(ResultGridComponent)
-            };
-        }
-
-        return msg.Type switch
-        {
-            "Text" => typeof(TextMessageComponent),
-            "Error" => typeof(ErrorMessageComponent),
-            "system" => typeof(SystemMessageComponent),
-            _ => typeof(TextMessageComponent)
-        };
-    }
-
-    private Dictionary<string, object> GetParameters(MessageBase msg)
-    {
-        var parameters = new Dictionary<string, object>
-        {
-            ["Message"] = msg
-        };
-
-        if (msg is ResultMessage)
-        {
-            parameters["OnViewTypeChange"] = EventCallback.Factory.Create<string>(this, (string vt) => OnViewTypeChanged((ResultMessage)msg, vt));
-        }
-
-        return parameters;
-    }
-
-    private async Task OnViewTypeChanged(ResultMessage msg, string viewType)
-    {
-        msg.ViewType = viewType;
-        preferredViewType = viewType;
-        await JS.InvokeVoidAsync("viewTypePref.set", viewType);
-        StateHasChanged();
-    }
+    protected override async Task OnParametersSetAsync() => await VM.OnParametersSetAsync(chatId);
 }
