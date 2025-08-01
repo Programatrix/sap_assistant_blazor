@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
 using SAPAssistant.Models;
+using SAPAssistant.Exceptions;
 using SAPAssistant.Service;
 
 namespace SAPAssistant.ViewModels;
@@ -10,6 +11,7 @@ public partial class LoginViewModel : BaseViewModel
     private readonly AuthService _authService;
     private readonly NavigationManager _navigation;
     private readonly NotificationService _notificationService;
+    private readonly StateContainer _stateContainer;
 
     [ObservableProperty]
     private LoginRequest loginModel = new();
@@ -33,11 +35,13 @@ public partial class LoginViewModel : BaseViewModel
     public LoginViewModel(
         AuthService authService,
         NavigationManager navigation,
-        NotificationService notificationService)
+        NotificationService notificationService,
+        StateContainer stateContainer)
     {
         _authService = authService;
         _navigation = navigation;
         _notificationService = notificationService;
+        _stateContainer = stateContainer;
     }
 
     public async Task HandleLogin()
@@ -53,11 +57,18 @@ public partial class LoginViewModel : BaseViewModel
 
             if (result.Success)
             {
+                _stateContainer.SetUser(result.Data);
                 _navigation.NavigateTo("/");
             }
             else
             {
-                _notificationService.Notify(result);
+                var notify = new ResultMessage
+                {
+                    Success = result.Success,
+                    Message = result.Message,
+                    ErrorCode = result.ErrorCode
+                };
+                _notificationService.Notify(notify);
                 PasswordError = true;
             }
         }
