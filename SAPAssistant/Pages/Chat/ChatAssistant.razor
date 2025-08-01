@@ -6,8 +6,10 @@
 @using SAPAssistant.Models.Chat
 @using SAPAssistant.ViewModels
 @using SAPAssistant.Service
+@using System.ComponentModel
 @inject ChatViewModel VM
 @inject StateContainer State
+@implements IDisposable
 
 <div class="chat-content-full">
     <div class="messages" @ref="VM.MessagesContainer">
@@ -30,7 +32,16 @@
     [Parameter]
     public string? chatId { get; set; }
 
-    protected override async Task OnInitializedAsync() => await VM.OnInitializedAsync();
+    protected override async Task OnInitializedAsync()
+    {
+        State.PropertyChanged += HandleStateChanged;
+        await VM.OnInitializedAsync();
+    }
 
     protected override async Task OnParametersSetAsync() => await VM.OnParametersSetAsync(chatId);
+
+    private void HandleStateChanged(object? sender, PropertyChangedEventArgs e)
+        => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => State.PropertyChanged -= HandleStateChanged;
 }

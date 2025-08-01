@@ -107,7 +107,7 @@ public partial class ChatViewModel : BaseViewModel
             }
         }
 
-        _stateContainer.SetChat(CurrentSession);
+        _stateContainer.CurrentChat = CurrentSession;
     }
 
     public async Task SendMessage(string message)
