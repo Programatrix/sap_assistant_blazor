@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
 using SAPAssistant.Models;
 using SAPAssistant.Service;
+using SAPAssistant.Exceptions;
 
 namespace SAPAssistant.ViewModels;
 
@@ -109,6 +110,13 @@ public partial class DashboardCatalogViewModel : BaseViewModel
         };
 
         DashboardService.KPIs.Add(copy);
-        await _userDashboardService.AddKpiAsync(copy);
+        try
+        {
+            await _userDashboardService.AddKpiAsync(copy);
+        }
+        catch (DashboardServiceException ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+        }
     }
 }
