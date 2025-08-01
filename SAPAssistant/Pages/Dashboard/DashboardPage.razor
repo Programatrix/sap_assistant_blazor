@@ -1,33 +1,34 @@
 ﻿@page "/dashboard"
 @using SAPAssistant.Service
 @using SAPAssistant.Models
+@using SAPAssistant.ViewModels
 @attribute [Authorize]
 @layout AssistantLayout
 
-@inject DashboardService DashboardService
+@inject DashboardPageViewModel VM
 
 <h1>📊 Mi Cockpit Inteligente</h1>
 
 <div class="dashboard-actions">
-    <button class="btn-global-refresh" @onclick="RefreshAll">🔄 Actualizar Todo</button>
-    <button class="btn-create-kpi" @onclick="OpenWizard">✨ Crear Nuevo KPI</button>
-    <button class="btn-edit-dashboard" @onclick="EditDashboard">🛠️ Editar Dashboard</button>
+    <button class="btn-global-refresh" @onclick="VM.RefreshAll">🔄 Actualizar Todo</button>
+    <button class="btn-create-kpi" @onclick="VM.OpenWizard">✨ Crear Nuevo KPI</button>
+    <button class="btn-edit-dashboard" @onclick="VM.EditDashboard">🛠️ Editar Dashboard</button>
 </div>
 
-@if (IsWizardOpen)
+@if (VM.IsWizardOpen)
 {
-    <DashboardWizard OnFinished="CloseWizard" />
+    <DashboardWizard OnFinished="VM.CloseWizard" />
 }
 else
 {
-    @if (DashboardService.KPIs.Count == 0)
+    @if (VM.DashboardService.KPIs.Count == 0)
     {
-        <DashboardEmptyState OnCreateKPI="OpenWizard" />
+        <DashboardEmptyState OnCreateKPI="VM.OpenWizard" />
     }
     else
     {
         <div class="dashboard-grid">
-            @foreach (var card in DashboardService.KPIs)
+            @foreach (var card in VM.DashboardService.KPIs)
             {
                 <DashboardCardWrapper Card="card" />
             }
@@ -35,27 +36,3 @@ else
     }
 }
 
-@code {
-    private bool IsWizardOpen = false;
-
-    private void OpenWizard()
-    {
-        IsWizardOpen = true;
-    }
-
-    private void CloseWizard()
-    {
-        IsWizardOpen = false;
-        StateHasChanged();
-    }
-
-    private void EditDashboard()
-    {
-        // Aquí podrías activar modo edición en el futuro
-    }
-
-    private async Task RefreshAll()
-    {
-        await DashboardService.RefreshAllKPIs();
-    }
-}
