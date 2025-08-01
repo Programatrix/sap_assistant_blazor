@@ -20,7 +20,7 @@
   <ItemGroup>
     <None Remove="wwwroot\assets\img\hero-dashboard.png" />
     <None Remove="Components\Chat\ErrorMessageComponent.razor.css" />
-    <None Remove="Components\Conection\ConectionManager.css" />
+    <None Remove="Components\Connection\ConnectionManager.css" />
     <None Remove="Components\Dashboard\DashboardEditor.razor~RF1520c87.TMP" />
     <None Remove="Pages\Assistant.razor.css" />
     <None Remove="Pages\Chat\ChatMessage.razor.css" />
