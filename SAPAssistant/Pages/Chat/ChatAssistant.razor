@@ -30,15 +30,16 @@
 </div>
 
 @code {
-    [Parameter]
-    public string? chatId { get; set; }
 
+    private bool isProcessing = false;
+    private string? preferredViewType;
+    private ElementReference messagesContainer;
     private ChatSession? CurrentSession { get; set; }
     private string UserInput { get; set; } = string.Empty;
     private List<MessageBase> Messages { get; set; } = new();
-    private ElementReference messagesContainer;
-    private bool isProcessing = false;
-    private string? preferredViewType;
+
+    [Parameter]
+    public string? chatId { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -110,6 +111,7 @@
                 }
             }
         }
+
     }
 
 

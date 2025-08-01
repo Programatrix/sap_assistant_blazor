@@ -1,11 +1,30 @@
-﻿using SAPAssistant.Exceptions;
+﻿using System;
+using SAPAssistant.Exceptions;
 
-public class NotificationService
+namespace SAPAssistant.Service
 {
-    public event Action<ResultMessage>? OnNotify;
-
-    public void ShowToast(ResultMessage result)
+    public class NotificationService
     {
-        OnNotify?.Invoke(result);
+        // Evento al que se suscriben los componentes que muestran mensajes
+        public event Action<ResultMessage>? OnNotify;
+
+        // Método para emitir mensajes de éxito/error
+        public void Notify(ResultMessage message)
+        {
+            OnNotify?.Invoke(message);
+        }
+
+        // Atajo para errores
+        public void NotifyError(string message, string errorCode = "")
+        {
+            Notify(ResultMessage.Fail(message, errorCode));
+        }
+
+        // Atajo para éxitos
+        public void NotifySuccess(string message)
+        {
+            Notify(ResultMessage.Ok(message));
+        }
     }
+
 }

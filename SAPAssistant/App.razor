@@ -1,8 +1,9 @@
-﻿@using SAPAssistant.Exceptions
+﻿@using SAPAssistant.Service
 <CascadingAuthenticationState>
     <MudDialogProvider />
     <MudSnackbarProvider /> <!-- Si usas snackbars (opcional) -->
     <MudPopoverProvider />
+
     <Router AppAssembly="@typeof(App).Assembly" PreferExactMatches="@true">
         <Found Context="routeData">
             <RouteView RouteData="@routeData" DefaultLayout="@typeof(PublicLayout)" />
@@ -13,35 +14,4 @@
             </LayoutView>
         </NotFound>
     </Router>
-
-    <!-- ✅ Toast Global -->
-    <SAPAssistant.Components.AlertMessageError Result="GlobalResult" OnClear="ClearGlobalAlert" />
 </CascadingAuthenticationState>
-
-@code {
-    [Inject] private NotificationService NotificationService { get; set; } = default!;
-    private ResultMessage? GlobalResult;
-
-    protected override void OnInitialized()
-    {
-        NotificationService.OnNotify += ShowToast;
-    }
-
-    private void ShowToast(ResultMessage result)
-    {
-        InvokeAsync(() =>
-        {
-            GlobalResult = result;
-            StateHasChanged();
-        });
-    }
-
-    private void ClearGlobalAlert()
-    {
-        InvokeAsync(() =>
-        {
-            GlobalResult = null;
-            StateHasChanged();
-        });
-    }
-}
