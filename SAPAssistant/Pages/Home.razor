@@ -1,23 +1,23 @@
 ﻿@page "/home"
 @attribute [Authorize]
 @layout AssistantLayout
-@inject NavigationManager NavigationManager
+@using SAPAssistant.ViewModels
+@inject HomeViewModel VM
 
 <div class="home-container">
 
     <!-- Encabezado -->
-    <h1 class="home-title">👋 ¡Hola, @UserName!</h1>
-    <p class="home-subtitle">Hoy es @TodayDate. ¿En qué puedo ayudarte hoy?</p>
+    <h1 class="home-title">👋 ¡Hola, @VM.UserName!</h1>
+    <p class="home-subtitle">Hoy es @VM.TodayDate. ¿En qué puedo ayudarte hoy?</p>
 
     <!-- Input de Consulta Rápida -->
     <div class="quick-assistant-form">
         <input class="quick-input"
-               value="@PromptModel.Prompt"
-               placeholder="Escribe tu consulta aquí..."
-               @oninput="e => PromptModel.Prompt = e.Value?.ToString()" />
-        <button class="quick-submit" @onclick="HandleQuickPrompt">
+               @bind="VM.Prompt"
+               placeholder="Escribe tu consulta aquí..." />
+        <button class="quick-submit" @onclick="VM.HandleQuickPrompt">
             ➔
-        </button>      
+        </button>
     </div>
 
     <!-- KPIs -->
@@ -51,26 +51,3 @@
     </div>
 
 </div>
-
-@code {
-    private string UserName = "Usuario"; // Cambiar por nombre real si tienes auth.
-    private string TodayDate = DateTime.Now.ToString("dddd, dd MMMM yyyy");
-
-    private PromptInput PromptModel = new();
-
-    private async Task HandleQuickPrompt()
-    {
-        if (string.IsNullOrWhiteSpace(PromptModel.Prompt))
-            return;
-
-        // Aquí en el futuro podrías llamar al backend
-        await Task.Delay(500);
-        // Opcional: redirigir al /assistant
-        NavigationManager.NavigateTo($"/assistant?prompt={Uri.EscapeDataString(PromptModel.Prompt)}");
-    }
-
-    private class PromptInput
-    {
-        public string Prompt { get; set; } = "";
-    }
-}
