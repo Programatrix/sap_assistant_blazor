@@ -14,6 +14,7 @@ public partial class ChatViewModel : BaseViewModel
     private readonly IJSRuntime _js;
     private readonly AssistantService _assistantService;
     private readonly ChatHistoryService _chatHistoryService;
+    private readonly StateContainer _stateContainer;
 
     public ElementReference MessagesContainer { get; set; }
 
@@ -29,11 +30,12 @@ public partial class ChatViewModel : BaseViewModel
     [ObservableProperty]
     private bool isProcessing;
 
-    public ChatViewModel(IJSRuntime js, AssistantService assistantService, ChatHistoryService chatHistoryService)
+    public ChatViewModel(IJSRuntime js, AssistantService assistantService, ChatHistoryService chatHistoryService, StateContainer stateContainer)
     {
         _js = js;
         _assistantService = assistantService;
         _chatHistoryService = chatHistoryService;
+        _stateContainer = stateContainer;
     }
 
     public async Task OnInitializedAsync()
@@ -104,6 +106,8 @@ public partial class ChatViewModel : BaseViewModel
                 }
             }
         }
+
+        _stateContainer.SetChat(CurrentSession);
     }
 
     public async Task SendMessage(string message)

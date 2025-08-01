@@ -20,39 +20,39 @@ namespace SAPAssistant.Service
             _authProvider = authProvider;
         }
 
-        public async Task<ResultMessage> LoginAsync(LoginRequest request)
+        public async Task<ResultMessage<LoginResponse>> LoginAsync(LoginRequest request)
         {
             try
             {
                 var response = await _http.PostAsJsonAsync("/login", request);
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    return ResultMessage.Fail("Usuario o contraseña incorrectos.", "AUTH-401");
+                    return ResultMessage<LoginResponse>.Fail("Usuario o contraseña incorrectos.", "AUTH-401");
                 }
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    return ResultMessage.Fail("El sistema no está disponible. Intenta más tarde.", $"SVC-{(int)response.StatusCode}");
+                    return ResultMessage<LoginResponse>.Fail("El sistema no está disponible. Intenta más tarde.", $"SVC-{(int)response.StatusCode}");
                 }
 
                 var user = await response.Content.ReadFromJsonAsync<LoginResponse>();
                 if (user is null)
                 {
-                    return ResultMessage.Fail("No se pudo procesar la respuesta del servidor.", "AUTH-INVALID-RESPONSE");
+                    return ResultMessage<LoginResponse>.Fail("No se pudo procesar la respuesta del servidor.", "AUTH-INVALID-RESPONSE");
                 }
 
                 await _authProvider.MarkUserAsAuthenticated(user.Username, user.Token);
                 await _authProvider.SaveRemoteUrlAsync(user.remote_url); // ✅ Guardar remote_url
 
-                return ResultMessage.Ok("Inicio de sesión exitoso.");
+                return ResultMessage<LoginResponse>.Ok(user, "Inicio de sesión exitoso.");
             }
             catch (HttpRequestException)
             {
-                return ResultMessage.Fail("Problema de conexión. Verifique su conexión a Internet.", "NET-ERROR");
+                return ResultMessage<LoginResponse>.Fail("Problema de conexión. Verifique su conexión a Internet.", "NET-ERROR");
             }
             catch (Exception)
             {
-                return ResultMessage.Fail("Error inesperado. Por favor, intente nuevamente.", "UNEXPECTED-ERROR");
+                return ResultMessage<LoginResponse>.Fail("Error inesperado. Por favor, intente nuevamente.", "UNEXPECTED-ERROR");
             }
         }
 
