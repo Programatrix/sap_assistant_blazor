@@ -47,6 +47,7 @@ builder.Services.AddHttpClient<AssistantService>(client =>
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ProtectedSessionStorage>();
+builder.Services.AddScoped<SessionContextService>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<CustomAuthStateProvider>();
     builder.Services.AddScoped<DashboardService>();
