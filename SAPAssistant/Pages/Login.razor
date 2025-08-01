@@ -1,8 +1,10 @@
 @page "/login"
 @using SAPAssistant.ViewModels
+@using SAPAssistant.Service
 @attribute [AllowAnonymous]
 @layout PublicLayout
 @inject LoginViewModel VM
+@inject StateContainer State
 
 <div class="flex-center">
     <div class="card">

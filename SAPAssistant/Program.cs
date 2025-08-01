@@ -54,8 +54,9 @@ builder.Services.AddScoped<CustomAuthStateProvider>();
     builder.Services.AddScoped<UserDashboardService>();
 builder.Services.AddSingleton<NotificationService>();
 builder.Services.AddScoped<ChatHistoryService>();
-builder.Services.AddScoped<StateContainer>();
 builder.Services.AddMudServices();
+
+builder.Services.AddScoped<StateContainer>();
 builder.Services.AddScoped<ChatViewModel>();
 builder.Services.AddScoped<LoginViewModel>();
 

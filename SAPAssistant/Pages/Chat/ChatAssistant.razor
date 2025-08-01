@@ -5,7 +5,9 @@
 @using SAPAssistant.Components.Chat
 @using SAPAssistant.Models.Chat
 @using SAPAssistant.ViewModels
+@using SAPAssistant.Service
 @inject ChatViewModel VM
+@inject StateContainer State
 
 <div class="chat-content-full">
     <div class="messages" @ref="VM.MessagesContainer">
