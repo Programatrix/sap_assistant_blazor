@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using SAPAssistant.Models;
 using SAPAssistant.Service;
+using SAPAssistant.Service.Interfaces;
 
 namespace SAPAssistant.ViewModels;
 
 public partial class ConnectionManagerViewModel : BaseViewModel
 {
-    private readonly ConnectionService _connectionService;
+    private readonly IConnectionService _connectionService;
     private readonly ProtectedSessionStorage _sessionStorage;
     private readonly NavigationManager _navigation;
 
@@ -30,7 +31,7 @@ public partial class ConnectionManagerViewModel : BaseViewModel
     [ObservableProperty]
     private string? errorAlCargar;
 
-    public ConnectionManagerViewModel(ConnectionService connectionService, ProtectedSessionStorage sessionStorage, NavigationManager navigation)
+    public ConnectionManagerViewModel(IConnectionService connectionService, ProtectedSessionStorage sessionStorage, NavigationManager navigation)
     {
         _connectionService = connectionService;
         _sessionStorage = sessionStorage;

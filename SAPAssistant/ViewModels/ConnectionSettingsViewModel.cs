@@ -3,13 +3,14 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using SAPAssistant.Models;
 using SAPAssistant.Service;
+using SAPAssistant.Service.Interfaces;
 
 namespace SAPAssistant.ViewModels;
 
 public partial class ConnectionSettingsViewModel : BaseViewModel
 {
     private readonly ProtectedSessionStorage _sessionStorage;
-    private readonly ConnectionService _connectionService;
+    private readonly IConnectionService _connectionService;
     private readonly NavigationManager _navigation;
 
     [ObservableProperty]
@@ -19,7 +20,7 @@ public partial class ConnectionSettingsViewModel : BaseViewModel
 
     public ConnectionSettingsViewModel(
         ProtectedSessionStorage sessionStorage,
-        ConnectionService connectionService,
+        IConnectionService connectionService,
         NavigationManager navigation)
     {
         _sessionStorage = sessionStorage;

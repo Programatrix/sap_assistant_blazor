@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Components.Web;
 using SAPAssistant.Security;
 using SAPAssistant.Service;
+using SAPAssistant.Service.Interfaces;
 using SAPAssistant.Security.Policies;
 using Microsoft.AspNetCore.Authorization;
 using SAPAssistant.Exceptions;
@@ -32,12 +33,12 @@ builder.Services.AddScoped(sp => new HttpClient
 });
 
 // Servicios API específicos
-builder.Services.AddHttpClient<ConnectionService>(client =>
+builder.Services.AddHttpClient<IConnectionService, ConnectionService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
-builder.Services.AddHttpClient<AssistantService>(client =>
+builder.Services.AddHttpClient<IAssistantService, AssistantService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
 });
@@ -50,7 +51,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>
 builder.Services.AddScoped<CustomAuthStateProvider>();
     builder.Services.AddScoped<DashboardService>();
     builder.Services.AddSingleton<KpiCatalogService>();
-    builder.Services.AddScoped<UserDashboardService>();
+    builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
 builder.Services.AddSingleton<NotificationService>();
 builder.Services.AddScoped<ChatHistoryService>();
 builder.Services.AddMudServices();

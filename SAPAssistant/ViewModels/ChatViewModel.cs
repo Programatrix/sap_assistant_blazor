@@ -5,6 +5,7 @@ using SAPAssistant.Components.Chat;
 using SAPAssistant.Models;
 using SAPAssistant.Models.Chat;
 using SAPAssistant.Service;
+using SAPAssistant.Service.Interfaces;
 using System.Text.Json;
 
 namespace SAPAssistant.ViewModels;
@@ -12,7 +13,7 @@ namespace SAPAssistant.ViewModels;
 public partial class ChatViewModel : BaseViewModel
 {
     private readonly IJSRuntime _js;
-    private readonly AssistantService _assistantService;
+    private readonly IAssistantService _assistantService;
     private readonly ChatHistoryService _chatHistoryService;
     private readonly StateContainer _stateContainer;
 
@@ -30,7 +31,7 @@ public partial class ChatViewModel : BaseViewModel
     [ObservableProperty]
     private bool isProcessing;
 
-    public ChatViewModel(IJSRuntime js, AssistantService assistantService, ChatHistoryService chatHistoryService, StateContainer stateContainer)
+    public ChatViewModel(IJSRuntime js, IAssistantService assistantService, ChatHistoryService chatHistoryService, StateContainer stateContainer)
     {
         _js = js;
         _assistantService = assistantService;

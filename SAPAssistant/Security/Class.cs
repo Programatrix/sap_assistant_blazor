@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using SAPAssistant.Service;
+using SAPAssistant.Service.Interfaces;
 using System.Security.Claims;
 
 namespace SAPAssistant.Security.Policies
@@ -8,11 +9,11 @@ namespace SAPAssistant.Security.Policies
     public class ConnectionAuthorizationHandler : AuthorizationHandler<ConnectionRequirement>
     {
         private readonly ProtectedSessionStorage _sessionStorage;
-        private readonly ConnectionService _connectionService;
+        private readonly IConnectionService _connectionService;
 
         public ConnectionAuthorizationHandler(
             ProtectedSessionStorage sessionStorage,
-            ConnectionService connectionService)
+            IConnectionService connectionService)
         {
             _sessionStorage = sessionStorage;
             _connectionService = connectionService;
