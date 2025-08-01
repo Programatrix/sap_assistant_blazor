@@ -1,10 +1,11 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
 using SAPAssistant.Models;
+using SAPAssistant.Service.Interfaces;
 
 namespace SAPAssistant.Service
 {
-    public class AssistantService
+    public class AssistantService : IAssistantService
     {
         private readonly HttpClient _http;
         private readonly SessionContextService _sessionContext;

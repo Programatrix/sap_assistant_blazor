@@ -3,10 +3,11 @@ using System.Net.Http.Json;
 using SAPAssistant.Exceptions;
 using SAPAssistant.Mapper;
 using Microsoft.Extensions.Logging;
+using SAPAssistant.Service.Interfaces;
 
 namespace SAPAssistant.Service
 {
-    public class ConnectionService
+    public class ConnectionService : IConnectionService
     {
         private readonly HttpClient _http;
         private readonly SessionContextService _sessionContext;

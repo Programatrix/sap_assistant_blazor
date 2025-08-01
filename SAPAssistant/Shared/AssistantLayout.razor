@@ -1,11 +1,12 @@
 ﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using SAPAssistant.Security
 @using SAPAssistant.Service
+@using SAPAssistant.Service.Interfaces
 @inherits LayoutComponentBase
 @attribute [Authorize]
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
-@inject ConnectionService ConnectionService
+@inject IConnectionService ConnectionService
 @inject ProtectedSessionStorage SessionStorage
 
 @if (isLoading || validandoConexion)

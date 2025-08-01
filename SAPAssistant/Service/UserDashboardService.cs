@@ -2,10 +2,11 @@ using SAPAssistant.Models;
 using System.Net.Http.Json;
 using SAPAssistant.Exceptions;
 using Microsoft.Extensions.Logging;
+using SAPAssistant.Service.Interfaces;
 
 namespace SAPAssistant.Service
 {
-    public class UserDashboardService
+    public class UserDashboardService : IUserDashboardService
     {
         private readonly HttpClient _http;
         private readonly SessionContextService _sessionContext;

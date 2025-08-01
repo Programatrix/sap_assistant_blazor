@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
 using SAPAssistant.Models;
 using SAPAssistant.Service;
+using SAPAssistant.Service.Interfaces;
 using SAPAssistant.Exceptions;
 
 namespace SAPAssistant.ViewModels;
@@ -13,7 +14,7 @@ namespace SAPAssistant.ViewModels;
 public partial class DashboardCatalogViewModel : BaseViewModel
 {
     private readonly KpiCatalogService _kpiCatalogService;
-    private readonly UserDashboardService _userDashboardService;
+    private readonly IUserDashboardService _userDashboardService;
     public DashboardService DashboardService { get; }
 
     [ObservableProperty]
@@ -41,7 +42,7 @@ public partial class DashboardCatalogViewModel : BaseViewModel
 
     public DashboardCatalogViewModel(
         KpiCatalogService kpiCatalogService,
-        UserDashboardService userDashboardService,
+        IUserDashboardService userDashboardService,
         DashboardService dashboardService)
     {
         _kpiCatalogService = kpiCatalogService;
