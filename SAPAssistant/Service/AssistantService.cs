@@ -1,22 +1,21 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
 using SAPAssistant.Models;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 namespace SAPAssistant.Service
 {
     public class AssistantService
     {
         private readonly HttpClient _http;
-        private readonly ProtectedSessionStorage _sessionStorage;
+        private readonly SessionContextService _sessionContext;
         private readonly ILogger<AssistantService> _logger;
 
         public AssistantService(HttpClient http,
-                              ProtectedSessionStorage sessionStorage,
+                              SessionContextService sessionContext,
                               ILogger<AssistantService> logger)
         {
             _http = http;
-            _sessionStorage = sessionStorage;
+            _sessionContext = sessionContext;
             _logger = logger;
         }
 
@@ -24,15 +23,14 @@ namespace SAPAssistant.Service
         {
             try
             {
-                var userResult = await _sessionStorage.GetAsync<string>("username");
-                var connectionResult = await _sessionStorage.GetAsync<string>("active_connection_id");
-                var ipResult = await _sessionStorage.GetAsync<string>("remote_url");
-                var dbtypeResult = await _sessionStorage.GetAsync<string>("active_db_type");
-
-                var username = userResult.Value ?? throw new AssistantException("Usuario no autenticado", "UNAUTHENTICATED");
-                var connectionId = connectionResult.Value ?? throw new AssistantException("No hay conexión activa", "NO_ACTIVE_CONNECTION");
-                var remoteIp = ipResult.Value ?? throw new AssistantException("Configuración remota faltante", "MISSING_REMOTE_IP");
-                var dbType = dbtypeResult.Value ?? throw new AssistantException("Tipo de base de datos no especificado", "MISSING_DB_TYPE");
+                var username = await _sessionContext.GetUserIdAsync() ??
+                    throw new AssistantException("Usuario no autenticado", "UNAUTHENTICATED");
+                var connectionId = await _sessionContext.GetActiveConnectionIdAsync() ??
+                    throw new AssistantException("No hay conexión activa", "NO_ACTIVE_CONNECTION");
+                var remoteIp = await _sessionContext.GetRemoteIpAsync() ??
+                    throw new AssistantException("Configuración remota faltante", "MISSING_REMOTE_IP");
+                var dbType = await _sessionContext.GetDatabaseTypeAsync() ??
+                    throw new AssistantException("Tipo de base de datos no especificado", "MISSING_DB_TYPE");
 
                 if (string.IsNullOrWhiteSpace(chatId))
                     throw new AssistantException("ID de chat inválido", "INVALID_CHAT_ID");

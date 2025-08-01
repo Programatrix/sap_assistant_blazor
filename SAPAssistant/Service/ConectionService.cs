@@ -1,6 +1,5 @@
 ﻿using SAPAssistant.Models;
 using System.Net.Http.Json;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using SAPAssistant.Exceptions;
 using SAPAssistant.Mapper;
 using Microsoft.Extensions.Logging;
@@ -10,15 +9,15 @@ namespace SAPAssistant.Service
     public class ConnectionService
     {
         private readonly HttpClient _http;
-        private readonly ProtectedSessionStorage _sessionStorage;
+        private readonly SessionContextService _sessionContext;
         private readonly ILogger<ConnectionService> _logger;
 
         public ConnectionService(HttpClient http,
-                                 ProtectedSessionStorage sessionStorage,
+                                 SessionContextService sessionContext,
                                  ILogger<ConnectionService> logger)
         {
             _http = http;
-            _sessionStorage = sessionStorage;
+            _sessionContext = sessionContext;
             _logger = logger;
         }
 
@@ -26,21 +25,18 @@ namespace SAPAssistant.Service
         {
             try
             {
-                var tokenResult = await _sessionStorage.GetAsync<string>("token");
-                var userResult = await _sessionStorage.GetAsync<string>("username");
-                var remoteIp = await GetRemoteIpAsync();
+                var token = await _sessionContext.GetTokenAsync();
+                var userId = await _sessionContext.GetUserIdAsync();
+                var remoteIp = await _sessionContext.GetRemoteIpAsync();
 
-                if (!tokenResult.Success)
+                if (string.IsNullOrWhiteSpace(token))
                     return ResultMessage<List<ConnectionDTO>>.Fail("Token no encontrado en la sesión.", "SESSION-TOKEN-NOT-FOUND");
 
-                if (!userResult.Success)
+                if (string.IsNullOrWhiteSpace(userId))
                     return ResultMessage<List<ConnectionDTO>>.Fail("Usuario no encontrado en la sesión.", "SESSION-USER-NOT-FOUND");
 
-                if (remoteIp == null)
+                if (string.IsNullOrWhiteSpace(remoteIp))
                     return ResultMessage<List<ConnectionDTO>>.Fail("Ip remota del usuario no encontrada en la sesión.", "SESSION-REMOTE_IP-NOT-FOUND");
-
-                var token = tokenResult.Value;
-                var userId = userResult.Value;
 
                 var request = new HttpRequestMessage(HttpMethod.Get, "/connection/user-connections");
                 request.Headers.Add("X-User-Id", userId);
@@ -73,13 +69,11 @@ namespace SAPAssistant.Service
 
         public async Task<ConnectionDTO?> GetConnectionByIdAsync(string connectionId)
         {
-            var userResult = await _sessionStorage.GetAsync<string>("username");
-            var remoteIp = await GetRemoteIpAsync();
+            var userId = await _sessionContext.GetUserIdAsync();
+            var remoteIp = await _sessionContext.GetRemoteIpAsync();
 
-            if (!userResult.Success || string.IsNullOrWhiteSpace(remoteIp))
+            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp))
                 return null;
-
-            var userId = userResult.Value;
 
             var request = new HttpRequestMessage(HttpMethod.Get, $"/connection/connections/{connectionId}");
             request.Headers.Add("X-User-Id", userId);
@@ -94,12 +88,10 @@ namespace SAPAssistant.Service
 
         public async Task<bool> UpdateConnectionAsync(ConnectionDTO connection)
         {
-            var userResult = await _sessionStorage.GetAsync<string>("username");
-            var remoteIp = await GetRemoteIpAsync();
+            var userId = await _sessionContext.GetUserIdAsync();
+            var remoteIp = await _sessionContext.GetRemoteIpAsync();
 
-            if (!userResult.Success || string.IsNullOrWhiteSpace(remoteIp)) return false;
-
-            var userId = userResult.Value;
+            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp)) return false;
 
             var request = new HttpRequestMessage(HttpMethod.Put, $"/connection/connections/{connection.ConnectionId}");
             request.Headers.Add("X-User-Id", userId);
@@ -112,12 +104,10 @@ namespace SAPAssistant.Service
 
         public async Task<bool> CreateConnectionAsync(ConnectionDTO connection)
         {
-            var userResult = await _sessionStorage.GetAsync<string>("username");
-            var remoteIp = await GetRemoteIpAsync();
+            var userId = await _sessionContext.GetUserIdAsync();
+            var remoteIp = await _sessionContext.GetRemoteIpAsync();
 
-            if (!userResult.Success || string.IsNullOrWhiteSpace(remoteIp)) return false;
-
-            var userId = userResult.Value;
+            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp)) return false;
 
             var request = new HttpRequestMessage(HttpMethod.Post, "/connection/connections");
             request.Headers.Add("X-User-Id", userId);
@@ -132,12 +122,10 @@ namespace SAPAssistant.Service
         {
             try
             {
-                var userResult = await _sessionStorage.GetAsync<string>("username");
-                var remoteIp = await GetRemoteIpAsync();
-                if (!userResult.Success || string.IsNullOrWhiteSpace(remoteIp))
+                var userId = await _sessionContext.GetUserIdAsync();
+                var remoteIp = await _sessionContext.GetRemoteIpAsync();
+                if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp))
                     return false;
-
-                var userId = userResult.Value;
 
                 var request = new HttpRequestMessage(HttpMethod.Post, $"/connection/connections/{connectionId}/validate");
                 request.Headers.Add("X-User-Id", userId);
@@ -163,14 +151,5 @@ namespace SAPAssistant.Service
             }
         }
 
-        private async Task<string?> GetRemoteIpAsync()
-        {
-            var remoteResult = await _sessionStorage.GetAsync<string>("remote_url");
-            if (!remoteResult.Success)
-                return null;
-
-            var remoteIp = remoteResult.Value;
-            return remoteIp?.TrimEnd('/');
-        }
     }
 }
