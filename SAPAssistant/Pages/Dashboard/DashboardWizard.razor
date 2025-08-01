@@ -1,12 +1,12 @@
-﻿@using SAPAssistant.Service
-@inject DashboardService DashboardService
+@using SAPAssistant.ViewModels
+@inject DashboardWizardViewModel VM
 
 <div class="dashboard-wizard">
     <h2>✨ Crea tu nuevo KPI</h2>
 
-    <EditForm Model="NewKpiModel" OnValidSubmit="CreateKPI">
-        <InputText @bind-Value="NewKpiModel.Prompt" placeholder="¿Qué quieres consultar?" class="input-prompt" />
-        <select @bind="NewKpiModel.ChartType" class="select-chart-type">
+    <EditForm Model="VM.NewKpiModel" OnValidSubmit="VM.CreateKPI">
+        <InputText @bind-Value="VM.NewKpiModel.Prompt" placeholder="¿Qué quieres consultar?" class="input-prompt" />
+        <select @bind="VM.NewKpiModel.ChartType" class="select-chart-type">
             <option value="bar">📊 Gráfico de Barras</option>
             <option value="pie">🥧 Gráfico de Pastel</option>
             <option value="number">🔢 Número</option>
@@ -14,29 +14,15 @@
         <button type="submit" class="btn-submit">Agregar al Dashboard</button>
     </EditForm>
 
-    <button class="btn-cancel" @onclick="Cancel">Cancelar</button>
+    <button class="btn-cancel" @onclick="VM.Cancel">Cancelar</button>
 </div>
 
 @code {
     [Parameter]
     public EventCallback OnFinished { get; set; }
 
-    private NewKpiInputModel NewKpiModel = new();
-
-    private async Task CreateKPI()
+    protected override void OnParametersSet()
     {
-        await DashboardService.CreateNewKPI(NewKpiModel.Prompt,NewKpiModel.ChartType);
-        await OnFinished.InvokeAsync();
-    }
-
-    private async Task Cancel()
-    {
-        await OnFinished.InvokeAsync();
-    }
-
-    private class NewKpiInputModel
-    {
-        public string Prompt { get; set; } = "";
-        public string ChartType { get; set; } = "bar";
+        VM.OnFinished = OnFinished;
     }
 }
