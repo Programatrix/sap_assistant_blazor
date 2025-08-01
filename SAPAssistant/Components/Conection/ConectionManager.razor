@@ -1,25 +1,22 @@
-﻿@namespace SAPAssistant.Components.Connection
-@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@namespace SAPAssistant.Components.Connection
 @using SAPAssistant.Models
-@using SAPAssistant.Service
-@inject ConnectionService ConnectionService
-@inject ProtectedSessionStorage SessionStorage
-@inject NavigationManager Navigation
+@using SAPAssistant.ViewModels
+@inject ConnectionManagerViewModel VM
 
 <div class="card card-wide">
     <h3 class="text-xl font-semibold mb-4">Mis conexiones</h3>
 
-    @if (!string.IsNullOrEmpty(ErrorAlCargar))
+    @if (!string.IsNullOrEmpty(VM.ErrorAlCargar))
     {
         <div class="alert-error mb-4">
-            @ErrorAlCargar
+            @VM.ErrorAlCargar
             <br />
-            <button class="button-secondary mt-2" @onclick="RecargarConexiones" disabled="@IsActivating">
+            <button class="button-secondary mt-2" @onclick="RecargarConexiones" disabled="@VM.IsActivating">
                 🔄 Reintentar
             </button>
         </div>
     }
-    else if (Connections == null || !Connections.Any())
+    else if (VM.Connections == null || !VM.Connections.Any())
     {
         <p>Cargando conexiones...</p>
     }
@@ -37,7 +34,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var conn in Connections)
+                    @foreach (var conn in VM.Connections)
                     {
                         <tr>
                             <td>@conn.ConnectionId</td>
@@ -55,13 +52,13 @@
                             </td>
                             <td>
                                 <div class="flex gap-2">
-                                    <button class="button-secondary" @onclick="() => EditarConexion(conn)" disabled="@IsActivating">
+                                    <button class="button-secondary" @onclick="() => EditarConexion(conn)" disabled="@VM.IsActivating">
                                         Editar
                                     </button>
                                     @if (!conn.IsActive)
                                     {
-                                        <button class="icon-button" title="Usar esta conexión" @onclick="() => SetActive(conn)" disabled="@IsActivating">
-                                            @if (IsActivating && ActivatingConnectionId == conn.ConnectionId)
+                                        <button class="icon-button" title="Usar esta conexión" @onclick="() => SetActive(conn)" disabled="@VM.IsActivating">
+                                            @if (VM.IsActivating && VM.ActivatingConnectionId == conn.ConnectionId)
                                             {
                                                 <span class="spinner-border"></span>
                                             }
@@ -80,20 +77,20 @@
         </div>
 
         <div class="mt-6 text-right">
-            <button class="button-primary" @onclick="NuevaConexion" disabled="@IsActivating">
+            <button class="button-primary" @onclick="NuevaConexion" disabled="@VM.IsActivating">
                 <span class="material-icons align-middle">add</span>
                 <span class="ml-1">Nueva conexión</span>
             </button>
         </div>
 
-        @if (MostrarMensaje)
+        @if (VM.MostrarMensaje)
         {
             <div class="alert-success mt-4">
                 ✅ Conexión activada correctamente
             </div>
         }
 
-        @if (MostrarError)
+        @if (VM.MostrarError)
         {
             <div class="alert-error mt-4">
                 ❌ No se pudo validar la conexión. Verifica los datos.
@@ -103,107 +100,35 @@
 </div>
 
 @code {
-    private List<ConnectionDTO> Connections = new();
-    private bool MostrarMensaje = false;
-    private bool MostrarError = false;
-    private bool IsActivating = false;
-    private string? ActivatingConnectionId = null;
-    private string? ErrorAlCargar = null;
-
     [Parameter] public bool EsModal { get; set; } = false;
     [Parameter] public EventCallback<bool> OnConnectionActivated { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await ConnectionService.GetConnectionsAsync();
-
-        if (result.Success)
-        {
-            Connections = result.Data ?? new();
-        }
-        else
-        {
-            ErrorAlCargar = $"❌ {result.Message} (Código: {result.ErrorCode})";
-        }
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            var activeResult = await SessionStorage.GetAsync<string>("active_connection_id");
-            var activeId = activeResult.Success ? activeResult.Value : null;
-
-            foreach (var conn in Connections)
-                conn.IsActive = conn.ConnectionId == activeId;
-
-            StateHasChanged();
-        }
+        await VM.LoadConnections();
     }
 
     private async Task RecargarConexiones()
     {
-        ErrorAlCargar = null;
-        StateHasChanged();
-        await OnInitializedAsync();
-        StateHasChanged();
+        await VM.RecargarConexiones();
     }
 
     private async Task SetActive(ConnectionDTO connection)
     {
-        if (IsActivating)
-            return;
-
-        IsActivating = true;
-        ActivatingConnectionId = connection.ConnectionId;
-        MostrarMensaje = false;
-        MostrarError = false;
-        StateHasChanged();
-
-        try
+        var activated = await VM.SetActive(connection);
+        if (activated)
         {
-            var isValid = await ConnectionService.ValidateConnectionAsync(connection.ConnectionId);
-
-            if (!isValid)
-            {
-                MostrarError = true;
-                StateHasChanged();
-                await Task.Delay(3000);
-                MostrarError = false;
-                return;
-            }
-
-            await SessionStorage.SetAsync("active_connection_id", connection.ConnectionId);
-            await SessionStorage.SetAsync("active_db_type", connection.db_type);
-
-            foreach (var c in Connections)
-                c.IsActive = c.ConnectionId == connection.ConnectionId;
-
-            MostrarMensaje = true;
             await OnConnectionActivated.InvokeAsync(true);
-            await Task.Delay(3000);
-            MostrarMensaje = false;
-        }
-        finally
-        {
-            IsActivating = false;
-            ActivatingConnectionId = null;
-            StateHasChanged();
         }
     }
 
     private async Task EditarConexion(ConnectionDTO conn)
     {
-        if (IsActivating) return;
-
-        await SessionStorage.SetAsync("connection_to_edit", conn);
-        Navigation.NavigateTo("/connection/edit", EsModal);
+        await VM.EditarConexion(conn, EsModal);
     }
 
     private void NuevaConexion()
     {
-        if (IsActivating) return;
-
-        Navigation.NavigateTo("/connection/edit", EsModal);
+        VM.NuevaConexion(EsModal);
     }
 }
