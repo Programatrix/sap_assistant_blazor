@@ -56,6 +56,7 @@ builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddScoped<ChatHistoryService>();
 builder.Services.AddMudServices();
 builder.Services.AddScoped<ChatViewModel>();
+builder.Services.AddScoped<LoginViewModel>();
 
 
 // ✅ Política de conexión activa
