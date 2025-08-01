@@ -5,7 +5,7 @@ using SAPAssistant.Service;
 
 namespace SAPAssistant.ViewModels;
 
-public partial class LoginViewModel : ObservableObject
+public partial class LoginViewModel : BaseViewModel
 {
     private readonly AuthService _authService;
     private readonly NavigationManager _navigation;

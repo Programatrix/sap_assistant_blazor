@@ -9,7 +9,7 @@ using System.Text.Json;
 
 namespace SAPAssistant.ViewModels;
 
-public partial class ChatViewModel : ObservableObject
+public partial class ChatViewModel : BaseViewModel
 {
     private readonly IJSRuntime _js;
     private readonly AssistantService _assistantService;
