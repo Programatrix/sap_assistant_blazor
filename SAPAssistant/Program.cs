@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Components.Web;
-using SAPAssistant.Data;
 using SAPAssistant.Security;
 using SAPAssistant.Service;
 using SAPAssistant.Security.Policies;
@@ -44,7 +43,6 @@ builder.Services.AddHttpClient<AssistantService>(client =>
 });
 
 
-builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<SessionContextService>();
