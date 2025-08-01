@@ -1,30 +1,27 @@
-﻿@page "/conexiones"
+@page "/conexiones"
 @layout PostLoginLayout
-@using SAPAssistant.Service
 @using SAPAssistant.Components.Connection
-@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using SAPAssistant.ViewModels
 
-@inject NavigationManager Navigation
-@inject ConnectionService ConnectionService
-@inject ProtectedSessionStorage SessionStorage
+@inject ConnectionSelectionViewModel VM
 
 <div class="conexiones-wrapper">
     <h2>🔗 Selecciona una conexión activa</h2>
     <p>Necesitas una conexión activa para usar el asistente.</p>
 
-    <ConectionManager OnConnectionActivated="HandleConnectionActivated" EsModal="false" />
+    <ConectionManager OnConnectionActivated="VM.HandleConnectionActivated" EsModal="false" />
 
-    @if (MostrarAviso)
+    @if (VM.MostrarAviso)
     {
         <div class="mensaje-error mt-4">
             ⚠️ La conexión previamente activa ya no es válida.
         </div>
     }
 
-    @if (HayConexionActiva)
+    @if (VM.HayConexionActiva)
     {
         <div class="volver-btn">
-            <button class="btn btn-primary" @onclick="VolverHome">
+            <button class="btn btn-primary" @onclick="VM.VolverHome">
                 ✅ Volver al inicio
             </button>
         </div>
@@ -32,39 +29,9 @@
 </div>
 
 @code {
-    private bool HayConexionActiva = false;
-    private bool MostrarAviso = false;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender)
-        {
-            var result = await SessionStorage.GetAsync<string>("active_connection_id");
-            if (result.Success && !string.IsNullOrEmpty(result.Value))
-            {
-                var isValid = await ConnectionService.ValidateConnectionAsync(result.Value);
-                if (isValid)
-                {
-                    HayConexionActiva = true;
-                }
-                else
-                {
-                    HayConexionActiva = false;
-                    MostrarAviso = true;
-                    await SessionStorage.DeleteAsync("active_connection_id");
-                }
-
-                StateHasChanged();
-            }
-        }
+        await VM.InitializeAsync();
     }
-
-    private void HandleConnectionActivated(bool activo)
-    {
-        HayConexionActiva = activo;
-        MostrarAviso = false;
-        StateHasChanged();
-    }
-
-    private void VolverHome() => Navigation.NavigateTo("/");
 }
+

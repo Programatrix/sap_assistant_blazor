@@ -61,6 +61,7 @@ builder.Services.AddScoped<ChatViewModel>();
 builder.Services.AddScoped<HomeViewModel>();
 builder.Services.AddScoped<LoginViewModel>();
 builder.Services.AddScoped<ConnectionSettingsViewModel>();
+builder.Services.AddScoped<ConnectionSelectionViewModel>();
 
 
 // ✅ Política de conexión activa
