@@ -1,45 +1,54 @@
-﻿@page "/login"
-@using SAPAssistant.Models
-@using SAPAssistant.Service
+@page "/login"
+@using SAPAssistant.ViewModels
 @attribute [AllowAnonymous]
 @layout PublicLayout
+@inject LoginViewModel VM
 
 <div class="flex-center">
     <div class="card">
         <h1 class="text-center mb-6 text-2xl font-semibold">Iniciar Sesión</h1>
 
-        <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+        <EditForm Model="VM.LoginModel" OnValidSubmit="VM.HandleLogin">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
             <div class="flex flex-col gap-4">
                 <!-- Usuario -->
                 <label class="text-sm text-left">Usuario *</label>
-                <InputText class="@GetInputClass(userNameError)"
-                           @bind-Value="loginModel.Username"
-                           @oninput="ValidateFields"
+                <InputText class="@VM.GetInputClass(VM.UserNameError)"
+                           @bind-Value="VM.LoginModel.Username"
+                           @oninput="VM.ValidateFields"
                            placeholder="Introduce tu usuario" />
 
                 <!-- Contraseña -->
                 <label class="text-sm text-left">Contraseña *</label>
                 <div class="password-wrapper">
-                    <InputText @bind-Value="loginModel.Password"
-                               @oninput="ValidateFields"
-                               class="@GetInputClass(passwordError)"
-                               type="@(ShowPassword ? "text" : "password")"
+                    <InputText @bind-Value="VM.LoginModel.Password"
+                               @oninput="VM.ValidateFields"
+                               class="@VM.GetInputClass(VM.PasswordError)"
+                               type="@(VM.ShowPassword ? "text" : "password")"
                                placeholder="Introduce tu contraseña" />
 
                     <button type="button"
                             class="toggle-password-icon"
-                            @onclick="TogglePasswordVisibility"
+                            @onclick="VM.TogglePasswordVisibility"
                             aria-label="Mostrar/Ocultar contraseña">
-                        @if (ShowPassword)
+                        @if (VM.ShowPassword)
                         {
-                            @EyeOffIcon
+                            <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white' width='20' height='20'>
+                                <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2'
+                                      d='M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7 a9.964 9.964 0 012.132-3.368m1.941-1.941A9.964 9.964 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.965 9.965 0 01-4.132 4.868M15 12a3 3 0 11-6 0 3 3 0 016 0z' />
+                                <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M3 3l18 18' />
+                            </svg>
                         }
                         else
                         {
-                            @EyeIcon
+                            <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor' width='20' height='20'>
+                                <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2'
+                                      d='M15 12a3 3 0 11-6 0 3 3 0 016 0z' />
+                                <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2'
+                                      d='M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' />
+                            </svg>
                         }
                     </button>
                 </div>
@@ -47,7 +56,7 @@
                 <!-- Botón de Login -->
                 <button type="submit"
                         class="button-primary"
-                        disabled="@(!CanSubmit || IsLoading)">
+                        disabled="@(!VM.CanSubmit || VM.IsLoading)">
                     Entrar
                 </button>
             </div>
@@ -55,7 +64,7 @@
     </div>
 </div>
 
-@if (IsLoading)
+@if (VM.IsLoading)
 {
     <div class="loading-overlay">
         <svg class="spinner-large" viewBox="0 0 50 50">
@@ -64,79 +73,3 @@
     </div>
 }
 
-@code {
-    private LoginRequest loginModel = new();
-    private bool IsLoading = false;
-    private bool userNameError = false;
-    private bool passwordError = false;
-    private bool ShowPassword = false;
-
-    private bool CanSubmit =>
-        !string.IsNullOrWhiteSpace(loginModel.Username) &&
-        !string.IsNullOrWhiteSpace(loginModel.Password);
-
-    [Inject] private AuthService AuthService { get; set; } = default!;
-    [Inject] private NavigationManager Navigation { get; set; } = default!;
-    [Inject] private NotificationService NotificationService { get; set; } = default!;
-
-    private async Task HandleLogin()
-    {
-        IsLoading = true;
-
-        userNameError = string.IsNullOrWhiteSpace(loginModel.Username);
-        passwordError = string.IsNullOrWhiteSpace(loginModel.Password);
-
-        if (!userNameError && !passwordError)
-        {
-            var result = await AuthService.LoginAsync(loginModel);
-
-            if (result.Success)
-            {
-                Navigation.NavigateTo("/");
-            }
-            else
-            {
-                NotificationService.Notify(result);
-                passwordError = true;
-            }
-        }
-
-        IsLoading = false;
-    }
-
-    private void TogglePasswordVisibility() => ShowPassword = !ShowPassword;
-
-    private void ValidateFields()
-    {
-        userNameError = string.IsNullOrWhiteSpace(loginModel.Username);
-        passwordError = string.IsNullOrWhiteSpace(loginModel.Password);
-    }
-
-    private string GetInputClass(bool hasError) => hasError ? "input input-error" : "input";
-
-    private RenderFragment EyeIcon => builder =>
-    {
-        builder.AddMarkupContent(0, @"
-            <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor' width='20' height='20'>
-                <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2'
-                      d='M15 12a3 3 0 11-6 0 3 3 0 016 0z' />
-                <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2'
-                      d='M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943
-                      9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' />
-            </svg>");
-    };
-
-    private RenderFragment EyeOffIcon => builder =>
-    {
-        builder.AddMarkupContent(0, @"
-            <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white' width='20' height='20'>
-                <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2'
-                      d='M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7
-                      a9.964 9.964 0 012.132-3.368m1.941-1.941A9.964 9.964 0 0112 5c4.477 0
-                      8.268 2.943 9.542 7a9.965 9.965 0 01-4.132 4.868M15 12a3 3 0
-                      11-6 0 3 3 0 016 0z' />
-                <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2'
-                      d='M3 3l18 18' />
-            </svg>");
-    };
-}
