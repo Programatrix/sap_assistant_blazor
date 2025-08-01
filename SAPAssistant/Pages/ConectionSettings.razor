@@ -1,57 +1,52 @@
-﻿@page "/connection/edit"
+@page "/connection/edit"
 @layout PublicLayout
 @attribute [Authorize]
-@using Microsoft.AspNetCore.Components
-@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
-@using SAPAssistant.Models
-@using SAPAssistant.Service
-@inject NavigationManager NavigationManager
-@inject ProtectedSessionStorage SessionStorage
-@inject ConnectionService ConnectionService
+@using SAPAssistant.ViewModels
+@inject ConnectionSettingsViewModel VM
 
 <div class="connection-form-wrapper">
-    <h2>@(IsEditMode ? "Editar Conexión" : "Nueva Conexión")</h2>
+    <h2>@(VM.IsEditMode ? "Editar Conexión" : "Nueva Conexión")</h2>
 
-    <EditForm Model="@connectionData" OnValidSubmit="HandleSave">
+    <EditForm Model="@VM.ConnectionData" OnValidSubmit="VM.HandleSave">
         <div class="form-grid">
             <div class="form-group">
                 <label>ID de la conexión</label>
-                <InputText class="form-input" @bind-Value="connectionData.ConnectionId" disabled="@IsEditMode" />
+                <InputText class="form-input" @bind-Value="VM.ConnectionData.ConnectionId" disabled="@VM.IsEditMode" />
             </div>
 
             <div class="form-group">
                 <label>Usuario</label>
-                <InputText class="form-input" @bind-Value="connectionData.User" />
+                <InputText class="form-input" @bind-Value="VM.ConnectionData.User" />
             </div>
 
             <div class="form-group">
                 <label>Host</label>
-                <InputText class="form-input" @bind-Value="connectionData.Host" />
+                <InputText class="form-input" @bind-Value="VM.ConnectionData.Host" />
             </div>
 
             <div class="form-group">
                 <label>Contraseña</label>
-                <InputText type="password" class="form-input" @bind-Value="connectionData.Password" />
+                <InputText type="password" class="form-input" @bind-Value="VM.ConnectionData.Password" />
             </div>
 
             <div class="form-group">
                 <label>Puerto</label>
-                <InputNumber class="form-input" @bind-Value="connectionData.Port" />
+                <InputNumber class="form-input" @bind-Value="VM.ConnectionData.Port" />
             </div>
 
             <div class="form-group">
                 <label>Esquema (Schema)</label>
-                <InputText class="form-input" @bind-Value="connectionData.Schema" />
+                <InputText class="form-input" @bind-Value="VM.ConnectionData.Schema" />
             </div>
 
             <div class="form-group">
                 <label>Base de Datos</label>
-                <InputText class="form-input" @bind-Value="connectionData.Database" />
+                <InputText class="form-input" @bind-Value="VM.ConnectionData.Database" />
             </div>
 
             <div class="form-group">
                 <label>Tipo de Base de Datos</label>
-                <InputSelect class="form-input" @bind-Value="connectionData.db_type">
+                <InputSelect class="form-input" @bind-Value="VM.ConnectionData.db_type">
                     <option value="">-- Selecciona --</option>
                     <option value="SQL">SQL</option>
                     <option value="HANA">HANA</option>
@@ -60,7 +55,7 @@
 
             <div class="form-group">
                 <label>IP Remota del Servidor</label>
-                <InputText class="form-input" @bind-Value="connectionData.remote_ip" />
+                <InputText class="form-input" @bind-Value="VM.ConnectionData.remote_ip" />
             </div>
         </div>
 
@@ -71,41 +66,8 @@
 </div>
 
 @code {
-    private ConnectionDTO connectionData = new();
-    private string Password = string.Empty;
-
-    private bool IsEditMode => !string.IsNullOrWhiteSpace(connectionData.ConnectionId);
-
     protected override async Task OnInitializedAsync()
     {
-        var result = await SessionStorage.GetAsync<ConnectionDTO>("connection_to_edit");
-        if (result.Success && result.Value is not null)
-        {
-            connectionData = result.Value;
-            await SessionStorage.DeleteAsync("connection_to_edit");
-        }
-    }
-
-    private async Task HandleSave()
-    {
-        bool success;
-
-        if (IsEditMode)
-        {
-            success = await ConnectionService.UpdateConnectionAsync(connectionData);
-        }
-        else
-        {
-            success = await ConnectionService.CreateConnectionAsync(connectionData);
-        }
-
-        if (success)
-        {
-            NavigationManager.NavigateTo("/");
-        }
-        else
-        {
-            Console.WriteLine("❌ Error al guardar la conexión.");
-        }
+        await VM.InitializeAsync();
     }
 }

@@ -59,6 +59,7 @@ builder.Services.AddMudServices();
 builder.Services.AddScoped<StateContainer>();
 builder.Services.AddScoped<ChatViewModel>();
 builder.Services.AddScoped<LoginViewModel>();
+builder.Services.AddScoped<ConnectionSettingsViewModel>();
 
 
 // ✅ Política de conexión activa
