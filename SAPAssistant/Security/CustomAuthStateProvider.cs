@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 
 namespace SAPAssistant.Security
@@ -8,10 +9,12 @@ namespace SAPAssistant.Security
     {
         private readonly ProtectedSessionStorage _sessionStorage;
         private readonly ClaimsPrincipal _anonymous = new(new ClaimsIdentity());
+        private readonly ILogger<CustomAuthStateProvider> _logger;
 
-        public CustomAuthStateProvider(ProtectedSessionStorage sessionStorage)
+        public CustomAuthStateProvider(ProtectedSessionStorage sessionStorage, ILogger<CustomAuthStateProvider> logger)
         {
             _sessionStorage = sessionStorage;
+            _logger = logger;
         }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -39,7 +42,7 @@ namespace SAPAssistant.Security
             }
             catch (Exception ex)
             {
-                Console.WriteLine("❌ Error al restaurar autenticación: " + ex.Message);
+                _logger.LogError(ex, "❌ Error al restaurar autenticación");
             }
 
             // usuario anónimo

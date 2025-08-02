@@ -1,4 +1,6 @@
 ﻿@using SAPAssistant.Models.Chat
+@using SAPAssistant.Service
+@inject NotificationService NotificationService
 
 <div class="chat-message @(M.IsUser ? "user" : "assistant")">
     <div class="message-content">
@@ -21,6 +23,13 @@
 
     private void RateMessage(bool isPositive)
     {
-        Console.WriteLine($"Valorado como: {(isPositive ? "👍" : "👎")}");
+        if (isPositive)
+        {
+            NotificationService.NotifySuccess("Valorado como: 👍");
+        }
+        else
+        {
+            NotificationService.NotifyError("Valorado como: 👎");
+        }
     }
 }

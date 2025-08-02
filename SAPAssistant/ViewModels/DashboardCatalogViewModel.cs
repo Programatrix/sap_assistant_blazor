@@ -15,6 +15,7 @@ public partial class DashboardCatalogViewModel : BaseViewModel
 {
     private readonly KpiCatalogService _kpiCatalogService;
     private readonly IUserDashboardService _userDashboardService;
+    private readonly NotificationService _notificationService;
     public DashboardService DashboardService { get; }
 
     [ObservableProperty]
@@ -43,11 +44,13 @@ public partial class DashboardCatalogViewModel : BaseViewModel
     public DashboardCatalogViewModel(
         KpiCatalogService kpiCatalogService,
         IUserDashboardService userDashboardService,
-        DashboardService dashboardService)
+        DashboardService dashboardService,
+        NotificationService notificationService)
     {
         _kpiCatalogService = kpiCatalogService;
         _userDashboardService = userDashboardService;
         DashboardService = dashboardService;
+        _notificationService = notificationService;
     }
 
     public async Task InitializeAsync()
@@ -117,7 +120,7 @@ public partial class DashboardCatalogViewModel : BaseViewModel
         }
         catch (DashboardServiceException ex)
         {
-            Console.Error.WriteLine(ex.Message);
+            _notificationService.NotifyError(ex.Message);
         }
     }
 }
