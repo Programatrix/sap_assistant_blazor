@@ -2,7 +2,8 @@
 
 namespace SAPAssistant.Exceptions
 {
-    using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
+using System.Threading.Tasks;
     using SAPAssistant.Exceptions;
     using SAPAssistant.Service.Interfaces;
 
@@ -11,23 +12,23 @@ namespace SAPAssistant.Exceptions
         [Inject] protected INotificationService NotificationService { get; set; } = default!;
 
         /// Muestra un mensaje de éxito
-        protected void NotifySuccess(string message)
+        protected Task NotifySuccess(string message)
             => NotificationService.NotifySuccess(message);
 
         /// Muestra un mensaje de error
-        protected void NotifyError(string message)
+        protected Task NotifyError(string message)
             => NotificationService.NotifyError(message);
 
         /// Muestra un mensaje informativo
-        protected void NotifyInfo(string message)
+        protected Task NotifyInfo(string message)
             => NotificationService.NotifyInfo(message);
 
         /// Muestra un mensaje de advertencia
-        protected void NotifyWarning(string message)
+        protected Task NotifyWarning(string message)
             => NotificationService.NotifyWarning(message);
 
         /// Maneja una excepción mostrando su mensaje como error
-        protected void HandleError(Exception ex)
+        protected Task HandleError(Exception ex)
             => NotifyError(ex.Message);
     }
 

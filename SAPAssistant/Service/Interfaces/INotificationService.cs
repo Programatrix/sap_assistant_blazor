@@ -1,17 +1,18 @@
 using System;
+using System.Threading.Tasks;
 using SAPAssistant.Exceptions;
 
 namespace SAPAssistant.Service.Interfaces
 {
     public interface INotificationService
     {
-        event Action<ResultMessage>? OnNotify;
+        event Func<ResultMessage, Task>? OnNotify;
 
-        void Notify(ResultMessage message);
-        void NotifyError(string message, string errorCode = "");
-        void NotifySuccess(string message);
-        void NotifyInfo(string message);
-        void NotifyWarning(string message);
-        void NotifyException(Exception ex, string context);
+        Task Notify(ResultMessage message);
+        Task NotifyError(string message, string errorCode = "");
+        Task NotifySuccess(string message);
+        Task NotifyInfo(string message);
+        Task NotifyWarning(string message);
+        Task NotifyException(Exception ex, string context);
     }
 }

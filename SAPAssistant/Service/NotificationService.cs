@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SAPAssistant.Exceptions;
 using SAPAssistant.Service.Interfaces;
@@ -19,10 +20,10 @@ public class NotificationService : INotificationService
     }
 
     // Evento al que se suscriben los componentes que muestran mensajes
-    public event Action<ResultMessage>? OnNotify;
+    public event Func<ResultMessage, Task>? OnNotify;
 
     // Método para emitir mensajes de notificación
-    public void Notify(ResultMessage message)
+    public async Task Notify(ResultMessage message)
     {
         if (!string.IsNullOrEmpty(message.ErrorCode))
         {
@@ -33,38 +34,41 @@ public class NotificationService : INotificationService
             }
         }
 
-        OnNotify?.Invoke(message);
+        if (OnNotify != null)
+        {
+            await OnNotify.Invoke(message);
+        }
     }
 
     // Atajo para errores
-    public void NotifyError(string message, string errorCode = "")
+    public Task NotifyError(string message, string errorCode = "")
     {
-        Notify(ResultMessage.Fail(message, errorCode, NotificationType.Error));
+        return Notify(ResultMessage.Fail(message, errorCode, NotificationType.Error));
     }
 
     // Atajo para éxitos
-    public void NotifySuccess(string message)
+    public Task NotifySuccess(string message)
     {
-        Notify(ResultMessage.Ok(message, NotificationType.Success));
+        return Notify(ResultMessage.Ok(message, NotificationType.Success));
     }
 
     // Atajo para información
-    public void NotifyInfo(string message)
+    public Task NotifyInfo(string message)
     {
-        Notify(ResultMessage.Ok(message, NotificationType.Info));
+        return Notify(ResultMessage.Ok(message, NotificationType.Info));
     }
 
     // Atajo para advertencias
-    public void NotifyWarning(string message)
+    public Task NotifyWarning(string message)
     {
-        Notify(ResultMessage.Ok(message, NotificationType.Warning));
+        return Notify(ResultMessage.Ok(message, NotificationType.Warning));
     }
 
     // Registra un error y dispara una notificación
-    public void NotifyException(Exception ex, string context)
+    public async Task NotifyException(Exception ex, string context)
     {
         _logger.LogError(ex, "Error en {Context}", context);
-        NotifyError($"❌ {context}: {ex.Message}");
+        await NotifyError($"❌ {context}: {ex.Message}");
     }
 }
 

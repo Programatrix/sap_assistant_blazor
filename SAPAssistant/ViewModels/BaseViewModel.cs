@@ -63,7 +63,7 @@ public abstract partial class BaseViewModel : ObservableObject, INotifyDataError
         catch (Exception ex)
         {
             Console.Error.WriteLine(ex);
-            NotificationService.NotifyError(friendlyMessage);
+            await NotificationService.NotifyError(friendlyMessage);
             return false;
         }
     }

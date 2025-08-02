@@ -21,15 +21,15 @@
     [Parameter] public MessageBase Message { get; set; }
     private TextMessage M => (TextMessage)Message;
 
-    private void RateMessage(bool isPositive)
+    private async Task RateMessage(bool isPositive)
     {
         if (isPositive)
         {
-            NotificationService.NotifySuccess("Valorado como: 👍");
+            await NotificationService.NotifySuccess("Valorado como: 👍");
         }
         else
         {
-            NotificationService.NotifyError("Valorado como: 👎");
+            await NotificationService.NotifyError("Valorado como: 👎");
         }
     }
 }
