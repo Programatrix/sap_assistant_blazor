@@ -1,4 +1,6 @@
 ﻿@page "/test"
+@using Microsoft.Extensions.Logging
+@inject ILogger<Test> Logger
 
 <SearchBar @bind-SearchText="searchInput" 
             OnSearch="HandleSearch" />
@@ -8,6 +10,6 @@
 
     private void HandleSearch()
     {
-        Console.WriteLine($"Search ejecutado con: {searchInput}");
+        Logger.LogInformation("Search ejecutado con: {SearchInput}", searchInput);
     }
 }

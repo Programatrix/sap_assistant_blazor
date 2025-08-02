@@ -1,5 +1,7 @@
 ﻿@using SAPAssistant.Models
+@using SAPAssistant.Service
 @inject IJSRuntime JS
+@inject NotificationService NotificationService
 
 <div class="chat-item @(IsMenuOpen ? "active" : "")" @onclick="AbrirChat">
     <div class="chat-title">@Chat.Titulo</div>
@@ -49,7 +51,7 @@
         await OnOpenChat.InvokeAsync(Chat.Id);
     }
 
-    private void Renombrar() => Console.WriteLine($"Renombrar {Chat.Titulo}");
-    private void Compartir() => Console.WriteLine($"Compartir {Chat.Titulo}");
-    private void Archivar() => Console.WriteLine($"Archivar {Chat.Titulo}");
+    private void Renombrar() => NotificationService.NotifySuccess($"Renombrar {Chat.Titulo}");
+    private void Compartir() => NotificationService.NotifySuccess($"Compartir {Chat.Titulo}");
+    private void Archivar() => NotificationService.NotifySuccess($"Archivar {Chat.Titulo}");
 }

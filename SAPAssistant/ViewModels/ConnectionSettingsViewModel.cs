@@ -12,6 +12,7 @@ public partial class ConnectionSettingsViewModel : BaseViewModel
     private readonly ProtectedSessionStorage _sessionStorage;
     private readonly IConnectionService _connectionService;
     private readonly NavigationManager _navigation;
+    private readonly NotificationService _notificationService;
 
     [ObservableProperty]
     private ConnectionDTO connectionData = new();
@@ -21,11 +22,13 @@ public partial class ConnectionSettingsViewModel : BaseViewModel
     public ConnectionSettingsViewModel(
         ProtectedSessionStorage sessionStorage,
         IConnectionService connectionService,
-        NavigationManager navigation)
+        NavigationManager navigation,
+        NotificationService notificationService)
     {
         _sessionStorage = sessionStorage;
         _connectionService = connectionService;
         _navigation = navigation;
+        _notificationService = notificationService;
     }
 
     public async Task InitializeAsync()
@@ -57,7 +60,7 @@ public partial class ConnectionSettingsViewModel : BaseViewModel
         }
         else
         {
-            Console.WriteLine("❌ Error al guardar la conexión.");
+            _notificationService.NotifyError("❌ Error al guardar la conexión.");
         }
     }
 }

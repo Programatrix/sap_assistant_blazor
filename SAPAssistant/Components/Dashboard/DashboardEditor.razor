@@ -1,6 +1,8 @@
 ﻿@page "/dashboard/editor"
 @using SAPAssistant.Models
 @using System.Text.Json
+@using Microsoft.Extensions.Logging
+@inject ILogger<DashboardEditor> Logger
 
 <div class="editor-container">
     <div class="left-panel">
@@ -66,7 +68,7 @@
     private void SaveDashboard()
     {
         var json = JsonSerializer.Serialize(new { components = Widgets });
-        Console.WriteLine(json);
+        Logger.LogInformation(json);
     }
 }
 

@@ -1,7 +1,9 @@
 ﻿@using SAPAssistant.Models
 @using SAPAssistant.Service.Interfaces
+@using SAPAssistant.Service
 @inject IChatHistoryService ChatService
 @inject NavigationManager Navigation
+@inject NotificationService NotificationService
 
 <div class="sidebar">
     <button class="btn btn-primary w-100 mb-3" @onclick="StartNewChat">+ Nuevo Chat</button>
@@ -43,7 +45,7 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ Error al cargar el historial: {ex.Message}");
+            NotificationService.NotifyError($"❌ Error al cargar el historial: {ex.Message}");
             Sessions = new List<ChatSession>();
         }
         finally
@@ -72,7 +74,7 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ Error al eliminar el chat: {ex.Message}");
+            NotificationService.NotifyError($"❌ Error al eliminar el chat: {ex.Message}");
         }
     }
 }
