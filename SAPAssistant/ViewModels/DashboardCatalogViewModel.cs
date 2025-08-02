@@ -112,7 +112,7 @@ public partial class DashboardCatalogViewModel : BaseViewModel
         };
 
         DashboardService.KPIs.Add(copy);
-        await ExecuteSafeAsync(async () =>
+        await TryNotifyAsync(async () =>
         {
             await _userDashboardService.AddKpiAsync(copy);
         }, "Error al agregar KPI");

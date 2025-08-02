@@ -53,7 +53,7 @@ public abstract partial class BaseViewModel : ObservableObject, INotifyDataError
         }
     }
 
-    protected async Task<bool> ExecuteSafeAsync(Func<Task> action, string context)
+    protected async Task<bool> TryNotifyAsync(Func<Task> action, string friendlyMessage)
     {
         try
         {
@@ -62,7 +62,8 @@ public abstract partial class BaseViewModel : ObservableObject, INotifyDataError
         }
         catch (Exception ex)
         {
-            NotificationService.NotifyException(ex, context);
+            Console.Error.WriteLine(ex);
+            NotificationService.NotifyError(friendlyMessage);
             return false;
         }
     }
