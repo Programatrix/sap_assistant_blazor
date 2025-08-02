@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 using SAPAssistant.Models;
 using SAPAssistant.Service;
 using SAPAssistant.Service.Interfaces;
@@ -15,7 +16,6 @@ public partial class DashboardCatalogViewModel : BaseViewModel
 {
     private readonly KpiCatalogService _kpiCatalogService;
     private readonly IUserDashboardService _userDashboardService;
-    private readonly NotificationService _notificationService;
     public DashboardService DashboardService { get; }
 
     [ObservableProperty]
@@ -45,12 +45,12 @@ public partial class DashboardCatalogViewModel : BaseViewModel
         KpiCatalogService kpiCatalogService,
         IUserDashboardService userDashboardService,
         DashboardService dashboardService,
-        NotificationService notificationService)
+        NotificationService notificationService,
+        ILogger<DashboardCatalogViewModel> logger) : base(notificationService, logger)
     {
         _kpiCatalogService = kpiCatalogService;
         _userDashboardService = userDashboardService;
         DashboardService = dashboardService;
-        _notificationService = notificationService;
     }
 
     public async Task InitializeAsync()
@@ -114,13 +114,9 @@ public partial class DashboardCatalogViewModel : BaseViewModel
         };
 
         DashboardService.KPIs.Add(copy);
-        try
+        await ExecuteSafeAsync(async () =>
         {
             await _userDashboardService.AddKpiAsync(copy);
-        }
-        catch (DashboardServiceException ex)
-        {
-            _notificationService.NotifyError(ex.Message);
-        }
+        }, ex => new ErrorOptions { Message = ex.Message });
     }
 }

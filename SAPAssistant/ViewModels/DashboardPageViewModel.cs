@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using SAPAssistant.Service;
+using Microsoft.Extensions.Logging;
 
 namespace SAPAssistant.ViewModels;
 
@@ -11,7 +12,10 @@ public partial class DashboardPageViewModel : BaseViewModel
     [ObservableProperty]
     private bool isWizardOpen;
 
-    public DashboardPageViewModel(DashboardService dashboardService)
+    public DashboardPageViewModel(
+        DashboardService dashboardService,
+        NotificationService notificationService,
+        ILogger<DashboardPageViewModel> logger) : base(notificationService, logger)
     {
         DashboardService = dashboardService;
     }

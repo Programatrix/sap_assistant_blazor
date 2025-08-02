@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 using SAPAssistant.Models;
 using SAPAssistant.Service;
 using SAPAssistant.Service.Interfaces;
@@ -10,7 +11,6 @@ public partial class ChatHistoryViewModel : BaseViewModel
 {
     private readonly IChatHistoryService _chatService;
     private readonly NavigationManager _navigation;
-    private readonly NotificationService _notificationService;
 
     [ObservableProperty]
     private List<ChatSession> sessions = new();
@@ -18,29 +18,29 @@ public partial class ChatHistoryViewModel : BaseViewModel
     [ObservableProperty]
     private bool isLoading = true;
 
-    public ChatHistoryViewModel(IChatHistoryService chatService, NavigationManager navigation, NotificationService notificationService)
+    public ChatHistoryViewModel(
+        IChatHistoryService chatService,
+        NavigationManager navigation,
+        NotificationService notificationService,
+        ILogger<ChatHistoryViewModel> logger) : base(notificationService, logger)
     {
         _chatService = chatService;
         _navigation = navigation;
-        _notificationService = notificationService;
     }
 
     public async Task LoadHistoryAsync()
     {
-        try
+        IsLoading = true;
+        var success = await ExecuteSafeAsync(async () =>
         {
-            IsLoading = true;
             Sessions = await _chatService.GetChatHistoryAsync();
-        }
-        catch (Exception ex)
+        }, ex => new ErrorOptions { Message = $"❌ Error al cargar el historial: {ex.Message}" });
+
+        if (!success)
         {
-            _notificationService.NotifyError($"❌ Error al cargar el historial: {ex.Message}");
             Sessions = new List<ChatSession>();
         }
-        finally
-        {
-            IsLoading = false;
-        }
+        IsLoading = false;
     }
 
     public void StartNewChat()
@@ -55,15 +55,11 @@ public partial class ChatHistoryViewModel : BaseViewModel
 
     public async Task DeleteChat(string chatId)
     {
-        try
+        await ExecuteSafeAsync(async () =>
         {
             await _chatService.DeleteChatSessionAsync(chatId);
             await LoadHistoryAsync();
-        }
-        catch (Exception ex)
-        {
-            _notificationService.NotifyError($"❌ Error al eliminar el chat: {ex.Message}");
-        }
+        }, ex => new ErrorOptions { Message = $"❌ Error al eliminar el chat: {ex.Message}" });
     }
 }
 
