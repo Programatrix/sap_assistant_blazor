@@ -1,9 +1,11 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @using MudBlazor
+@using SAPAssistant.Components
 
 <MudThemeProvider>
     <MudDialogProvider />
     <MudSnackbarProvider />
+    <NotificationDisplay />
 
     <MudLayout>
         <MudAppBar Color="Color.Primary">
