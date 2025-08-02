@@ -53,7 +53,7 @@ builder.Services.AddScoped<CustomAuthStateProvider>();
     builder.Services.AddSingleton<KpiCatalogService>();
     builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
 builder.Services.AddSingleton<NotificationService>();
-builder.Services.AddScoped<ChatHistoryService>();
+builder.Services.AddScoped<IChatHistoryService, ChatHistoryService>();
 builder.Services.AddMudServices();
 
 builder.Services.AddScoped<StateContainer>();
