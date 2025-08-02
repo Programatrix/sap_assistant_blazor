@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using SAPAssistant.Models;
 using SAPAssistant.Service;
 using SAPAssistant.Service.Interfaces;
@@ -10,8 +9,9 @@ namespace SAPAssistant.ViewModels;
 public partial class ConnectionManagerViewModel : BaseViewModel
 {
     private readonly IConnectionService _connectionService;
-    private readonly ProtectedSessionStorage _sessionStorage;
+    private readonly SessionContextService _sessionContext;
     private readonly NavigationManager _navigation;
+    private readonly StateContainer _stateContainer;
 
     [ObservableProperty]
     private List<ConnectionDTO> connections = new();
@@ -31,11 +31,12 @@ public partial class ConnectionManagerViewModel : BaseViewModel
     [ObservableProperty]
     private string? errorAlCargar;
 
-    public ConnectionManagerViewModel(IConnectionService connectionService, ProtectedSessionStorage sessionStorage, NavigationManager navigation)
+    public ConnectionManagerViewModel(IConnectionService connectionService, SessionContextService sessionContext, NavigationManager navigation, StateContainer stateContainer)
     {
         _connectionService = connectionService;
-        _sessionStorage = sessionStorage;
+        _sessionContext = sessionContext;
         _navigation = navigation;
+        _stateContainer = stateContainer;
     }
 
     public async Task LoadConnections()
@@ -44,8 +45,7 @@ public partial class ConnectionManagerViewModel : BaseViewModel
         if (result.Success)
         {
             Connections = result.Data ?? new();
-            var activeResult = await _sessionStorage.GetAsync<string>("active_connection_id");
-            var activeId = activeResult.Success ? activeResult.Value : null;
+            var activeId = await _sessionContext.GetActiveConnectionIdAsync();
             foreach (var conn in Connections)
                 conn.IsActive = conn.ConnectionId == activeId;
         }
@@ -82,8 +82,10 @@ public partial class ConnectionManagerViewModel : BaseViewModel
                 return false;
             }
 
-            await _sessionStorage.SetAsync("active_connection_id", connection.ConnectionId);
-            await _sessionStorage.SetAsync("active_db_type", connection.db_type);
+            await _sessionContext.SetActiveConnectionIdAsync(connection.ConnectionId);
+            await _sessionContext.SetDatabaseTypeAsync(connection.db_type);
+
+            _stateContainer.ActiveConnection = connection;
 
             foreach (var c in Connections)
                 c.IsActive = c.ConnectionId == connection.ConnectionId;
@@ -105,7 +107,7 @@ public partial class ConnectionManagerViewModel : BaseViewModel
         if (IsActivating)
             return;
 
-        await _sessionStorage.SetAsync("connection_to_edit", conn);
+        await _sessionContext.SetConnectionToEditAsync(conn);
         _navigation.NavigateTo("/connection/edit", esModal);
     }
 

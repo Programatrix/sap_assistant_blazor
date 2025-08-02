@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using SAPAssistant.Models;
 using SAPAssistant.Service;
 using SAPAssistant.Service.Interfaces;
@@ -9,7 +8,7 @@ namespace SAPAssistant.ViewModels;
 
 public partial class ConnectionSettingsViewModel : BaseViewModel
 {
-    private readonly ProtectedSessionStorage _sessionStorage;
+    private readonly SessionContextService _sessionContext;
     private readonly IConnectionService _connectionService;
     private readonly NavigationManager _navigation;
     private readonly NotificationService _notificationService;
@@ -20,12 +19,12 @@ public partial class ConnectionSettingsViewModel : BaseViewModel
     public bool IsEditMode => !string.IsNullOrWhiteSpace(ConnectionData.ConnectionId);
 
     public ConnectionSettingsViewModel(
-        ProtectedSessionStorage sessionStorage,
+        SessionContextService sessionContext,
         IConnectionService connectionService,
         NavigationManager navigation,
         NotificationService notificationService)
     {
-        _sessionStorage = sessionStorage;
+        _sessionContext = sessionContext;
         _connectionService = connectionService;
         _navigation = navigation;
         _notificationService = notificationService;
@@ -33,11 +32,11 @@ public partial class ConnectionSettingsViewModel : BaseViewModel
 
     public async Task InitializeAsync()
     {
-        var result = await _sessionStorage.GetAsync<ConnectionDTO>("connection_to_edit");
-        if (result.Success && result.Value is not null)
+        var result = await _sessionContext.GetConnectionToEditAsync();
+        if (result is not null)
         {
-            ConnectionData = result.Value;
-            await _sessionStorage.DeleteAsync("connection_to_edit");
+            ConnectionData = result;
+            await _sessionContext.DeleteConnectionToEditAsync();
         }
     }
 
