@@ -1,80 +1,32 @@
 ﻿@using SAPAssistant.Models
-@using SAPAssistant.Service.Interfaces
-@using SAPAssistant.Service
-@inject IChatHistoryService ChatService
-@inject NavigationManager Navigation
-@inject NotificationService NotificationService
+@using SAPAssistant.ViewModels
+@inject ChatHistoryViewModel VM
 
 <div class="sidebar">
-    <button class="btn btn-primary w-100 mb-3" @onclick="StartNewChat">+ Nuevo Chat</button>
+    <button class="btn btn-primary w-100 mb-3" @onclick="VM.StartNewChat">+ Nuevo Chat</button>
 
-    @if (Sessions == null)
+    @if (VM.IsLoading)
     {
         <p>Cargando historial...</p>
     }
-    else if (!Sessions.Any())
+    else if (!VM.Sessions.Any())
     {
         <p>No hay chats guardados.</p>
     }
     else
     {
-        @foreach (var chat in Sessions.OrderByDescending(c => c.Fecha))
+        @foreach (var chat in VM.Sessions.OrderByDescending(c => c.Fecha))
         {
             <ChatHistoryItem Chat="chat"
-                             OnOpenChat="OpenChat"
-                             OnDeleteChat="DeleteChat" />
+                             OnOpenChat="VM.OpenChat"
+                             OnDeleteChat="VM.DeleteChat" />
         }
     }
 </div>
 
 @code {
-    private List<ChatSession> Sessions = new();
-    private bool IsLoading = true;
-
     protected override async Task OnInitializedAsync()
     {
-        await LoadHistoryAsync();
-    }
-
-    private async Task LoadHistoryAsync()
-    {
-        try
-        {
-            IsLoading = true;
-            Sessions = await ChatService.GetChatHistoryAsync();
-        }
-        catch (Exception ex)
-        {
-            NotificationService.NotifyError($"❌ Error al cargar el historial: {ex.Message}");
-            Sessions = new List<ChatSession>();
-        }
-        finally
-        {
-            IsLoading = false;
-            StateHasChanged();
-        }
-    }
-
-    private void StartNewChat()
-    {
-        Navigation.NavigateTo("/");
-    }
-
-    private void OpenChat(string chatId)
-    {
-        Navigation.NavigateTo($"/chat/{chatId}", forceLoad: true);
-    }
-
-    private async Task DeleteChat(string chatId)
-    {
-        try
-        {
-            await ChatService.DeleteChatSessionAsync(chatId);
-            await LoadHistoryAsync();
-        }
-        catch (Exception ex)
-        {
-            NotificationService.NotifyError($"❌ Error al eliminar el chat: {ex.Message}");
-        }
+        await VM.LoadHistoryAsync();
     }
 }
