@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AUTH-401" xml:space="preserve"><value>Usuario o contraseña incorrectos.</value></data>
+  <data name="SVC-UNAVAILABLE" xml:space="preserve"><value>El sistema no está disponible. Intenta más tarde.</value></data>
+  <data name="AUTH-INVALID-RESPONSE" xml:space="preserve"><value>No se pudo procesar la respuesta del servidor.</value></data>
+  <data name="LOGIN-SUCCESS" xml:space="preserve"><value>Inicio de sesión exitoso.</value></data>
+  <data name="NET-ERROR" xml:space="preserve"><value>Problema de conexión. Verifique su conexión a Internet.</value></data>
+  <data name="UNEXPECTED-ERROR" xml:space="preserve"><value>Error inesperado. Por favor, intente nuevamente.</value></data>
+  <data name="SESSION-TOKEN-NOT-FOUND" xml:space="preserve"><value>Token no encontrado en la sesión.</value></data>
+  <data name="SESSION-USER-NOT-FOUND" xml:space="preserve"><value>Usuario no encontrado en la sesión.</value></data>
+  <data name="SESSION-REMOTE_IP-NOT-FOUND" xml:space="preserve"><value>IP remota del usuario no encontrada en la sesión.</value></data>
+  <data name="CONNECTIONS-FETCH-ERROR" xml:space="preserve"><value>Error al obtener las conexiones desde el servidor.</value></data>
+  <data name="CONNECTIONS-FETCH-SUCCESS" xml:space="preserve"><value>Conexiones obtenidas exitosamente.</value></data>
+  <data name="SESSION-DATA-NOT-FOUND" xml:space="preserve"><value>Usuario o IP remota no encontrada en la sesión.</value></data>
+  <data name="CONNECTION-FETCH-ERROR" xml:space="preserve"><value>Error al obtener la conexión desde el servidor.</value></data>
+  <data name="EMPTY-RESPONSE" xml:space="preserve"><value>Respuesta vacía del servidor.</value></data>
+  <data name="CONNECTION-FETCH-SUCCESS" xml:space="preserve"><value>Conexión obtenida exitosamente.</value></data>
+  <data name="UPDATE-CONNECTION-ERROR" xml:space="preserve"><value>Error al actualizar la conexión.</value></data>
+  <data name="CONNECTION-UPDATED" xml:space="preserve"><value>Conexión actualizada correctamente.</value></data>
+  <data name="CREATE-CONNECTION-ERROR" xml:space="preserve"><value>Error al crear la conexión.</value></data>
+  <data name="CONNECTION-CREATED" xml:space="preserve"><value>Conexión creada correctamente.</value></data>
+  <data name="VALIDATION-CONNECTION-ERROR" xml:space="preserve"><value>Conexión inválida.</value></data>
+  <data name="CONNECTION-VALID" xml:space="preserve"><value>Conexión válida.</value></data>
+  <data name="CHAT-FETCH-ERROR" xml:space="preserve"><value>Error al obtener el chat.</value></data>
+  <data name="CHAT-FETCH-SUCCESS" xml:space="preserve"><value>Chat obtenido exitosamente.</value></data>
+  <data name="CHAT-HISTORY-LOAD-ERROR" xml:space="preserve"><value>Error al cargar historial.</value></data>
+  <data name="CHAT-SAVE-ERROR" xml:space="preserve"><value>Error al guardar chat.</value></data>
+  <data name="CHAT-DELETE-ERROR" xml:space="preserve"><value>Error al eliminar chat.</value></data>
+  <data name="UNKNOWN-MESSAGE-TYPE" xml:space="preserve"><value>Tipo de mensaje desconocido.</value></data>
+  <data name="NEW-CHAT-TITLE" xml:space="preserve"><value>Nuevo chat</value></data>
+</root>

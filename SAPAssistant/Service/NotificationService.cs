@@ -2,16 +2,20 @@ using System;
 using Microsoft.Extensions.Logging;
 using SAPAssistant.Exceptions;
 using SAPAssistant.Service.Interfaces;
+using Microsoft.Extensions.Localization;
+using SAPAssistant.Resources;
 
 namespace SAPAssistant.Service;
 
 public class NotificationService : INotificationService
 {
     private readonly ILogger<NotificationService> _logger;
+    private readonly IStringLocalizer<ErrorMessages> _localizer;
 
-    public NotificationService(ILogger<NotificationService> logger)
+    public NotificationService(ILogger<NotificationService> logger, IStringLocalizer<ErrorMessages> localizer)
     {
         _logger = logger;
+        _localizer = localizer;
     }
 
     // Evento al que se suscriben los componentes que muestran mensajes
@@ -20,6 +24,15 @@ public class NotificationService : INotificationService
     // Método para emitir mensajes de notificación
     public void Notify(ResultMessage message)
     {
+        if (!string.IsNullOrEmpty(message.ErrorCode))
+        {
+            var localized = _localizer[message.ErrorCode];
+            if (!localized.ResourceNotFound)
+            {
+                message.Message = localized;
+            }
+        }
+
         OnNotify?.Invoke(message);
     }
 

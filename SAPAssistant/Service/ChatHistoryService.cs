@@ -5,6 +5,8 @@ using SAPAssistant.Models.Chat;
 using SAPAssistant.Service.Interfaces;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.Localization;
+using SAPAssistant.Resources;
 
 namespace SAPAssistant.Service
 {
@@ -13,18 +15,20 @@ namespace SAPAssistant.Service
         private readonly HttpClient _http;
         private readonly SessionContextService _sessionContext;
         private readonly ILogger<ChatHistoryService> _logger;
+        private readonly IStringLocalizer<ErrorMessages> _localizer;
 
-        public ChatHistoryService(HttpClient http, SessionContextService sessionContext, ILogger<ChatHistoryService> logger)
+        public ChatHistoryService(HttpClient http, SessionContextService sessionContext, ILogger<ChatHistoryService> logger, IStringLocalizer<ErrorMessages> localizer)
         {
             _http = http;
             _sessionContext = sessionContext;
             _logger = logger;
+            _localizer = localizer;
         }
 
         private async Task<string> GetUserIdAsync()
         {
             var userId = await _sessionContext.GetUserIdAsync();
-            if (string.IsNullOrEmpty(userId)) throw new ChatHistoryServiceException("Usuario no encontrado en la sesión.");
+            if (string.IsNullOrEmpty(userId)) throw new ChatHistoryServiceException(_localizer["SESSION-USER-NOT-FOUND"]);
             return userId;
         }
 
@@ -39,7 +43,7 @@ namespace SAPAssistant.Service
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
-                throw new ChatHistoryServiceException($"Error al cargar historial: {response.StatusCode} - {error}");
+                throw new ChatHistoryServiceException($"{_localizer["CHAT-HISTORY-LOAD-ERROR"]}: {response.StatusCode} - {error}");
             }
             List<ChatSession> result = null;
             try
@@ -68,23 +72,31 @@ namespace SAPAssistant.Service
                 {
                     var errorMessage = await response.Content.ReadAsStringAsync();
                     _logger.LogError("[ChatService] Error HTTP {StatusCode}: {Error}", response.StatusCode, errorMessage);
-                    return OperationResult<ChatSession>.Fail("Error al obtener el chat.", $"HTTP-{(int)response.StatusCode}");
+                    const string code = "CHAT-FETCH-ERROR";
+                    return OperationResult<ChatSession>.Fail(_localizer[code], code);
                 }
 
                 var chat = await response.Content.ReadFromJsonAsync<ChatSession>();
                 if (chat == null)
-                    return OperationResult<ChatSession>.Fail("Respuesta vacía del servidor.", "EMPTY-RESPONSE");
+                {
+                    const string code = "EMPTY-RESPONSE";
+                    return OperationResult<ChatSession>.Fail(_localizer[code], code);
+                }
 
-                return OperationResult<ChatSession>.Ok(chat, "Chat obtenido exitosamente.");
+                var ok = OperationResult<ChatSession>.Ok(chat, _localizer["CHAT-FETCH-SUCCESS"]);
+                ok.ErrorCode = "CHAT-FETCH-SUCCESS";
+                return ok;
             }
             catch (HttpRequestException)
             {
-                return OperationResult<ChatSession>.Fail("Problema de conexión. Verifique su conexión a Internet.", "NET-ERROR");
+                const string code = "NET-ERROR";
+                return OperationResult<ChatSession>.Fail(_localizer[code], code);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[ChatService] Excepción inesperada al obtener el chat '{ChatId}'", chatId);
-                return OperationResult<ChatSession>.Fail("Error inesperado al obtener el chat.", "UNEXPECTED-ERROR");
+                const string code = "UNEXPECTED-ERROR";
+                return OperationResult<ChatSession>.Fail(_localizer[code], code);
             }
         }
 
@@ -104,7 +116,7 @@ namespace SAPAssistant.Service
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
-                throw new ChatHistoryServiceException($"Error al guardar chat: {response.StatusCode} - {error}");
+                throw new ChatHistoryServiceException($"{_localizer["CHAT-SAVE-ERROR"]}: {response.StatusCode} - {error}");
             }
         }
 
@@ -119,7 +131,7 @@ namespace SAPAssistant.Service
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
-                throw new ChatHistoryServiceException($"Error al eliminar chat: {response.StatusCode} - {error}");
+                throw new ChatHistoryServiceException($"{_localizer["CHAT-DELETE-ERROR"]}: {response.StatusCode} - {error}");
             }
         }
 

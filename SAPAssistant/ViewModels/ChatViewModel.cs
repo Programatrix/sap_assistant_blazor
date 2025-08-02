@@ -7,6 +7,10 @@ using SAPAssistant.Models.Chat;
 using SAPAssistant.Service;
 using SAPAssistant.Service.Interfaces;
 using System.Text.Json;
+using SAPAssistant.Exceptions;
+using ChatResultMessage = SAPAssistant.Models.Chat.ResultMessage;
+using Microsoft.Extensions.Localization;
+using SAPAssistant.Resources;
 
 namespace SAPAssistant.ViewModels;
 
@@ -16,6 +20,7 @@ public partial class ChatViewModel : BaseViewModel
     private readonly IAssistantService _assistantService;
     private readonly IChatHistoryService _chatHistoryService;
     private readonly StateContainer _stateContainer;
+    private readonly IStringLocalizer<ErrorMessages> _localizer;
 
     public ElementReference MessagesContainer { get; set; }
 
@@ -36,12 +41,14 @@ public partial class ChatViewModel : BaseViewModel
         IAssistantService assistantService,
         IChatHistoryService chatHistoryService,
         StateContainer stateContainer,
-        INotificationService notificationService) : base(notificationService)
+        INotificationService notificationService,
+        IStringLocalizer<ErrorMessages> localizer) : base(notificationService)
     {
         _js = js;
         _assistantService = assistantService;
         _chatHistoryService = chatHistoryService;
         _stateContainer = stateContainer;
+        _localizer = localizer;
     }
 
     public async Task OnInitializedAsync()
@@ -67,7 +74,14 @@ public partial class ChatViewModel : BaseViewModel
             }
             else
             {
-                NotificationService.NotifyError($"❌ {result.Message}", result.ErrorCode);
+                var notify = new SAPAssistant.Exceptions.ResultMessage
+                {
+                    Success = result.Success,
+                    Message = result.Message,
+                    ErrorCode = result.ErrorCode,
+                    Type = NotificationType.Error
+                };
+                NotificationService.Notify(notify);
                 return;
             }
         }
@@ -77,7 +91,7 @@ public partial class ChatViewModel : BaseViewModel
             {
                 Id = Guid.NewGuid().ToString(),
                 Fecha = DateTime.Now,
-                Titulo = "Nuevo chat"
+                Titulo = _localizer["NEW-CHAT-TITLE"]
             };
         }
 
@@ -99,16 +113,16 @@ public partial class ChatViewModel : BaseViewModel
                         "text" => JsonSerializer.Deserialize<TextMessage>(json, options),
                         "aclaracion" => JsonSerializer.Deserialize<TextMessage>(json, options),
                         "assistant" => JsonSerializer.Deserialize<TextMessage>(json, options),
-                        "result" => JsonSerializer.Deserialize<ResultMessage>(json, options),
+                        "result" => JsonSerializer.Deserialize<ChatResultMessage>(json, options),
                         "error" => JsonSerializer.Deserialize<ErrorMessage>(json, options),
                         "system" => JsonSerializer.Deserialize<SystemMessage>(json, options),
-                        "consulta" => JsonSerializer.Deserialize<ResultMessage>(json, options),
+                        "consulta" => JsonSerializer.Deserialize<ChatResultMessage>(json, options),
                         _ => null
                     };
 
                     if (msg != null)
                     {
-                        if (msg is ResultMessage rm && !string.IsNullOrEmpty(preferredViewType))
+                        if (msg is ChatResultMessage rm && !string.IsNullOrEmpty(preferredViewType))
                         {
                             rm.ViewType = preferredViewType;
                         }
@@ -158,7 +172,7 @@ public partial class ChatViewModel : BaseViewModel
                 {
                     Mensaje = resultado.Mensaje
                 },
-                _ => new ResultMessage
+                _ => new ChatResultMessage
                 {
                     Resumen = resultado?.Resumen ?? "",
                     Sql = resultado?.Sql ?? "",
@@ -190,7 +204,7 @@ public partial class ChatViewModel : BaseViewModel
     {
         if (msg.Type == "Result")
         {
-            var view = ((ResultMessage)msg).ViewType?.ToLower();
+            var view = ((ChatResultMessage)msg).ViewType?.ToLower();
             return view switch
             {
                 "cards" => typeof(ResultCardListComponent),
@@ -216,15 +230,15 @@ public partial class ChatViewModel : BaseViewModel
             ["Message"] = msg
         };
 
-        if (msg is ResultMessage)
+        if (msg is ChatResultMessage)
         {
-            parameters["OnViewTypeChange"] = EventCallback.Factory.Create<string>(component, (string vt) => OnViewTypeChanged((ResultMessage)msg, vt));
+            parameters["OnViewTypeChange"] = EventCallback.Factory.Create<string>(component, (string vt) => OnViewTypeChanged((ChatResultMessage)msg, vt));
         }
 
         return parameters;
     }
 
-    public async Task OnViewTypeChanged(ResultMessage msg, string viewType)
+    public async Task OnViewTypeChanged(ChatResultMessage msg, string viewType)
     {
         msg.ViewType = viewType;
         preferredViewType = viewType;
