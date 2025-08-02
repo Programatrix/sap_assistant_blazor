@@ -18,6 +18,14 @@ namespace SAPAssistant.Exceptions
         protected void NotifyError(string message)
             => NotificationService.NotifyError(message);
 
+        /// Muestra un mensaje informativo
+        protected void NotifyInfo(string message)
+            => NotificationService.NotifyInfo(message);
+
+        /// Muestra un mensaje de advertencia
+        protected void NotifyWarning(string message)
+            => NotificationService.NotifyWarning(message);
+
         /// Maneja una excepción mostrando su mensaje como error
         protected void HandleError(Exception ex)
             => NotifyError(ex.Message);

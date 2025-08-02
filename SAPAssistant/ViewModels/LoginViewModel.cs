@@ -66,7 +66,8 @@ public partial class LoginViewModel : BaseViewModel
                 {
                     Success = result.Success,
                     Message = result.Message,
-                    ErrorCode = result.ErrorCode
+                    ErrorCode = result.ErrorCode,
+                    Type = result.Type
                 };
                 _notificationService.Notify(notify);
                 PasswordError = true;
