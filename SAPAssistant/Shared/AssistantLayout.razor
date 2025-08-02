@@ -7,6 +7,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IConnectionService ConnectionService
 @inject SessionContextService SessionContext
+@inject NotificationService NotificationService
 
 @if (isLoading || validandoConexion)
 {
@@ -97,10 +98,11 @@ else
             var activeId = await SessionContext.GetActiveConnectionIdAsync();
             if (!string.IsNullOrEmpty(activeId))
             {
-                var isValid = await ConnectionService.ValidateConnectionAsync(activeId);
-                if (!isValid)
+                var validation = await ConnectionService.ValidateConnectionAsync(activeId);
+                if (!validation.Success)
                 {
                     await SessionContext.DeleteActiveConnectionIdAsync();
+                    NotificationService.NotifyError($"❌ {validation.Message}", validation.ErrorCode);
                     Navigation.NavigateTo("/conexiones", true);
                     return;
                 }

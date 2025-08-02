@@ -80,10 +80,11 @@ public partial class ConnectionManagerViewModel : BaseViewModel
 
         try
         {
-            var isValid = await _connectionService.ValidateConnectionAsync(connection.ConnectionId);
-            if (!isValid)
+            var result = await _connectionService.ValidateConnectionAsync(connection.ConnectionId);
+            if (!result.Success)
             {
                 MostrarError = true;
+                NotificationService.NotifyError($"❌ {result.Message}", result.ErrorCode);
                 await Task.Delay(3000);
                 MostrarError = false;
                 return false;

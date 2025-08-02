@@ -53,7 +53,7 @@ namespace SAPAssistant.Service
             return result;
         }
 
-        public async Task<ChatSession?> GetChatSessionAsync(string chatId)
+        public async Task<OperationResult<ChatSession>> GetChatSessionAsync(string chatId)
         {
             try
             {
@@ -68,16 +68,23 @@ namespace SAPAssistant.Service
                 {
                     var errorMessage = await response.Content.ReadAsStringAsync();
                     _logger.LogError("[ChatService] Error HTTP {StatusCode}: {Error}", response.StatusCode, errorMessage);
-                    return null; // Retorna null en lugar de lanzar excepción
+                    return OperationResult<ChatSession>.Fail("Error al obtener el chat.", $"HTTP-{(int)response.StatusCode}");
                 }
 
                 var chat = await response.Content.ReadFromJsonAsync<ChatSession>();
-                return chat;
+                if (chat == null)
+                    return OperationResult<ChatSession>.Fail("Respuesta vacía del servidor.", "EMPTY-RESPONSE");
+
+                return OperationResult<ChatSession>.Ok(chat, "Chat obtenido exitosamente.");
+            }
+            catch (HttpRequestException)
+            {
+                return OperationResult<ChatSession>.Fail("Problema de conexión. Verifique su conexión a Internet.", "NET-ERROR");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[ChatService] Excepción inesperada al obtener el chat '{ChatId}'", chatId);
-                return null;
+                return OperationResult<ChatSession>.Fail("Error inesperado al obtener el chat.", "UNEXPECTED-ERROR");
             }
         }
 

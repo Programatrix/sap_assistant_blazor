@@ -68,65 +68,113 @@ namespace SAPAssistant.Service
             }
         }
 
-        public async Task<ConnectionDTO?> GetConnectionByIdAsync(string connectionId)
+        public async Task<OperationResult<ConnectionDTO>> GetConnectionByIdAsync(string connectionId)
         {
-            var userId = await _sessionContext.GetUserIdAsync();
-            var remoteIp = await _sessionContext.GetRemoteIpAsync();
+            try
+            {
+                var userId = await _sessionContext.GetUserIdAsync();
+                var remoteIp = await _sessionContext.GetRemoteIpAsync();
 
-            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp))
-                return null;
+                if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp))
+                    return OperationResult<ConnectionDTO>.Fail("Usuario o IP remota no encontrada en la sesión.", "SESSION-DATA-NOT-FOUND");
 
-            var request = new HttpRequestMessage(HttpMethod.Get, $"/connection/connections/{connectionId}");
-            request.Headers.Add("X-User-Id", userId);
-            request.Headers.Add("x_remote_ip", remoteIp);
+                var request = new HttpRequestMessage(HttpMethod.Get, $"/connection/connections/{connectionId}");
+                request.Headers.Add("X-User-Id", userId);
+                request.Headers.Add("x_remote_ip", remoteIp);
 
-            var response = await _http.SendAsync(request);
-            if (!response.IsSuccessStatusCode)
-                return null;
+                var response = await _http.SendAsync(request);
+                if (!response.IsSuccessStatusCode)
+                    return OperationResult<ConnectionDTO>.Fail("Error al obtener la conexión desde el servidor.", $"HTTP-{(int)response.StatusCode}");
 
-            return await response.Content.ReadFromJsonAsync<ConnectionDTO>();
+                var dto = await response.Content.ReadFromJsonAsync<ConnectionDTO>();
+                if (dto == null)
+                    return OperationResult<ConnectionDTO>.Fail("Respuesta vacía del servidor.", "EMPTY-RESPONSE");
+
+                return OperationResult<ConnectionDTO>.Ok(dto, "Conexión obtenida exitosamente.");
+            }
+            catch (HttpRequestException)
+            {
+                return OperationResult<ConnectionDTO>.Fail("Problema de conexión. Verifique su conexión a Internet.", "NET-ERROR");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener conexión {ConnectionId}", connectionId);
+                return OperationResult<ConnectionDTO>.Fail("Error inesperado al obtener la conexión.", "UNEXPECTED-ERROR");
+            }
         }
 
-        public async Task<bool> UpdateConnectionAsync(ConnectionDTO connection)
+        public async Task<OperationResult> UpdateConnectionAsync(ConnectionDTO connection)
         {
-            var userId = await _sessionContext.GetUserIdAsync();
-            var remoteIp = await _sessionContext.GetRemoteIpAsync();
+            try
+            {
+                var userId = await _sessionContext.GetUserIdAsync();
+                var remoteIp = await _sessionContext.GetRemoteIpAsync();
 
-            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp)) return false;
+                if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp))
+                    return OperationResult.Fail("Usuario o IP remota no encontrada en la sesión.", "SESSION-DATA-NOT-FOUND");
 
-            var request = new HttpRequestMessage(HttpMethod.Put, $"/connection/connections/{connection.ConnectionId}");
-            request.Headers.Add("X-User-Id", userId);
-            request.Headers.Add("x_remote_ip", remoteIp);
-            request.Content = JsonContent.Create(connection);
+                var request = new HttpRequestMessage(HttpMethod.Put, $"/connection/connections/{connection.ConnectionId}");
+                request.Headers.Add("X-User-Id", userId);
+                request.Headers.Add("x_remote_ip", remoteIp);
+                request.Content = JsonContent.Create(connection);
 
-            var response = await _http.SendAsync(request);
-            return response.IsSuccessStatusCode;
+                var response = await _http.SendAsync(request);
+                if (!response.IsSuccessStatusCode)
+                    return OperationResult.Fail("Error al actualizar la conexión.", $"HTTP-{(int)response.StatusCode}");
+
+                return OperationResult.Ok("Conexión actualizada correctamente.");
+            }
+            catch (HttpRequestException)
+            {
+                return OperationResult.Fail("Problema de conexión. Verifique su conexión a Internet.", "NET-ERROR");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al actualizar conexión {ConnectionId}", connection.ConnectionId);
+                return OperationResult.Fail("Error inesperado al actualizar la conexión.", "UNEXPECTED-ERROR");
+            }
         }
 
-        public async Task<bool> CreateConnectionAsync(ConnectionDTO connection)
+        public async Task<OperationResult> CreateConnectionAsync(ConnectionDTO connection)
         {
-            var userId = await _sessionContext.GetUserIdAsync();
-            var remoteIp = await _sessionContext.GetRemoteIpAsync();
+            try
+            {
+                var userId = await _sessionContext.GetUserIdAsync();
+                var remoteIp = await _sessionContext.GetRemoteIpAsync();
 
-            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp)) return false;
+                if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp))
+                    return OperationResult.Fail("Usuario o IP remota no encontrada en la sesión.", "SESSION-DATA-NOT-FOUND");
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "/connection/connections");
-            request.Headers.Add("X-User-Id", userId);
-            request.Headers.Add("x_remote_ip", remoteIp);
-            request.Content = JsonContent.Create(connection);
+                var request = new HttpRequestMessage(HttpMethod.Post, "/connection/connections");
+                request.Headers.Add("X-User-Id", userId);
+                request.Headers.Add("x_remote_ip", remoteIp);
+                request.Content = JsonContent.Create(connection);
 
-            var response = await _http.SendAsync(request);
-            return response.IsSuccessStatusCode;
+                var response = await _http.SendAsync(request);
+                if (!response.IsSuccessStatusCode)
+                    return OperationResult.Fail("Error al crear la conexión.", $"HTTP-{(int)response.StatusCode}");
+
+                return OperationResult.Ok("Conexión creada correctamente.");
+            }
+            catch (HttpRequestException)
+            {
+                return OperationResult.Fail("Problema de conexión. Verifique su conexión a Internet.", "NET-ERROR");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al crear conexión");
+                return OperationResult.Fail("Error inesperado al crear la conexión.", "UNEXPECTED-ERROR");
+            }
         }
 
-        public async Task<bool> ValidateConnectionAsync(string connectionId)
+        public async Task<OperationResult> ValidateConnectionAsync(string connectionId)
         {
             try
             {
                 var userId = await _sessionContext.GetUserIdAsync();
                 var remoteIp = await _sessionContext.GetRemoteIpAsync();
                 if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp))
-                    return false;
+                    return OperationResult.Fail("Usuario o IP remota no encontrada en la sesión.", "SESSION-DATA-NOT-FOUND");
 
                 var request = new HttpRequestMessage(HttpMethod.Post, $"/connection/connections/{connectionId}/validate");
                 request.Headers.Add("X-User-Id", userId);
@@ -140,15 +188,19 @@ namespace SAPAssistant.Service
                                      connectionId,
                                      response.StatusCode,
                                      errorContent);
-                    return false;
+                    return OperationResult.Fail("Conexión inválida.", $"HTTP-{(int)response.StatusCode}");
                 }
 
-                return true;
+                return OperationResult.Ok("Conexión válida.");
+            }
+            catch (HttpRequestException)
+            {
+                return OperationResult.Fail("Problema de conexión. Verifique su conexión a Internet.", "NET-ERROR");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al validar conexión {ConnectionId}", connectionId);
-                return false;
+                return OperationResult.Fail("Error inesperado al validar la conexión.", "UNEXPECTED-ERROR");
             }
         }
 

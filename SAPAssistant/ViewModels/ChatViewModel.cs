@@ -62,7 +62,16 @@ public partial class ChatViewModel : BaseViewModel
 
         if (!string.IsNullOrWhiteSpace(chatId))
         {
-            CurrentSession = await _chatHistoryService.GetChatSessionAsync(chatId);
+            var result = await _chatHistoryService.GetChatSessionAsync(chatId);
+            if (result.Success)
+            {
+                CurrentSession = result.Data;
+            }
+            else
+            {
+                NotificationService.NotifyError($"❌ {result.Message}", result.ErrorCode);
+                return;
+            }
         }
         else
         {

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using SAPAssistant.Models;
 using SAPAssistant.Service;
 using SAPAssistant.Service.Interfaces;
+using SAPAssistant.Exceptions;
 
 namespace SAPAssistant.ViewModels;
 
@@ -44,24 +45,25 @@ public partial class ConnectionSettingsViewModel : BaseViewModel
 
     public async Task HandleSave()
     {
-        bool success;
+        OperationResult result;
 
         if (IsEditMode)
         {
-            success = await _connectionService.UpdateConnectionAsync(ConnectionData);
+            result = await _connectionService.UpdateConnectionAsync(ConnectionData);
         }
         else
         {
-            success = await _connectionService.CreateConnectionAsync(ConnectionData);
+            result = await _connectionService.CreateConnectionAsync(ConnectionData);
         }
 
-        if (success)
+        if (result.Success)
         {
+            _notificationService.NotifySuccess(result.Message);
             _navigation.NavigateTo("/");
         }
         else
         {
-            _notificationService.NotifyError("❌ Error al guardar la conexión.");
+            _notificationService.NotifyError($"❌ {result.Message}", result.ErrorCode);
         }
     }
 }
