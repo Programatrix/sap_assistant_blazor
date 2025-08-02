@@ -1,0 +1,23 @@
+@using SAPAssistant.Exceptions
+@using SAPAssistant.Service
+@inject NotificationService NotificationService
+@inject ISnackbar Snackbar
+@implements IDisposable
+
+@code {
+    protected override void OnInitialized()
+    {
+        NotificationService.OnNotify += HandleNotification;
+    }
+
+    private void HandleNotification(ResultMessage message)
+    {
+        var severity = message.Success ? Severity.Success : Severity.Error;
+        Snackbar.Add(message.Message, severity);
+    }
+
+    public void Dispose()
+    {
+        NotificationService.OnNotify -= HandleNotification;
+    }
+}
