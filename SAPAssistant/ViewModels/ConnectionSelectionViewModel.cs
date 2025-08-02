@@ -51,7 +51,7 @@ public partial class ConnectionSelectionViewModel : BaseViewModel
                     ErrorCode = result.ErrorCode,
                     Type = NotificationType.Error
                 };
-                NotificationService.Notify(notify);
+                await NotificationService.Notify(notify);
             }
         }
     }

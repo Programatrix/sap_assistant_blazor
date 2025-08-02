@@ -27,11 +27,15 @@
         NotificationService.OnNotify += HandleNotification;
     }
 
-    private void HandleNotification(ResultMessage message)
+    private async Task HandleNotification(ResultMessage message)
     {
         _message = message;
-        _ = Task.Delay(5000).ContinueWith(_ => InvokeAsync(ClearMessage));
-        InvokeAsync(StateHasChanged);
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(5000);
+            await InvokeAsync(ClearMessage);
+        });
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task ClearMessage()

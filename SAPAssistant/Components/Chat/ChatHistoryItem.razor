@@ -51,7 +51,7 @@
         await OnOpenChat.InvokeAsync(Chat.Id);
     }
 
-    private void Renombrar() => NotificationService.NotifySuccess($"Renombrar {Chat.Titulo}");
-    private void Compartir() => NotificationService.NotifySuccess($"Compartir {Chat.Titulo}");
-    private void Archivar() => NotificationService.NotifySuccess($"Archivar {Chat.Titulo}");
+    private Task Renombrar() => NotificationService.NotifySuccess($"Renombrar {Chat.Titulo}");
+    private Task Compartir() => NotificationService.NotifySuccess($"Compartir {Chat.Titulo}");
+    private Task Archivar() => NotificationService.NotifySuccess($"Archivar {Chat.Titulo}");
 }

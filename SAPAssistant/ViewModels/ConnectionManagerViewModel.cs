@@ -90,7 +90,7 @@ public partial class ConnectionManagerViewModel : BaseViewModel
                     ErrorCode = result.ErrorCode,
                     Type = NotificationType.Error
                 };
-                NotificationService.Notify(notify);
+                await NotificationService.Notify(notify);
                 await Task.Delay(3000);
                 MostrarError = false;
                 return false;

@@ -62,7 +62,7 @@ public partial class ConnectionSettingsViewModel : BaseViewModel
             Type = result.Success ? NotificationType.Success : NotificationType.Error
         };
 
-        _notificationService.Notify(notify);
+        await _notificationService.Notify(notify);
 
         if (result.Success)
         {

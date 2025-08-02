@@ -102,7 +102,7 @@ else
                 if (!validation.Success)
                 {
                     await SessionContext.DeleteActiveConnectionIdAsync();
-                    NotificationService.NotifyError($"❌ {validation.Message}", validation.ErrorCode);
+                    await NotificationService.NotifyError($"❌ {validation.Message}", validation.ErrorCode);
                     Navigation.NavigateTo("/conexiones", true);
                     return;
                 }

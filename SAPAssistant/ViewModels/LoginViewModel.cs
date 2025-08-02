@@ -70,7 +70,7 @@ public partial class LoginViewModel : BaseViewModel
                     ErrorCode = result.ErrorCode,
                     Type = result.Type
                 };
-                _notificationService.Notify(notify);
+                await _notificationService.Notify(notify);
                 PasswordError = true;
             }
         }
