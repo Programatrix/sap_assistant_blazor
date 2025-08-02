@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using SAPAssistant.Service;
-using Microsoft.Extensions.Logging;
 
 namespace SAPAssistant.ViewModels;
 
@@ -14,8 +13,7 @@ public partial class DashboardPageViewModel : BaseViewModel
 
     public DashboardPageViewModel(
         DashboardService dashboardService,
-        NotificationService notificationService,
-        ILogger<DashboardPageViewModel> logger) : base(notificationService, logger)
+        NotificationService notificationService) : base(notificationService)
     {
         DashboardService = dashboardService;
     }

@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Logging;
 using SAPAssistant.Models;
 using SAPAssistant.Service;
 using SAPAssistant.Service.Interfaces;
@@ -21,8 +20,7 @@ public partial class ChatHistoryViewModel : BaseViewModel
     public ChatHistoryViewModel(
         IChatHistoryService chatService,
         NavigationManager navigation,
-        NotificationService notificationService,
-        ILogger<ChatHistoryViewModel> logger) : base(notificationService, logger)
+        NotificationService notificationService) : base(notificationService)
     {
         _chatService = chatService;
         _navigation = navigation;
@@ -34,7 +32,7 @@ public partial class ChatHistoryViewModel : BaseViewModel
         var success = await ExecuteSafeAsync(async () =>
         {
             Sessions = await _chatService.GetChatHistoryAsync();
-        }, ex => new ErrorOptions { Message = $"❌ Error al cargar el historial: {ex.Message}" });
+        }, "Error al cargar el historial");
 
         if (!success)
         {
@@ -59,7 +57,7 @@ public partial class ChatHistoryViewModel : BaseViewModel
         {
             await _chatService.DeleteChatSessionAsync(chatId);
             await LoadHistoryAsync();
-        }, ex => new ErrorOptions { Message = $"❌ Error al eliminar el chat: {ex.Message}" });
+        }, "Error al eliminar el chat");
     }
 }
 

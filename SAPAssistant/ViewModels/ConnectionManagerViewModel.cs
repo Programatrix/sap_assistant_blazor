@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Logging;
 using SAPAssistant.Models;
 using SAPAssistant.Service;
 using SAPAssistant.Service.Interfaces;
@@ -37,8 +36,7 @@ public partial class ConnectionManagerViewModel : BaseViewModel
         SessionContextService sessionContext,
         NavigationManager navigation,
         StateContainer stateContainer,
-        NotificationService notificationService,
-        ILogger<ConnectionManagerViewModel> logger) : base(notificationService, logger)
+        NotificationService notificationService) : base(notificationService)
     {
         _connectionService = connectionService;
         _sessionContext = sessionContext;

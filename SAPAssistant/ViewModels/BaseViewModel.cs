@@ -1,28 +1,19 @@
+using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.Extensions.Logging;
-using SAPAssistant.Exceptions;
 using SAPAssistant.Service;
 
 namespace SAPAssistant.ViewModels;
 
-public record ErrorOptions(
-    string? Message = null,
-    string? Title = null,
-    NotificationType Severity = NotificationType.Error,
-    object? AdditionalData = null);
-
 public abstract partial class BaseViewModel : ObservableObject, INotifyDataErrorInfo
 {
     protected readonly NotificationService NotificationService;
-    protected readonly ILogger Logger;
-
-    protected BaseViewModel(NotificationService notificationService, ILogger logger)
+    
+    protected BaseViewModel(NotificationService notificationService)
     {
         NotificationService = notificationService;
-        Logger = logger;
     }
 
     [ObservableProperty]
@@ -62,7 +53,7 @@ public abstract partial class BaseViewModel : ObservableObject, INotifyDataError
         }
     }
 
-    protected async Task<bool> ExecuteSafeAsync(Func<Task> action, Func<Exception, ErrorOptions>? optionsFactory = null)
+    protected async Task<bool> ExecuteSafeAsync(Func<Task> action, string context)
     {
         try
         {
@@ -71,16 +62,7 @@ public abstract partial class BaseViewModel : ObservableObject, INotifyDataError
         }
         catch (Exception ex)
         {
-            var options = optionsFactory?.Invoke(ex) ?? new ErrorOptions
-            {
-                Message = "❌ Ocurrió un error inesperado.",
-                Title = "Error",
-                Severity = NotificationType.Error,
-                AdditionalData = null
-            };
-
-            Logger.LogError(ex, "{Title}: {Message} {@Data}", options.Title ?? "Error", options.Message, options.AdditionalData);
-            NotificationService.Notify(ResultMessage.Fail(options.Message ?? "Error", type: options.Severity));
+            NotificationService.NotifyException(ex, context);
             return false;
         }
     }
