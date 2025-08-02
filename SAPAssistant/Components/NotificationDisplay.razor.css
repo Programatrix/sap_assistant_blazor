@@ -1,4 +1,4 @@
-﻿.toast-container {
+.toast-container {
     position: fixed;
     top: 30px;
     right: 30px;
@@ -29,6 +29,15 @@
 
 .toast-danger {
     background-color: #dc3545;
+}
+
+.toast-info {
+    background-color: #17a2b8;
+}
+
+.toast-warning {
+    background-color: #ffc107;
+    color: #212529;
 }
 
 .error-code {

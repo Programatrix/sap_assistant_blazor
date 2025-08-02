@@ -2,12 +2,25 @@
 @using SAPAssistant.Exceptions
 @implements IDisposable
 
-<AlertMessageError Result="@_message" OnClear="@ClearMessage" />
+@if (_message != null && !string.IsNullOrEmpty(_message.Message))
+{
+    <div class="toast-container">
+        <div class="toast-message @GetCssClass(_message.Type) @(_isClosing ? "toast-hide" : "")">
+            @_message.Message
+            @if (_message.Type == NotificationType.Error && !string.IsNullOrEmpty(_message.ErrorCode))
+            {
+                <div class="error-code">[Código: @_message.ErrorCode]</div>
+            }
+            <button class="close-btn" @onclick="ClearMessage">×</button>
+        </div>
+    </div>
+}
 
 @code {
     [Inject] private NotificationService NotificationService { get; set; } = default!;
 
     private ResultMessage? _message;
+    private bool _isClosing = false;
 
     protected override void OnInitialized()
     {
@@ -17,14 +30,29 @@
     private void HandleNotification(ResultMessage message)
     {
         _message = message;
+        _ = Task.Delay(5000).ContinueWith(_ => InvokeAsync(ClearMessage));
         InvokeAsync(StateHasChanged);
     }
 
-    private void ClearMessage()
+    private async Task ClearMessage()
     {
+        if (_message == null) return;
+        _isClosing = true;
+        StateHasChanged();
+        await Task.Delay(500);
         _message = null;
+        _isClosing = false;
         StateHasChanged();
     }
+
+    private string GetCssClass(NotificationType type) => type switch
+    {
+        NotificationType.Success => "toast-success",
+        NotificationType.Error => "toast-danger",
+        NotificationType.Info => "toast-info",
+        NotificationType.Warning => "toast-warning",
+        _ => string.Empty
+    };
 
     public void Dispose()
     {
