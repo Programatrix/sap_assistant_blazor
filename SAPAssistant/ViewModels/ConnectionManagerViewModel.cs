@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 using SAPAssistant.Models;
 using SAPAssistant.Service;
 using SAPAssistant.Service.Interfaces;
@@ -31,7 +32,13 @@ public partial class ConnectionManagerViewModel : BaseViewModel
     [ObservableProperty]
     private string? errorAlCargar;
 
-    public ConnectionManagerViewModel(IConnectionService connectionService, SessionContextService sessionContext, NavigationManager navigation, StateContainer stateContainer)
+    public ConnectionManagerViewModel(
+        IConnectionService connectionService,
+        SessionContextService sessionContext,
+        NavigationManager navigation,
+        StateContainer stateContainer,
+        NotificationService notificationService,
+        ILogger<ConnectionManagerViewModel> logger) : base(notificationService, logger)
     {
         _connectionService = connectionService;
         _sessionContext = sessionContext;

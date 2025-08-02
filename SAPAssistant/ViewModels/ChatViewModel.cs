@@ -7,6 +7,7 @@ using SAPAssistant.Models.Chat;
 using SAPAssistant.Service;
 using SAPAssistant.Service.Interfaces;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace SAPAssistant.ViewModels;
 
@@ -31,7 +32,13 @@ public partial class ChatViewModel : BaseViewModel
     [ObservableProperty]
     private bool isProcessing;
 
-    public ChatViewModel(IJSRuntime js, IAssistantService assistantService, IChatHistoryService chatHistoryService, StateContainer stateContainer)
+    public ChatViewModel(
+        IJSRuntime js,
+        IAssistantService assistantService,
+        IChatHistoryService chatHistoryService,
+        StateContainer stateContainer,
+        NotificationService notificationService,
+        ILogger<ChatViewModel> logger) : base(notificationService, logger)
     {
         _js = js;
         _assistantService = assistantService;

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using CommunityToolkit.Mvvm.ComponentModel;
 using SAPAssistant.Service;
+using Microsoft.Extensions.Logging;
 
 namespace SAPAssistant.ViewModels;
 
@@ -13,7 +14,10 @@ public partial class DashboardWizardViewModel : BaseViewModel
 
     public EventCallback OnFinished { get; set; }
 
-    public DashboardWizardViewModel(DashboardService dashboardService)
+    public DashboardWizardViewModel(
+        DashboardService dashboardService,
+        NotificationService notificationService,
+        ILogger<DashboardWizardViewModel> logger) : base(notificationService, logger)
     {
         _dashboardService = dashboardService;
     }
