@@ -29,7 +29,7 @@ public partial class ChatHistoryViewModel : BaseViewModel
     public async Task LoadHistoryAsync()
     {
         IsLoading = true;
-        var success = await ExecuteSafeAsync(async () =>
+        var success = await TryNotifyAsync(async () =>
         {
             Sessions = await _chatService.GetChatHistoryAsync();
         }, "Error al cargar el historial");
@@ -53,7 +53,7 @@ public partial class ChatHistoryViewModel : BaseViewModel
 
     public async Task DeleteChat(string chatId)
     {
-        await ExecuteSafeAsync(async () =>
+        await TryNotifyAsync(async () =>
         {
             await _chatService.DeleteChatSessionAsync(chatId);
             await LoadHistoryAsync();
