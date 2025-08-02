@@ -4,11 +4,11 @@ namespace SAPAssistant.Exceptions
 {
     using Microsoft.AspNetCore.Components;
     using SAPAssistant.Exceptions;
-    using SAPAssistant.Service;
+    using SAPAssistant.Service.Interfaces;
 
     public abstract class BasePage : ComponentBase
     {
-        [Inject] protected NotificationService NotificationService { get; set; } = default!;
+        [Inject] protected INotificationService NotificationService { get; set; } = default!;
 
         /// Muestra un mensaje de éxito
         protected void NotifySuccess(string message)

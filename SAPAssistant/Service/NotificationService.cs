@@ -1,10 +1,11 @@
 using System;
 using Microsoft.Extensions.Logging;
 using SAPAssistant.Exceptions;
+using SAPAssistant.Service.Interfaces;
 
 namespace SAPAssistant.Service;
 
-public class NotificationService
+public class NotificationService : INotificationService
 {
     private readonly ILogger<NotificationService> _logger;
 

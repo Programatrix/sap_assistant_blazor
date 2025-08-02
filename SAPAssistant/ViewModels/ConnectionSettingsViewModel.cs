@@ -12,7 +12,7 @@ public partial class ConnectionSettingsViewModel : BaseViewModel
     private readonly SessionContextService _sessionContext;
     private readonly IConnectionService _connectionService;
     private readonly NavigationManager _navigation;
-    private readonly NotificationService _notificationService;
+    private readonly INotificationService _notificationService;
 
     [ObservableProperty]
     private ConnectionDTO connectionData = new();
@@ -23,7 +23,7 @@ public partial class ConnectionSettingsViewModel : BaseViewModel
         SessionContextService sessionContext,
         IConnectionService connectionService,
         NavigationManager navigation,
-        NotificationService notificationService) : base(notificationService)
+        INotificationService notificationService) : base(notificationService)
     {
         _sessionContext = sessionContext;
         _connectionService = connectionService;

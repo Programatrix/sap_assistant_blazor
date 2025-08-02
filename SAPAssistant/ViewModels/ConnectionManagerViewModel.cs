@@ -36,7 +36,7 @@ public partial class ConnectionManagerViewModel : BaseViewModel
         SessionContextService sessionContext,
         NavigationManager navigation,
         StateContainer stateContainer,
-        NotificationService notificationService) : base(notificationService)
+        INotificationService notificationService) : base(notificationService)
     {
         _connectionService = connectionService;
         _sessionContext = sessionContext;

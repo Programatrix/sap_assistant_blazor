@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components;
 using SAPAssistant.Models;
 using SAPAssistant.Exceptions;
 using SAPAssistant.Service;
+using SAPAssistant.Service.Interfaces;
 
 namespace SAPAssistant.ViewModels;
 
@@ -10,7 +11,7 @@ public partial class LoginViewModel : BaseViewModel
 {
     private readonly AuthService _authService;
     private readonly NavigationManager _navigation;
-    private readonly NotificationService _notificationService;
+    private readonly INotificationService _notificationService;
     private readonly StateContainer _stateContainer;
 
     [ObservableProperty]
@@ -35,7 +36,7 @@ public partial class LoginViewModel : BaseViewModel
     public LoginViewModel(
         AuthService authService,
         NavigationManager navigation,
-        NotificationService notificationService,
+        INotificationService notificationService,
         StateContainer stateContainer) : base(notificationService)
     {
         _authService = authService;

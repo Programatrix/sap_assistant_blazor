@@ -1,7 +1,7 @@
 ﻿@using SAPAssistant.Models
-@using SAPAssistant.Service
+@using SAPAssistant.Service.Interfaces
 @inject IJSRuntime JS
-@inject NotificationService NotificationService
+@inject INotificationService NotificationService
 
 <div class="chat-item @(IsMenuOpen ? "active" : "")" @onclick="AbrirChat">
     <div class="chat-title">@Chat.Titulo</div>

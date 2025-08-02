@@ -36,7 +36,7 @@ public partial class ChatViewModel : BaseViewModel
         IAssistantService assistantService,
         IChatHistoryService chatHistoryService,
         StateContainer stateContainer,
-        NotificationService notificationService) : base(notificationService)
+        INotificationService notificationService) : base(notificationService)
     {
         _js = js;
         _assistantService = assistantService;

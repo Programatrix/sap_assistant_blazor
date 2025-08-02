@@ -1,4 +1,4 @@
-@using SAPAssistant.Service
+@using SAPAssistant.Service.Interfaces
 @using SAPAssistant.Exceptions
 @implements IDisposable
 
@@ -17,7 +17,7 @@
 }
 
 @code {
-    [Inject] private NotificationService NotificationService { get; set; } = default!;
+    [Inject] private INotificationService NotificationService { get; set; } = default!;
 
     private ResultMessage? _message;
     private bool _isClosing = false;

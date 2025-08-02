@@ -1,6 +1,6 @@
 ﻿@using SAPAssistant.Models.Chat
-@using SAPAssistant.Service
-@inject NotificationService NotificationService
+@using SAPAssistant.Service.Interfaces
+@inject INotificationService NotificationService
 
 <div class="chat-message @(M.IsUser ? "user" : "assistant")">
     <div class="message-content">
