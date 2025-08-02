@@ -1,4 +1,11 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject NotificationService NotificationService
+@using SAPAssistant.Exceptions
+@using SAPAssistant.Service
+@using SAPAssistant.Components
+
+<AlertMessageError Result="@_message" OnClear="@ClearMessage" />
 
 <PageTitle>Iniciar sesión - SAPAssistant</PageTitle>
 
@@ -7,3 +14,28 @@
         @Body
     </div>
 </div>
+
+@code {
+    private ResultMessage? _message;
+
+    protected override void OnInitialized()
+    {
+        NotificationService.OnNotify += HandleNotification;
+    }
+
+    private void HandleNotification(ResultMessage message)
+    {
+        _message = message;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void ClearMessage()
+    {
+        _message = null;
+    }
+
+    public void Dispose()
+    {
+        NotificationService.OnNotify -= HandleNotification;
+    }
+}
