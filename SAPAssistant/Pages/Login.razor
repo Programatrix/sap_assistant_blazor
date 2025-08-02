@@ -84,7 +84,12 @@
     }
 
     private void HandleStateChanged(object? sender, PropertyChangedEventArgs e)
-        => InvokeAsync(StateHasChanged);
+    {
+        if (e.PropertyName == nameof(State.AuthenticatedUser))
+        {
+            InvokeAsync(StateHasChanged);
+        }
+    }
 
     public void Dispose() => State.PropertyChanged -= HandleStateChanged;
 }

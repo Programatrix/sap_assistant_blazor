@@ -41,7 +41,12 @@
     protected override async Task OnParametersSetAsync() => await VM.OnParametersSetAsync(chatId);
 
     private void HandleStateChanged(object? sender, PropertyChangedEventArgs e)
-        => InvokeAsync(StateHasChanged);
+    {
+        if (e.PropertyName == nameof(State.CurrentChat))
+        {
+            InvokeAsync(StateHasChanged);
+        }
+    }
 
     public void Dispose() => State.PropertyChanged -= HandleStateChanged;
 }
