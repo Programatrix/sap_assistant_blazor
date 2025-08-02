@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using SAPAssistant.Service;
 using SAPAssistant.Service.Interfaces;
 using System.Security.Claims;
@@ -8,14 +7,14 @@ namespace SAPAssistant.Security.Policies
 {
     public class ConnectionAuthorizationHandler : AuthorizationHandler<ConnectionRequirement>
     {
-        private readonly ProtectedSessionStorage _sessionStorage;
+        private readonly SessionContextService _sessionContext;
         private readonly IConnectionService _connectionService;
 
         public ConnectionAuthorizationHandler(
-            ProtectedSessionStorage sessionStorage,
+            SessionContextService sessionContext,
             IConnectionService connectionService)
         {
-            _sessionStorage = sessionStorage;
+            _sessionContext = sessionContext;
             _connectionService = connectionService;
         }
 
@@ -28,13 +27,13 @@ namespace SAPAssistant.Security.Policies
             if (user?.Identity?.IsAuthenticated != true)
                 return;
 
-            // Intentar obtener conexión activa desde SessionStorage
-            var connResult = await _sessionStorage.GetAsync<string>("active_connection_id");
-            if (!connResult.Success || string.IsNullOrWhiteSpace(connResult.Value))
+            // Intentar obtener conexión activa desde SessionContext
+            var activeId = await _sessionContext.GetActiveConnectionIdAsync();
+            if (string.IsNullOrWhiteSpace(activeId))
                 return;
 
             // Validar conexión con el backend
-            var isValid = await _connectionService.ValidateConnectionAsync(connResult.Value);
+            var isValid = await _connectionService.ValidateConnectionAsync(activeId);
             if (isValid)
             {
                 context.Succeed(requirement);

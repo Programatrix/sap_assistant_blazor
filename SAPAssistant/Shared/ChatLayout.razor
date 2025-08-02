@@ -1,7 +1,6 @@
 ﻿@inherits LayoutComponentBase
 @attribute [Authorize]
 
-@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using SAPAssistant.Security
 @using SAPAssistant.Service
 @using SAPAssistant.Service.Interfaces
@@ -10,7 +9,7 @@
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IConnectionService ConnectionService
-@inject ProtectedSessionStorage SessionStorage
+@inject SessionContextService SessionContext
 
 @if (isLoading || validandoConexion)
 {
@@ -55,13 +54,13 @@ else
         var currentUri = Navigation.ToBaseRelativePath(Navigation.Uri).ToLower();
         if (!currentUri.StartsWith("conexiones"))
         {
-            var result = await SessionStorage.GetAsync<string>("active_connection_id");
-            if (result.Success && !string.IsNullOrEmpty(result.Value))
+            var activeId = await SessionContext.GetActiveConnectionIdAsync();
+            if (!string.IsNullOrEmpty(activeId))
             {
-                var isValid = await ConnectionService.ValidateConnectionAsync(result.Value);
+                var isValid = await ConnectionService.ValidateConnectionAsync(activeId);
                 if (!isValid)
                 {
-                    await SessionStorage.DeleteAsync("active_connection_id");
+                    await SessionContext.DeleteActiveConnectionIdAsync();
                     Navigation.NavigateTo("/conexiones", true);
                     return;
                 }

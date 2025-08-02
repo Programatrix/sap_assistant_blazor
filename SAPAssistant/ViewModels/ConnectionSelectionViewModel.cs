@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using SAPAssistant.Service;
 using SAPAssistant.Service.Interfaces;
 
@@ -8,7 +7,7 @@ namespace SAPAssistant.ViewModels;
 
 public partial class ConnectionSelectionViewModel : BaseViewModel
 {
-    private readonly ProtectedSessionStorage _sessionStorage;
+    private readonly SessionContextService _sessionContext;
     private readonly IConnectionService _connectionService;
     private readonly NavigationManager _navigation;
 
@@ -19,21 +18,21 @@ public partial class ConnectionSelectionViewModel : BaseViewModel
     private bool mostrarAviso;
 
     public ConnectionSelectionViewModel(
-        ProtectedSessionStorage sessionStorage,
+        SessionContextService sessionContext,
         IConnectionService connectionService,
         NavigationManager navigation)
     {
-        _sessionStorage = sessionStorage;
+        _sessionContext = sessionContext;
         _connectionService = connectionService;
         _navigation = navigation;
     }
 
     public async Task InitializeAsync()
     {
-        var result = await _sessionStorage.GetAsync<string>("active_connection_id");
-        if (result.Success && !string.IsNullOrEmpty(result.Value))
+        var activeId = await _sessionContext.GetActiveConnectionIdAsync();
+        if (!string.IsNullOrEmpty(activeId))
         {
-            var isValid = await _connectionService.ValidateConnectionAsync(result.Value);
+            var isValid = await _connectionService.ValidateConnectionAsync(activeId);
             if (isValid)
             {
                 HayConexionActiva = true;
@@ -42,7 +41,7 @@ public partial class ConnectionSelectionViewModel : BaseViewModel
             {
                 HayConexionActiva = false;
                 MostrarAviso = true;
-                await _sessionStorage.DeleteAsync("active_connection_id");
+                await _sessionContext.DeleteActiveConnectionIdAsync();
             }
         }
     }

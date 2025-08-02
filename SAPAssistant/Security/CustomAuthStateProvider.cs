@@ -1,19 +1,19 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.Extensions.Logging;
+using SAPAssistant.Service;
 using System.Security.Claims;
 
 namespace SAPAssistant.Security
 {
     public class CustomAuthStateProvider : AuthenticationStateProvider
     {
-        private readonly ProtectedSessionStorage _sessionStorage;
+        private readonly SessionContextService _sessionContext;
         private readonly ClaimsPrincipal _anonymous = new(new ClaimsIdentity());
         private readonly ILogger<CustomAuthStateProvider> _logger;
 
-        public CustomAuthStateProvider(ProtectedSessionStorage sessionStorage, ILogger<CustomAuthStateProvider> logger)
+        public CustomAuthStateProvider(SessionContextService sessionContext, ILogger<CustomAuthStateProvider> logger)
         {
-            _sessionStorage = sessionStorage;
+            _sessionContext = sessionContext;
             _logger = logger;
         }
 
@@ -21,11 +21,8 @@ namespace SAPAssistant.Security
         {
             try
             {
-                var usernameResult = await _sessionStorage.GetAsync<string>("username");
-                var tokenResult = await _sessionStorage.GetAsync<string>("token");
-
-                var username = usernameResult.Success ? usernameResult.Value : null;
-                var token = tokenResult.Success ? tokenResult.Value : null;
+                var username = await _sessionContext.GetUserIdAsync();
+                var token = await _sessionContext.GetTokenAsync();
 
                 if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(token))
                 {
@@ -52,8 +49,8 @@ namespace SAPAssistant.Security
 
         public async Task MarkUserAsAuthenticated(string username, string token)
         {
-            await _sessionStorage.SetAsync("username", username);
-            await _sessionStorage.SetAsync("token", token);
+            await _sessionContext.SetUserIdAsync(username);
+            await _sessionContext.SetTokenAsync(token);
 
             var identity = new ClaimsIdentity(new[]
             {
@@ -65,26 +62,24 @@ namespace SAPAssistant.Security
         }
         public async Task SaveRemoteUrlAsync(string remoteUrl)
         {
-            await _sessionStorage.SetAsync("remote_url", remoteUrl);
+            await _sessionContext.SetRemoteIpAsync(remoteUrl);
         }
         public async Task<string?> GetRemoteUrlAsync()
         {
-            var result = await _sessionStorage.GetAsync<string>("remote_url");
-            return result.Success ? result.Value : null;
+            return await _sessionContext.GetRemoteIpAsync();
         }
 
         public async Task MarkUserAsLoggedOut()
         {
-            await _sessionStorage.DeleteAsync("username");
-            await _sessionStorage.DeleteAsync("token");
-            await _sessionStorage.DeleteAsync("remote_url");
+            await _sessionContext.DeleteUserIdAsync();
+            await _sessionContext.DeleteTokenAsync();
+            await _sessionContext.DeleteRemoteIpAsync();
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_anonymous)));
         }
 
         public async Task<string?> GetTokenAsync()
         {
-            var result = await _sessionStorage.GetAsync<string>("token");
-            return result.Success ? result.Value : null;
+            return await _sessionContext.GetTokenAsync();
         }
     }
 }
