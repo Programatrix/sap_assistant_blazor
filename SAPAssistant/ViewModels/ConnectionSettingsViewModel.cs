@@ -54,14 +54,19 @@ public partial class ConnectionSettingsViewModel : BaseViewModel
             result = await _connectionService.CreateConnectionAsync(ConnectionData);
         }
 
+        var notify = new ResultMessage
+        {
+            Success = result.Success,
+            Message = result.Message,
+            ErrorCode = result.ErrorCode,
+            Type = result.Success ? NotificationType.Success : NotificationType.Error
+        };
+
+        _notificationService.Notify(notify);
+
         if (result.Success)
         {
-            _notificationService.NotifySuccess(result.Message);
             _navigation.NavigateTo("/");
-        }
-        else
-        {
-            _notificationService.NotifyError($"❌ {result.Message}", result.ErrorCode);
         }
     }
 }

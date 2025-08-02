@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components;
 using SAPAssistant.Models;
 using SAPAssistant.Service;
 using SAPAssistant.Service.Interfaces;
+using SAPAssistant.Exceptions;
 
 namespace SAPAssistant.ViewModels;
 
@@ -56,7 +57,7 @@ public partial class ConnectionManagerViewModel : BaseViewModel
         }
         else
         {
-            ErrorAlCargar = $"❌ {result.Message} (Código: {result.ErrorCode})";
+            ErrorAlCargar = result.Message;
         }
     }
 
@@ -82,7 +83,14 @@ public partial class ConnectionManagerViewModel : BaseViewModel
             if (!result.Success)
             {
                 MostrarError = true;
-                NotificationService.NotifyError($"❌ {result.Message}", result.ErrorCode);
+                var notify = new ResultMessage
+                {
+                    Success = result.Success,
+                    Message = result.Message,
+                    ErrorCode = result.ErrorCode,
+                    Type = NotificationType.Error
+                };
+                NotificationService.Notify(notify);
                 await Task.Delay(3000);
                 MostrarError = false;
                 return false;

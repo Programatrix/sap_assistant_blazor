@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Authorization;
 using SAPAssistant.Exceptions;
 using MudBlazor.Services;
 using SAPAssistant.ViewModels;
+using System.Globalization;
+using Microsoft.AspNetCore.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +23,7 @@ var apiBaseUrl = builder.Configuration["ApiBaseUrl"]
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor()
  .AddCircuitOptions(options => { options.DetailedErrors = true; });
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services.AddHttpClient("Default", client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
@@ -90,6 +93,14 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+var supportedCultures = new[] { new CultureInfo("en"), new CultureInfo("es") };
+var localizationOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new("es"),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures
+};
+app.UseRequestLocalization(localizationOptions);
 app.UseRouting();
 
 app.MapBlazorHub();

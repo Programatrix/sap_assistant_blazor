@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
 using SAPAssistant.Service;
 using SAPAssistant.Service.Interfaces;
+using SAPAssistant.Exceptions;
 
 namespace SAPAssistant.ViewModels;
 
@@ -43,7 +44,14 @@ public partial class ConnectionSelectionViewModel : BaseViewModel
                 HayConexionActiva = false;
                 MostrarAviso = true;
                 await _sessionContext.DeleteActiveConnectionIdAsync();
-                NotificationService.NotifyError($"❌ {result.Message}", result.ErrorCode);
+                var notify = new ResultMessage
+                {
+                    Success = result.Success,
+                    Message = result.Message,
+                    ErrorCode = result.ErrorCode,
+                    Type = NotificationType.Error
+                };
+                NotificationService.Notify(notify);
             }
         }
     }
