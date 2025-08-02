@@ -6,10 +6,10 @@ namespace SAPAssistant.Service.Interfaces
     public interface IConnectionService
     {
         Task<ResultMessage<List<ConnectionDTO>>> GetConnectionsAsync();
-        Task<ConnectionDTO?> GetConnectionByIdAsync(string connectionId);
-        Task<bool> UpdateConnectionAsync(ConnectionDTO connection);
-        Task<bool> CreateConnectionAsync(ConnectionDTO connection);
-        Task<bool> ValidateConnectionAsync(string connectionId);
+        Task<OperationResult<ConnectionDTO>> GetConnectionByIdAsync(string connectionId);
+        Task<OperationResult> UpdateConnectionAsync(ConnectionDTO connection);
+        Task<OperationResult> CreateConnectionAsync(ConnectionDTO connection);
+        Task<OperationResult> ValidateConnectionAsync(string connectionId);
     }
 }
 

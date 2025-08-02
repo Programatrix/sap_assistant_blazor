@@ -33,8 +33,8 @@ namespace SAPAssistant.Security.Policies
                 return;
 
             // Validar conexión con el backend
-            var isValid = await _connectionService.ValidateConnectionAsync(activeId);
-            if (isValid)
+            var result = await _connectionService.ValidateConnectionAsync(activeId);
+            if (result.Success)
             {
                 context.Succeed(requirement);
             }

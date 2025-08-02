@@ -35,8 +35,8 @@ public partial class ConnectionSelectionViewModel : BaseViewModel
         var activeId = await _sessionContext.GetActiveConnectionIdAsync();
         if (!string.IsNullOrEmpty(activeId))
         {
-            var isValid = await _connectionService.ValidateConnectionAsync(activeId);
-            if (isValid)
+            var result = await _connectionService.ValidateConnectionAsync(activeId);
+            if (result.Success)
             {
                 HayConexionActiva = true;
             }
@@ -45,6 +45,7 @@ public partial class ConnectionSelectionViewModel : BaseViewModel
                 HayConexionActiva = false;
                 MostrarAviso = true;
                 await _sessionContext.DeleteActiveConnectionIdAsync();
+                NotificationService.NotifyError($"❌ {result.Message}", result.ErrorCode);
             }
         }
     }
