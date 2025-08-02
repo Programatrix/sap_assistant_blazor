@@ -14,7 +14,7 @@ public partial class ChatViewModel : BaseViewModel
 {
     private readonly IJSRuntime _js;
     private readonly IAssistantService _assistantService;
-    private readonly ChatHistoryService _chatHistoryService;
+    private readonly IChatHistoryService _chatHistoryService;
     private readonly StateContainer _stateContainer;
 
     public ElementReference MessagesContainer { get; set; }
@@ -31,7 +31,7 @@ public partial class ChatViewModel : BaseViewModel
     [ObservableProperty]
     private bool isProcessing;
 
-    public ChatViewModel(IJSRuntime js, IAssistantService assistantService, ChatHistoryService chatHistoryService, StateContainer stateContainer)
+    public ChatViewModel(IJSRuntime js, IAssistantService assistantService, IChatHistoryService chatHistoryService, StateContainer stateContainer)
     {
         _js = js;
         _assistantService = assistantService;
