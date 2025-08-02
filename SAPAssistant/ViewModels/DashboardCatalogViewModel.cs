@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Logging;
 using SAPAssistant.Models;
 using SAPAssistant.Service;
 using SAPAssistant.Service.Interfaces;
@@ -45,8 +44,7 @@ public partial class DashboardCatalogViewModel : BaseViewModel
         KpiCatalogService kpiCatalogService,
         IUserDashboardService userDashboardService,
         DashboardService dashboardService,
-        NotificationService notificationService,
-        ILogger<DashboardCatalogViewModel> logger) : base(notificationService, logger)
+        NotificationService notificationService) : base(notificationService)
     {
         _kpiCatalogService = kpiCatalogService;
         _userDashboardService = userDashboardService;
@@ -117,6 +115,6 @@ public partial class DashboardCatalogViewModel : BaseViewModel
         await ExecuteSafeAsync(async () =>
         {
             await _userDashboardService.AddKpiAsync(copy);
-        }, ex => new ErrorOptions { Message = ex.Message });
+        }, "Error al agregar KPI");
     }
 }

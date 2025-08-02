@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Components;
 using SAPAssistant.Models;
 using SAPAssistant.Exceptions;
 using SAPAssistant.Service;
-using Microsoft.Extensions.Logging;
 
 namespace SAPAssistant.ViewModels;
 
@@ -37,8 +36,7 @@ public partial class LoginViewModel : BaseViewModel
         AuthService authService,
         NavigationManager navigation,
         NotificationService notificationService,
-        StateContainer stateContainer,
-        ILogger<LoginViewModel> logger) : base(notificationService, logger)
+        StateContainer stateContainer) : base(notificationService)
     {
         _authService = authService;
         _navigation = navigation;
