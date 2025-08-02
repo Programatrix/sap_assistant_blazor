@@ -3,15 +3,15 @@ using System.Collections;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
-using SAPAssistant.Service;
+using SAPAssistant.Service.Interfaces;
 
 namespace SAPAssistant.ViewModels;
 
 public abstract partial class BaseViewModel : ObservableObject, INotifyDataErrorInfo
 {
-    protected readonly NotificationService NotificationService;
+    protected readonly INotificationService NotificationService;
     
-    protected BaseViewModel(NotificationService notificationService)
+    protected BaseViewModel(INotificationService notificationService)
     {
         NotificationService = notificationService;
     }

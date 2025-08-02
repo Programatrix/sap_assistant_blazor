@@ -21,7 +21,7 @@ public partial class ConnectionSelectionViewModel : BaseViewModel
         SessionContextService sessionContext,
         IConnectionService connectionService,
         NavigationManager navigation,
-        NotificationService notificationService) : base(notificationService)
+        INotificationService notificationService) : base(notificationService)
     {
         _sessionContext = sessionContext;
         _connectionService = connectionService;

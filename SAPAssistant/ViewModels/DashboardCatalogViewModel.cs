@@ -44,7 +44,7 @@ public partial class DashboardCatalogViewModel : BaseViewModel
         KpiCatalogService kpiCatalogService,
         IUserDashboardService userDashboardService,
         DashboardService dashboardService,
-        NotificationService notificationService) : base(notificationService)
+        INotificationService notificationService) : base(notificationService)
     {
         _kpiCatalogService = kpiCatalogService;
         _userDashboardService = userDashboardService;

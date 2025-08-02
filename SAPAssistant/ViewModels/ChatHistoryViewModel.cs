@@ -20,7 +20,7 @@ public partial class ChatHistoryViewModel : BaseViewModel
     public ChatHistoryViewModel(
         IChatHistoryService chatService,
         NavigationManager navigation,
-        NotificationService notificationService) : base(notificationService)
+        INotificationService notificationService) : base(notificationService)
     {
         _chatService = chatService;
         _navigation = navigation;

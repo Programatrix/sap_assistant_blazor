@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using CommunityToolkit.Mvvm.ComponentModel;
 using SAPAssistant.Service;
+using SAPAssistant.Service.Interfaces;
 
 namespace SAPAssistant.ViewModels;
 
@@ -15,7 +16,7 @@ public partial class DashboardWizardViewModel : BaseViewModel
 
     public DashboardWizardViewModel(
         DashboardService dashboardService,
-        NotificationService notificationService) : base(notificationService)
+        INotificationService notificationService) : base(notificationService)
     {
         _dashboardService = dashboardService;
     }
