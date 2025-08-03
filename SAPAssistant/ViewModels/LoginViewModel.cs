@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
 using SAPAssistant.Models;
 using SAPAssistant.Exceptions;
@@ -45,47 +45,66 @@ public partial class LoginViewModel : BaseViewModel
         _stateContainer = stateContainer;
     }
 
+    /// <summary>
+    /// Maneja el proceso de login con validación visual y notificaciones
+    /// </summary>
     public async Task HandleLogin()
     {
         IsLoading = true;
 
-        UserNameError = string.IsNullOrWhiteSpace(LoginModel.Username);
-        PasswordError = string.IsNullOrWhiteSpace(LoginModel.Password);
-
-        if (!UserNameError && !PasswordError)
+        // 1️⃣ Validación visual
+        ValidateFields();
+        if (UserNameError || PasswordError)
         {
-            var result = await _authService.LoginAsync(LoginModel);
+            IsLoading = false;
+            return; // No mostramos toasts, solo resaltamos campos
+        }
 
-            if (result.Success)
+        // 2️⃣ Llamada al servicio de autenticación
+        var result = await _authService.LoginAsync(LoginModel);
+
+        if (result.Success)
+        {
+            _stateContainer.AuthenticatedUser = result.Data;
+            _navigation.NavigateTo("/");
+        }
+        else
+        {
+            // 3️⃣ Notificación de error de negocio / autenticación
+            var notify = new ResultMessage
             {
-                _stateContainer.AuthenticatedUser = result.Data;
-                _navigation.NavigateTo("/");
-            }
-            else
-            {
-                var notify = new ResultMessage
-                {
-                    Success = result.Success,
-                    Message = result.Message,
-                    ErrorCode = result.ErrorCode,
-                    Type = result.Type
-                };
-                await _notificationService.Notify(notify);
-                PasswordError = true;
-            }
+                Success = result.Success,
+                Message = result.Message,
+                ErrorCode = result.ErrorCode,
+                Type = result.Type
+            };
+
+            await _notificationService.Notify(notify);
+
+            // Marcar solo la contraseña como errónea para feedback visual
+            PasswordError = true;
         }
 
         IsLoading = false;
     }
 
+    /// <summary>
+    /// Alterna la visibilidad de la contraseña
+    /// </summary>
     public void TogglePasswordVisibility() => ShowPassword = !ShowPassword;
 
+    /// <summary>
+    /// Valida que los campos requeridos no estén vacíos
+    /// </summary>
     public void ValidateFields()
     {
         UserNameError = string.IsNullOrWhiteSpace(LoginModel.Username);
         PasswordError = string.IsNullOrWhiteSpace(LoginModel.Password);
     }
 
+    /// <summary>
+    /// Devuelve la clase CSS en función del estado del input
+    /// </summary>
     public string GetInputClass(bool hasError) => hasError ? "input input-error" : "input";
 }
 

@@ -40,4 +40,6 @@
   <data name="CHAT-DELETE-ERROR" xml:space="preserve"><value>Error deleting chat.</value></data>
   <data name="UNKNOWN-MESSAGE-TYPE" xml:space="preserve"><value>Unknown message type.</value></data>
   <data name="NEW-CHAT-TITLE" xml:space="preserve"><value>New chat</value></data>
+  <data name="AUTH-USER-REQUIRED" xml:space="preserve"><value>Username is required.</value></data>
+  <data name="AUTH-PASSWORD-REQUIRED" xml:space="preserve"><value>Password is required.</value></data>
 </root>

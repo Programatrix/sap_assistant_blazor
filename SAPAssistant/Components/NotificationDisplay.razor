@@ -6,18 +6,43 @@
 {
     <div class="toast-container">
         <div class="toast-message @GetCssClass(_message.Type) @(_isClosing ? "toast-hide" : "")">
-            @_message.Message
+
+            <div class="toast-icon">
+                @if (_message.Type == NotificationType.Error)
+                {
+                    <span class="icon">❗</span>
+                }
+                else if (_message.Type == NotificationType.Warning)
+                {
+                    <span class="icon">⚠️</span>
+                }
+                else if (_message.Type == NotificationType.Success)
+                {
+                    <span class="icon">✅</span>
+                }
+                else
+                {
+                    <span class="icon">ℹ️</span>
+                }
+            </div>
+
+            <strong>@GetTitle(_message.Type)</strong>
+            <div>@_message.Message</div>
+
             @if (_message.Type == NotificationType.Error && !string.IsNullOrEmpty(_message.ErrorCode))
             {
                 <div class="error-code">[Código: @_message.ErrorCode]</div>
+                <button class="info-btn" type="button" @onclick="OnMoreInfoClick">
+                    Más información
+                </button>
             }
-            <button class="close-btn" @onclick="ClearMessage">×</button>
         </div>
     </div>
 }
 
 @code {
     [Inject] private INotificationService NotificationService { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
 
     private ResultMessage? _message;
     private bool _isClosing = false;
@@ -49,6 +74,18 @@
         StateHasChanged();
     }
 
+    private async Task OnMoreInfoClick()
+    {
+        // Cerrar el toast inmediatamente
+
+        // Navegar a la página de detalles
+        if (_message?.ErrorCode != null)
+        {
+            Navigation.NavigateTo($"/error-details/{_message.ErrorCode}");
+        }
+        await ClearMessage();
+    }
+
     private string GetCssClass(NotificationType type) => type switch
     {
         NotificationType.Success => "toast-success",
@@ -58,8 +95,18 @@
         _ => string.Empty
     };
 
+    private string GetTitle(NotificationType type) => type switch
+    {
+        NotificationType.Success => "Éxito",
+        NotificationType.Error => "Error",
+        NotificationType.Info => "Información",
+        NotificationType.Warning => "Advertencia",
+        _ => "Notificación"
+    };
+
     public void Dispose()
     {
         NotificationService.OnNotify -= HandleNotification;
     }
 }
+

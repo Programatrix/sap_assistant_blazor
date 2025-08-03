@@ -1,0 +1,45 @@
+﻿@page "/error-details/{ErrorCode?}"
+@inject NavigationManager Navigation
+
+<div class="error-page">
+    <div class="error-card @GetCssClass()">
+        <div class="icon">@GetIcon()</div>
+        <h2>@GetTitle()</h2>
+        <p>@GetMessage()</p>
+
+        @if (!string.IsNullOrEmpty(ErrorCode))
+        {
+            <p class="error-code">[Código: @ErrorCode]</p>
+        }
+
+        <button class="primary-btn" @onclick="GoHome">Volver al inicio</button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? ErrorCode { get; set; }
+
+    private string GetTitle() =>
+        ErrorCode?.StartsWith("NET") == true ? "Problema de conexión" :
+        ErrorCode?.StartsWith("AUTH") == true ? "Error de autenticación" :
+        "Ocurrió un error";
+
+    private string GetMessage() =>
+        ErrorCode?.StartsWith("NET") == true
+            ? "Parece que hay un problema con la red o el servidor."
+            : "Intenta nuevamente o contacta al administrador.";
+
+    private string GetIcon() =>
+        ErrorCode?.StartsWith("NET") == true ? "🌐" :
+        ErrorCode?.StartsWith("AUTH") == true ? "🔒" : "⚠️";
+
+    private string GetCssClass() =>
+        ErrorCode?.StartsWith("NET") == true ? "error-net" :
+        ErrorCode?.StartsWith("AUTH") == true ? "error-auth" :
+        "error-generic";
+
+    private void GoHome()
+    {
+        Navigation.NavigateTo("/");
+    }
+}
