@@ -42,4 +42,5 @@
   <data name="NEW-CHAT-TITLE" xml:space="preserve"><value>Nuevo chat</value></data>
   <data name="AUTH-USER-REQUIRED" xml:space="preserve"><value>El usuario es obligatorio.</value></data>
   <data name="AUTH-PASSWORD-REQUIRED" xml:space="preserve"><value>La contraseña es obligatoria.</value></data>
+  <data name="NET-ERROR" xml:space="preserve"><value>No se ha podido conectar con el servidor. Inténtalo más tarde.</value></data>
 </root>

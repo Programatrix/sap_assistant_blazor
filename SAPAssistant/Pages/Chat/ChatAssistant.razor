@@ -1,4 +1,4 @@
-@page "/"
+
 @page "/chat/{chatId}"
 @layout ChatLayout
 @using Microsoft.AspNetCore.Components.Web
@@ -20,7 +20,7 @@
     </div>
 
     <div class="input-area">
-        <SearchBar @bind-SearchText="VM.UserInput" OnSearch="VM.SendMessage" Disabled="VM.IsProcessing" />
+        <SearchBar @bind-SearchText="VM.UserInput" OnSearch="@(msg => VM.SendMessage(msg, false))" Disabled="VM.IsProcessing" />
         @if (VM.IsProcessing)
         {
             <div class="loading-spinner">⌛ Procesando...</div>

@@ -29,9 +29,9 @@ public partial class LoginViewModel : BaseViewModel
     [ObservableProperty]
     private bool showPassword;
 
-    public bool CanSubmit =>
-        !string.IsNullOrWhiteSpace(LoginModel.Username) &&
-        !string.IsNullOrWhiteSpace(LoginModel.Password);
+    //public bool CanSubmit =>
+    //    !string.IsNullOrWhiteSpace(LoginModel.Username) &&
+    //    !string.IsNullOrWhiteSpace(LoginModel.Password);
 
     public LoginViewModel(
         AuthService authService,

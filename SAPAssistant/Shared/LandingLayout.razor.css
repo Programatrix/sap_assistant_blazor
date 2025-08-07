@@ -1,19 +1,20 @@
-﻿/* Marca */
+﻿/* ===================== */
+/* Logo / Marca           */
+/* ===================== */
 .brand-hover {
     color: #0d6efd;
-    transition: color 0.3s ease;
     text-decoration: none;
+    transition: color 0.3s ease;
 }
 
     .brand-hover:hover {
         color: #0a58ca; /* Azul más oscuro al hover */
     }
 
-/* Icono */
 .brand-icon path {
     fill: #0d6efd;
-    transition: transform 0.3s ease, fill 0.3s ease;
     transform-origin: bottom;
+    transition: transform 0.3s ease, fill 0.3s ease;
 }
 
 .brand-hover:hover .brand-icon path {
@@ -21,22 +22,19 @@
     fill: #0a58ca;
 }
 
-/* Links del menú */
+/* ===================== */
+/* Links del menú         */
+/* ===================== */
 .nav-link {
     font-weight: 500;
     margin-left: 1rem;
     position: relative;
     color: #333;
-    transition: color 0.3s ease;
+    transition: color 0.3s ease, background-color 0.3s ease;
+    border-radius: 6px; /* Para que el hover suave se vea mejor */
 }
 
-    .nav-link:focus,
-    .nav-link:active {
-        outline: none;
-        box-shadow: none;
-        background: transparent !important;
-    }
-
+    /* Efecto de subrayado animado */
     .nav-link::after {
         content: "";
         position: absolute;
@@ -48,10 +46,27 @@
         transition: width 0.3s ease;
     }
 
-    .nav-link:hover {
+    /* Hover: color + subrayado + fondo sutil */
+    .nav-link:hover,
+    .nav-link:focus {
         color: #0d6efd;
+        background-color: rgba(13, 110, 253, 0.08); /* Azul translúcido */
+        outline: none !important;
+        box-shadow: none !important;
     }
 
         .nav-link:hover::after {
             width: 100%;
         }
+
+    /* Quita el rectángulo negro de accesibilidad */
+    .nav-link:focus-visible {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+/* Asegura que los nav-item tampoco pinten fondo */
+.navbar-light .navbar-nav .nav-item:hover,
+.navbar-light .navbar-nav .nav-item:focus {
+    background-color: transparent !important;
+}

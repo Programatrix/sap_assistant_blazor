@@ -1,74 +1,63 @@
 ﻿@page "/playground"
+@using SAPAssistant.ViewModels
+@inject ChatViewModel VM
 
 <section id="playground" class="d-flex justify-content-center align-items-center py-5" style="min-height:100vh;">
-    <div class="card-chat text-center">
+    <div class="card-chat text-center w-100" style="max-width:600px;">
         <h2 class="fw-bold mb-2">Prueba el Asistente SAP B1</h2>
         <p class="mb-4 text-muted">
             Hazle una consulta a nuestro asistente y descubre cómo puede ayudarte.
         </p>
 
         <!-- Contenedor del chat -->
-        <div class="chat-container border rounded p-3 mb-3" @ref="chatBox">
-            @foreach (var msg in Messages)
+        <div class="chat-container border rounded p-3 mb-3"
+             style="max-height:400px; overflow-y:auto;"
+             @ref="VM.MessagesContainer">
+            @foreach (var msg in VM.Messages)
             {
-                <div class="chat-bubble @(msg.IsUser ? "user" : "bot")">
-                    @msg.Text
-                </div>
+                <DynamicComponent Type="@VM.GetComponentType(msg)" Parameters="VM.GetParameters(this, msg)" />
             }
         </div>
 
         <!-- Input y botón -->
         <div class="input-group">
-            <input @bind="UserMessage" @bind:event="oninput"
+            <input @bind="VM.UserInput" @bind:event="oninput"
                    @onkeydown="HandleEnter"
                    type="text" class="form-control"
                    placeholder="Escribe tu consulta aquí..." />
-            <button class="btn btn-primary" @onclick="SendMessage">Enviar</button>
+            <button class="btn btn-primary" @onclick="SendCurrentMessage" disabled="@VM.IsProcessing">Enviar</button>
         </div>
+
+        @if (VM.IsProcessing)
+        {
+            <div class="text-muted mt-2">⌛ Procesando...</div>
+        }
     </div>
 </section>
 
 @code {
-    private string UserMessage { get; set; } = "";
-    private List<Message> Messages { get; set; } = new()
+    private async Task SendCurrentMessage()
     {
-        new Message { Text = "👋 ¡Hola! ¿Sobre qué datos de tu negocio quieres información?", IsUser = false }
-    };
+        var message = VM.UserInput;
+        if (string.IsNullOrWhiteSpace(message)) return;
 
-    private ElementReference chatBox;
-
-    private async Task SendMessage()
-    {
-        if (string.IsNullOrWhiteSpace(UserMessage)) return;
-
-        Messages.Add(new Message { Text = UserMessage, IsUser = true });
-        var userText = UserMessage;
-        UserMessage = "";
-
-        await ScrollToBottom();
-
-        // Simulación de respuesta
-        await Task.Delay(1000);
-        Messages.Add(new Message { Text = "Procesando tu solicitud... 📊", IsUser = false });
-        await ScrollToBottom();
+        await VM.SendMessage(message,true);
+        VM.UserInput = string.Empty;
+        StateHasChanged();
     }
 
-    private async Task ScrollToBottom()
+    private async void HandleEnter(KeyboardEventArgs e)
     {
-        await Task.Yield();
-        // Aquí puedes agregar JS Interop si quieres auto-scroll completo
+        if (e.Key == "Enter" && !VM.IsProcessing)
+        {
+            await SendCurrentMessage();
+        }
     }
 
-    private void HandleEnter(KeyboardEventArgs e)
+    protected override async Task OnInitializedAsync()
     {
-        if (e.Key == "Enter")
-            SendMessage();
-    }
-
-    public class Message
-    {
-        public string Text { get; set; }
-        public bool IsUser { get; set; }
+        await VM.OnInitializedAsync();
+        await VM.OnParametersSetAsync(null); // Nueva sesión
     }
 }
 

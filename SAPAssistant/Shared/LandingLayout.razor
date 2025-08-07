@@ -1,4 +1,6 @@
 ﻿@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthStateProvider
 
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3">
     <div class="container">
@@ -26,6 +28,15 @@
                 <li class="nav-item"><a class="nav-link" href="#testimonios">Testimonios</a></li>
                 <li class="nav-item"><a class="nav-link" href="#playground">Playground</a></li>
                 <li class="nav-item"><a class="nav-link" href="#contacto">Contacto</a></li>
+
+                @if (!isAuthenticated)
+                {
+                    <li class="nav-item">
+                        <a class="btn btn-outline-primary ms-3" href="/login">
+                            Iniciar Sesión
+                        </a>
+                    </li>
+                }
             </ul>
         </div>
     </div>
@@ -38,3 +49,13 @@
 <SAPAssistant.Components.Landing.LandingTestimonios />
 <SAPAssistant.Components.Landing.LandingPlayGround />
 <SAPAssistant.Components.Landing.LandingContact />
+
+@code {
+    private bool isAuthenticated;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+    }
+}

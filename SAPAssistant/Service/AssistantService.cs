@@ -71,10 +71,7 @@ namespace SAPAssistant.Service
                 {
                     Content = JsonContent.Create(new
                     {
-                        mensaje,
-                        modo_demo = true,
-                        chat_id = "demo",
-                        db_type = "HANA"
+                        mensaje
                     })
                 };
 

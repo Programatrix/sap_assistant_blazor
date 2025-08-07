@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Pages\Landing.razor.css" />
     <None Remove="wwwroot\assets\img\hero-dashboard.png" />
     <None Remove="Components\Chat\ErrorMessageComponent.razor.css" />
     <None Remove="Components\Connection\ConnectionManager.css" />

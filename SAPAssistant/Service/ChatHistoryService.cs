@@ -6,7 +6,7 @@ using SAPAssistant.Service.Interfaces;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Localization;
-using SAPAssistant.Resources;
+using SAPAssistant;
 
 namespace SAPAssistant.Service
 {

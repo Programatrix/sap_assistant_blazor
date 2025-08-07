@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using SAPAssistant.Service.Interfaces;
 
 using Microsoft.Extensions.Localization;
-using SAPAssistant.Resources;
+using SAPAssistant;
 
 namespace SAPAssistant.Service
 {

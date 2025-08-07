@@ -10,7 +10,7 @@ using System.Text.Json;
 using SAPAssistant.Exceptions;
 using ChatResultMessage = SAPAssistant.Models.Chat.ResultMessage;
 using Microsoft.Extensions.Localization;
-using SAPAssistant.Resources;
+using SAPAssistant;
 
 namespace SAPAssistant.ViewModels;
 
@@ -139,7 +139,7 @@ public partial class ChatViewModel : BaseViewModel
         _stateContainer.CurrentChat = CurrentSession;
     }
 
-    public async Task SendMessage(string message)
+    public async Task SendMessage(string message, bool isDemo)
     {
         if (string.IsNullOrWhiteSpace(message) || IsProcessing) return;
 
@@ -154,8 +154,10 @@ public partial class ChatViewModel : BaseViewModel
         Messages.Add(userMsg);
 
         try
-        {
-            var resultado = await _assistantService.ConsultarAsync(message, CurrentSession!.Id);
+        {            
+            QueryResponse? resultado = isDemo
+            ? await _assistantService.ConsultarDemoAsync(message)
+            : await _assistantService.ConsultarAsync(message, CurrentSession!.Id);
 
             MessageBase responseMsg = resultado?.Tipo switch
             {

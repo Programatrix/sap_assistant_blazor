@@ -7,7 +7,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Localization;
-using SAPAssistant.Resources;
+using SAPAssistant;
 
 namespace SAPAssistant.Service
 {
@@ -57,6 +57,8 @@ namespace SAPAssistant.Service
             }
             catch (HttpRequestException)
             {
+                // Error de red: servidor no accesible o timeout
+                //_logger.LogError(ex, "Error de red durante el login.");
                 const string code = "NET-ERROR";
                 return ResultMessage<LoginResponse>.Fail(_localizer[code], code);
             }

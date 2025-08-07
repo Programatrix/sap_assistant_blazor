@@ -42,4 +42,6 @@
   <data name="NEW-CHAT-TITLE" xml:space="preserve"><value>New chat</value></data>
   <data name="AUTH-USER-REQUIRED" xml:space="preserve"><value>Username is required.</value></data>
   <data name="AUTH-PASSWORD-REQUIRED" xml:space="preserve"><value>Password is required.</value></data>
+  <data name="NET-ERROR" xml:space="preserve"><value>Could not connect to the server. Please try again later.</value></data>
+
 </root>
