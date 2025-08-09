@@ -1,79 +1,138 @@
-﻿/* Fondo con degradado */
-body {
-    background: linear-gradient(135deg, #f0f2f5, #e6ebf1);
+﻿/* Fondo de la página del playground: usa gradiente suave acorde a la landing */
+.playground-section {
+    min-height: 100vh;
+    background: radial-gradient(1200px 600px at 20% -10%, #eef2ff, transparent 60%), linear-gradient(135deg, #f3f5f9, #e9eef7);
 }
 
-/* Contenedor del chat */
+/* Tarjeta principal */
 .card-chat {
-    background: white;
+    background: #fff;
     border-radius: 20px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 16px 40px rgba(2,6,23,.08);
     padding: 30px;
     width: 100%;
-    max-width: 500px;
+    max-width: 640px;
 }
+
+/* Sugerencias rápidas */
+.quick-prompts {
+    display: flex;
+    gap: .5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+    .quick-prompts .btn {
+        border-radius: 999px;
+        border-color: rgba(2,6,23,.16);
+        color: #475569;
+        background: #fff;
+    }
+
+        .quick-prompts .btn:hover {
+            color: #0d6efd;
+            border-color: #0d6efd33
+        }
 
 /* Área de mensajes */
 .chat-container {
-    height: 350px;
+    height: 380px;
     overflow-y: auto;
-    background-color: #f8f9fa;
+    background: #f8fafc;
     display: flex;
     flex-direction: column;
+    gap: .5rem;
+    border-color: rgba(2,6,23,.08) !important;
 }
 
-/* Burbujas */
+    /* Scrollbar sutil */
+    .chat-container::-webkit-scrollbar {
+        width: 10px
+    }
+
+    .chat-container::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 8px
+    }
+
+    .chat-container:hover::-webkit-scrollbar-thumb {
+        background: #94a3b8
+    }
+
+/* Burbujas (reutiliza tus clases user/bot) */
 .chat-bubble {
-    padding: 10px 15px;
-    margin-bottom: 10px;
+    padding: 10px 14px;
+    margin: 0;
     max-width: 80%;
-    animation: fadeIn 0.3s ease-in;
+    animation: fadeIn .25s ease-in;
     text-align: left;
+    border-radius: 14px;
+    line-height: 1.45;
+    box-shadow: 0 6px 16px rgba(2,6,23,.06);
 }
 
     .chat-bubble.user {
-        background-color: #0d6efd;
-        color: white;
+        background: #0d6efd;
+        color: #fff;
         align-self: flex-end;
         margin-left: auto;
-        border-radius: 15px 15px 0 15px;
+        border-radius: 14px 14px 2px 14px;
     }
 
     .chat-bubble.bot {
-        background-color: #f1f3f5;
-        color: #212529;
+        background: #eef2ff;
+        color: #0f172a;
         align-self: flex-start;
         margin-right: auto;
-        border-radius: 15px 15px 15px 0;
+        border-radius: 14px 14px 14px 2px;
     }
 
 /* Input y botón */
 .input-group {
     position: sticky;
     bottom: 0;
-    background: white;
-    border-top: 1px solid #eee;
+    background: #fff;
     padding-top: 10px;
 }
 
+/* Botón primario con micro‑interacción */
 .btn-primary {
     border-radius: 0 10px 10px 0;
-    transition: 0.2s;
+    transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease;
+    box-shadow: 0 8px 22px rgba(13,110,253,.22);
 }
 
     .btn-primary:hover {
-        background-color: #0b5ed7;
+        transform: translateY(-1px);
+        box-shadow: 0 12px 28px rgba(13,110,253,.28)
     }
 
-/* Animación */
+    .btn-primary:disabled {
+        opacity: .6;
+        box-shadow: none;
+        transform: none
+    }
+
+/* Animación de aparición */
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(8px);
     }
 
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* Mobile */
+@media (max-width:576px) {
+    .card-chat {
+        padding: 22px
+    }
+
+    .chat-container {
+        height: 320px
     }
 }

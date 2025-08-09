@@ -1,0 +1,72 @@
+﻿@using Microsoft.JSInterop
+@inject IJSRuntime JS
+
+<section id="faq" class="faq-section py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Preguntas Frecuentes</h2>
+            <p class="text-muted">Resolvemos las dudas más comunes sobre SAP B1 Assistant</p>
+        </div>
+
+        <div class="accordion" id="faqAccordion">
+            <!-- 1 -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="faq1">
+                    <button class="accordion-button collapsed" type="button"
+                            @onclick='@(() => ToggleAsync("collapse1"))'
+                            aria-controls="collapse1" aria-expanded="false">
+                        ¿Necesito licencias adicionales de SAP Business One?
+                    </button>
+                </h2>
+                <div id="collapse1" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        No. Nos conectamos a tu instancia existente mediante usuarios con permisos y el SDK/Service Layer según tu versión.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2 -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="faq2">
+                    <button class="accordion-button collapsed" type="button"
+                            @onclick='@(() => ToggleAsync("collapse2"))'
+                            aria-controls="collapse2" aria-expanded="false">
+                        ¿Dónde se alojan los datos y cómo se protegen?
+                    </button>
+                </h2>
+                <div id="collapse2" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        La información permanece en tu infraestructura o en la nube que elijas. Cifrado en tránsito (TLS 1.2+) y en reposo.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3 -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="faq3">
+                    <button class="accordion-button collapsed" type="button"
+                            @onclick='@(() => ToggleAsync("collapse3"))'
+                            aria-controls="collapse3" aria-expanded="false">
+                        ¿Cuánto tarda la implementación?
+                    </button>
+                </h2>
+                <div id="collapse3" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        Piloto en 3–5 días hábiles. Producción típica en 2–3 semanas.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        await JS.InvokeVoidAsync("faqInit", "faqAccordion");
+    }
+
+    private async Task ToggleAsync(string targetId)
+      => await JS.InvokeVoidAsync("faqToggle", "faqAccordion", targetId);
+}

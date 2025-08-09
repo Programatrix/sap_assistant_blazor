@@ -2,17 +2,32 @@
 @using SAPAssistant.ViewModels
 @inject ChatViewModel VM
 
-<section id="playground" class="d-flex justify-content-center align-items-center py-5" style="min-height:100vh;">
-    <div class="card-chat text-center w-100" style="max-width:600px;">
+<section id="playground" class="playground-section d-flex justify-content-center align-items-center py-5">
+    <div class="card-chat text-center w-100">
         <h2 class="fw-bold mb-2">Prueba el Asistente SAP B1</h2>
-        <p class="mb-4 text-muted">
-            Hazle una consulta a nuestro asistente y descubre cómo puede ayudarte.
-        </p>
+        <p class="mb-4 text-muted">Hazle una consulta a nuestro asistente y descubre cómo puede ayudarte.</p>
 
-        <!-- Contenedor del chat -->
-        <div class="chat-container border rounded p-3 mb-3"
-             style="max-height:400px; overflow-y:auto;"
-             @ref="VM.MessagesContainer">
+        <!-- Sugerencias rápidas (opcional) -->
+        <div class="quick-prompts mb-3">
+            <button class="btn btn-outline-secondary btn-sm"
+                    @onclick='@(() => SendQuickAsync("¿Ventas del mes por artículo?"))'>
+                Ventas del mes
+            </button>
+
+            <button class="btn btn-outline-secondary btn-sm"
+                    @onclick='@(() => SendQuickAsync("Top 5 clientes por facturación"))'>
+                Top clientes
+            </button>
+
+            <button class="btn btn-outline-secondary btn-sm"
+                    @onclick='@(() => SendQuickAsync("Órdenes de producción atrasadas"))'>
+                OP atrasadas
+            </button>
+        </div>
+
+
+        <!-- Chat -->
+        <div class="chat-container border rounded p-3 mb-3" @ref="VM.MessagesContainer">
             @foreach (var msg in VM.Messages)
             {
                 <DynamicComponent Type="@VM.GetComponentType(msg)" Parameters="VM.GetParameters(this, msg)" />
@@ -23,14 +38,20 @@
         <div class="input-group">
             <input @bind="VM.UserInput" @bind:event="oninput"
                    @onkeydown="HandleEnter"
-                   type="text" class="form-control"
-                   placeholder="Escribe tu consulta aquí..." />
-            <button class="btn btn-primary" @onclick="SendCurrentMessage" disabled="@VM.IsProcessing">Enviar</button>
+                   type="text" class="form-control" placeholder="Escribe tu consulta aquí…"
+                   aria-label="Escribe tu consulta" />
+            <button class="btn btn-primary d-inline-flex align-items-center gap-2" @onclick="SendCurrentMessage" disabled="@VM.IsProcessing" aria-label="Enviar">
+                @if (VM.IsProcessing)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                }
+                <span>Enviar</span>
+            </button>
         </div>
 
         @if (VM.IsProcessing)
         {
-            <div class="text-muted mt-2">⌛ Procesando...</div>
+            <div class="text-muted mt-2">⌛ Procesando…</div>
         }
     </div>
 </section>
@@ -40,18 +61,22 @@
     {
         var message = VM.UserInput;
         if (string.IsNullOrWhiteSpace(message)) return;
-
-        await VM.SendMessage(message,true);
+        await VM.SendMessage(message, true);
         VM.UserInput = string.Empty;
         StateHasChanged();
+    }
+
+    private async Task SendQuickAsync(string q)
+    {
+        if (VM.IsProcessing) return;
+        VM.UserInput = q;
+        await SendCurrentMessage();
     }
 
     private async void HandleEnter(KeyboardEventArgs e)
     {
         if (e.Key == "Enter" && !VM.IsProcessing)
-        {
             await SendCurrentMessage();
-        }
     }
 
     protected override async Task OnInitializedAsync()
@@ -60,4 +85,3 @@
         await VM.OnParametersSetAsync(null); // Nueva sesión
     }
 }
-

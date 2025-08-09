@@ -1,0 +1,21 @@
+﻿/* Quitar color azul de Bootstrap al expandir */
+.faq-section {
+    --bs-accordion-active-bg: #fff;
+    --bs-accordion-active-color: #0f172a;
+    --bs-accordion-btn-focus-box-shadow: 0 0 0 .2rem rgba(13,110,253,.15);
+}
+
+    .faq-section .accordion-button:not(.collapsed) {
+        background: #fff !important;
+        color: #0f172a !important;
+    }
+
+    /* Chevron uniforme */
+    .faq-section .accordion-button::after {
+        filter: grayscale(1) opacity(.6);
+    }
+
+    .faq-section .accordion-button:not(.collapsed)::after {
+        transform: rotate(-180deg);
+        filter: grayscale(1) opacity(.8);
+    }

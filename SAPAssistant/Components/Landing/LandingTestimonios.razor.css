@@ -1,11 +1,114 @@
-﻿#testimonios blockquote {
-    font-size: 1.1rem;
-    font-style: italic;
-    color: #555;
-    max-width: 600px;
+﻿/* Contenedor de la tarjeta */
+#testimonios {
+    background: #f8f9fa;
 }
 
-#testimonios img {
-    object-fit: cover;
-    border: 3px solid #0d6efd;
+    #testimonios h2 {
+        font-weight: 800;
+    }
+
+/* Tarjeta elegante */
+.testimonial-card {
+    max-width: 720px;
+    background: #fff;
+    border: 1px solid rgba(2,6,23,.08);
+    border-radius: 20px;
+    padding: 32px 28px;
+    box-shadow: 0 12px 32px rgba(2,6,23,.06);
+    position: relative;
+}
+
+    /* Avatar con aro */
+    .testimonial-card .avatar {
+        width: 96px;
+        height: 96px;
+        object-fit: cover;
+        border-radius: 50%;
+        display: block;
+        margin: 0 auto 14px auto;
+        border: 3px solid #0d6efd;
+        box-shadow: 0 8px 20px rgba(13,110,253,.25);
+    }
+
+    /* Blockquote con comillas decorativas */
+    .testimonial-card blockquote {
+        font-size: clamp(1rem, 2.2vw, 1.25rem);
+        font-style: italic;
+        color: #0f172a;
+        margin: 10px auto 14px auto;
+        line-height: 1.6;
+        max-width: 58ch;
+        position: relative;
+        padding: 0 18px;
+    }
+
+        .testimonial-card blockquote::before,
+        .testimonial-card blockquote::after {
+            content: "“";
+            position: absolute;
+            top: -10px;
+            left: -2px;
+            font-size: 2rem;
+            color: #2563EB22;
+        }
+
+        .testimonial-card blockquote::after {
+            content: "”";
+            right: -2px;
+            left: auto;
+            bottom: -18px;
+            top: auto;
+        }
+
+    /* Autor/empresa */
+    .testimonial-card figcaption {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        align-items: center;
+    }
+
+    .testimonial-card .name {
+        font-weight: 800;
+        color: #0f172a
+    }
+
+    .testimonial-card .company {
+        color: #64748B;
+        font-size: .95rem
+    }
+
+/* Indicadores tipo dot */
+#carouselTestimonios .carousel-indicators {
+    bottom: -36px;
+}
+
+    #carouselTestimonios .carousel-indicators [data-bs-target] {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #c7d2fe;
+        border: 0;
+        opacity: 1;
+    }
+
+    #carouselTestimonios .carousel-indicators .active {
+        background: #0d6efd;
+    }
+
+/* Controles más visibles en fondo claro */
+#carouselTestimonios .carousel-control-prev-icon,
+#carouselTestimonios .carousel-control-next-icon {
+    filter: invert(1) grayscale(1) opacity(.7);
+}
+
+/* Reduce motion: sin autoplay */
+@media (prefers-reduced-motion: reduce) {
+    #carouselTestimonios {
+        animation: none;
+    }
+
+        #carouselTestimonios[data-bs-ride="carousel"] {
+            animation: none;
+        }
 }

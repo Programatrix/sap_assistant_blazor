@@ -2,45 +2,46 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider AuthStateProvider
 
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3">
+<nav class="navbar navbar-expand-lg navbar-light nav-glass fixed-top">
     <div class="container">
         <!-- Logo con ícono SVG -->
-        <a class="navbar-brand fw-bold d-flex align-items-center brand-hover" href="/">
-            <!-- Ícono SVG -->
+        <a class="navbar-brand fw-bold d-flex align-items-center brand-hover" href="#top">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28"
-                 viewBox="0 0 24 24" class="me-2 brand-icon">
+                 viewBox="0 0 24 24" class="me-2 brand-icon" aria-hidden="true" focusable="false">
                 <path d="M3 17h2v-7H3v7zm4 0h2v-4H7v4zm4 0h2V7h-2v10zm4 0h2V4h-2v13zm4 0h2v-9h-2v9z" />
             </svg>
             <span>SAP B1 Assistant</span>
         </a>
 
         <!-- Botón hamburguesa en móvil -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler shadow-none" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+                aria-label="Menú">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <!-- Menú de navegación -->
+        <!-- Menú -->
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
+            <ul class="navbar-nav ms-auto align-items-lg-center">
                 <li class="nav-item"><a class="nav-link" href="#caracteristicas">Características</a></li>
                 <li class="nav-item"><a class="nav-link" href="#casos">Casos de Uso</a></li>
                 <li class="nav-item"><a class="nav-link" href="#testimonios">Testimonios</a></li>
                 <li class="nav-item"><a class="nav-link" href="#playground">Playground</a></li>
-                <li class="nav-item"><a class="nav-link" href="#contacto">Contacto</a></li>
+                <li class="nav-item me-lg-2"><a class="nav-link" href="#contacto">Contacto</a></li>
 
                 @if (!isAuthenticated)
                 {
                     <li class="nav-item">
-                        <a class="btn btn-outline-primary ms-3" href="/login">
-                            Iniciar Sesión
-                        </a>
+                        <a class="btn btn-login ms-lg-2 mt-3 mt-lg-0" href="/login">Iniciar Sesión</a>
                     </li>
                 }
             </ul>
         </div>
     </div>
 </nav>
+
+<!-- Offset para contenido (por navbar fixed) -->
+<div class="nav-offset"></div>
 
 <!-- Secciones -->
 <SAPAssistant.Components.Landing.LandingHero />
@@ -49,6 +50,8 @@
 <SAPAssistant.Components.Landing.LandingTestimonios />
 <SAPAssistant.Components.Landing.LandingPlayGround />
 <SAPAssistant.Components.Landing.LandingContact />
+<SAPAssistant.Components.Landing.LandingFAQ />
+<SAPAssistant.Components.Landing.LandingFooter />
 
 @code {
     private bool isAuthenticated;

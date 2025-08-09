@@ -1,33 +1,100 @@
-﻿.landing-hero {
-    min-height: 90vh;
-    background: linear-gradient(90deg, #4f46e5 0%, #06b6d4 100%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
+﻿/* Fondo + overlay */
+.landing-hero {
+    min-height: 88vh;
+    background: linear-gradient(115deg,#4f46e5 0%, #0ea5e9 50%, #06b6d4 100%);
+    padding: clamp(48px,6vw,96px) 0;
+    position: relative;
+    overflow: hidden;
 }
 
-    .landing-hero h1,
-    .landing-hero p {
-        color: #fff;
+    .landing-hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(1200px 600px at 20% -10%, rgba(255,255,255,.18), transparent 60%), radial-gradient(900px 500px at 100% 10%, rgba(0,0,0,.15), transparent 50%);
     }
 
-    /* Imagen del Hero */
-    .landing-hero img {
-        max-width: 900px;
-        width: 100%;
-        animation: fadeInUp 1s ease-in-out;
+    .landing-hero > .container {
+        position: relative;
+        z-index: 1
     }
 
-/* Animación de aparición */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
+/* Tipografía fluida */
+.hero-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    line-height: 1.15;
+    color: #fff
+}
+
+.hero-subtitle {
+    color: rgba(255,255,255,.92);
+    max-width: 42rem;
+    margin-inline: auto
+}
+
+/* Botones */
+.hero-btn-primary {
+    box-shadow: 0 10px 26px rgba(255,255,255,.25);
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+
+    .hero-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 34px rgba(255,255,255,.35)
     }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
+.hero-btn-secondary {
+    transition: transform .18s ease, box-shadow .18s ease
+}
+
+    .hero-btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(255,255,255,.25)
+    }
+
+/* Mockup flotante */
+.hero-visual {
+    max-width: 560px;
+    aspect-ratio: 16/10;
+    border-radius: 20px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.22);
+    box-shadow: 0 40px 80px rgba(2,6,23,.35), inset 0 1px 0 rgba(255,255,255,.25);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    transform: translateY(0);
+    animation: float 6s ease-in-out infinite;
+}
+
+.hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: drop-shadow(0 12px 24px rgba(0,0,0,.25));
+}
+
+/* Flotación sutil */
+@keyframes float {
+    0%,100% {
+        transform: translateY(0)
+    }
+
+    50% {
+        transform: translateY(-10px)
+    }
+}
+
+/* Respeto a reduce motion */
+@media (prefers-reduced-motion: reduce) {
+    .hero-visual {
+        animation: none
+    }
+}
+
+/* Mobile tweaks */
+@media (max-width: 992px) {
+    .hero-visual {
+        margin-top: 12px
     }
 }

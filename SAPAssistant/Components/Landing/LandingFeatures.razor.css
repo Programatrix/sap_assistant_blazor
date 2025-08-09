@@ -29,19 +29,29 @@
         color: #555;
     }
 
-    /* ===== Hover Effects ===== */
+    /* Hover Effects en la tarjeta */
     .feature-card:hover {
         transform: translateY(-8px);
         box-shadow: 0 12px 22px rgba(0, 0, 0, 0.15);
         border: 1px solid #0d6efd;
     }
 
-.icon-hover {
-    transition: transform 0.3s ease;
+/* ===== Icono en Badge (sin sombra) ===== */
+.icon-badge {
+    display: inline-grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    color: #2563EB;
+    background: rgba(37, 99, 235, .12);
+    margin-bottom: 6px;
+    transition: transform .18s ease, background .18s ease;
 }
 
-.feature-card:hover .icon-hover {
-    transform: scale(1.15);
+.feature-card:hover .icon-badge {
+    transform: translateY(-2px);
+    background: rgba(37, 99, 235, .18);
 }
 
 /* ===== Responsive ===== */
