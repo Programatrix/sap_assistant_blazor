@@ -1,0 +1,8 @@
+﻿<label class="form-label">@ChildContent @if (Required)
+	{
+		<span class="text-danger">*</span>
+	}</label>
+@code {
+	[Parameter] public bool Required { get; set; }
+	[Parameter] public RenderFragment ChildContent { get; set; }
+}

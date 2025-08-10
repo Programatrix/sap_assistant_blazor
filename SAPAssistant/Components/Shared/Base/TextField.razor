@@ -1,0 +1,39 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+
+<div class="mb-3">
+    @if (!string.IsNullOrWhiteSpace(Label))
+    {
+        <label class="form-label">
+            @Label @if (Required)
+            {
+                <span class="text-danger">*</span>
+            }
+        </label>
+    }
+
+    <InputText class="form-control"
+               @bind-Value="Value"
+               @bind-Value:event="oninput"
+               placeholder="@Placeholder"
+               @attributes="AdditionalAttributes" />
+
+    @if (!string.IsNullOrWhiteSpace(Help))
+    {
+        <div class="form-text">@Help</div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; }
+    [Parameter] public bool Required { get; set; }
+    [Parameter] public string Placeholder { get; set; }
+    [Parameter] public string Help { get; set; }
+
+    // binding estándar
+    [Parameter] public string Value { get; set; }
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    // atributos extra: type, autocomplete, maxlength, etc.
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> AdditionalAttributes { get; set; }
+}

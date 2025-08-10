@@ -1,0 +1,31 @@
+﻿@* /Shared/UiCard.razor *@
+<div class="card shadow-sm @Class" style="@Style">
+    @if (!string.IsNullOrWhiteSpace(Title) || Header != null)
+    {
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <div class="fw-semibold">@Title</div>
+            @if (Header != null)
+            {
+                @Header
+            }
+        </div>
+    }
+
+    <div class="card-body">
+        @ChildContent
+    </div>
+
+    @if (Footer != null)
+    {
+        <div class="card-footer">@Footer</div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public RenderFragment? Header { get; set; }
+    [Parameter] public RenderFragment? Footer { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+}

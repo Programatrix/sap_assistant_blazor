@@ -1,0 +1,35 @@
+﻿@* /Shared/UiAlert.razor *@
+@if (Visible)
+{
+    <div class="alert @CssClass d-flex align-items-start" role="alert">
+        @if (!string.IsNullOrEmpty(Icon))
+        {
+            <span class="me-2">@((MarkupString)Icon)</span>
+        }
+        <div class="flex-grow-1">
+            @ChildContent
+        </div>
+        @if (Dismissible)
+        {
+            <button type="button" class="btn-close ms-2" aria-label="Close" @onclick="() => Visible=false"></button>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public string Type { get; set; } = "info"; // primary|success|danger|warning|info|secondary
+    [Parameter] public bool Dismissible { get; set; } = true;
+    [Parameter] public bool Visible { get; set; } = true;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string? Icon { get; set; } // HTML/SVG
+
+    string CssClass => Type switch
+    {
+        "success" => "alert-success",
+        "danger" => "alert-danger",
+        "warning" => "alert-warning",
+        "primary" => "alert-primary",
+        "secondary" => "alert-secondary",
+        _ => "alert-info"
+    };
+}

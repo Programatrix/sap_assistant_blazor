@@ -1,0 +1,66 @@
+﻿@* /Shared/UiModal.razor *@
+@if (Open)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,.5);" @onclick="HandleBackdrop">
+        <div class="modal-dialog @SizeClass modal-dialog-centered" role="document" @onclick:stopPropagation>
+            <div class="modal-content">
+                @if (!string.IsNullOrWhiteSpace(Title) || Header != null)
+                {
+                    <div class="modal-header">
+                        <h5 class="modal-title">@Title</h5>
+                        @if (Header != null)
+                        {
+                            @Header
+                        }
+                        <button type="button" class="btn-close" aria-label="Close" @onclick="Close"></button>
+                    </div>
+                }
+                <div class="modal-body">
+                    @ChildContent
+                </div>
+                <div class="modal-footer">
+                    @if (Footer != null)
+                    {
+                        @Footer
+                    }
+                    else
+                    {
+                        <button class="btn btn-outline-secondary" @onclick="Close">Cancelar</button>
+                        <button class="btn btn-primary" @onclick="Confirm">Aceptar</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string Size { get; set; } = "md"; // sm | md | lg | xl
+    [Parameter] public RenderFragment? Header { get; set; }
+    [Parameter] public RenderFragment? Footer { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public bool CloseOnBackdrop { get; set; } = true;
+    [Parameter] public EventCallback OnConfirm { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    string SizeClass => Size switch
+    {
+        "sm" => "modal-sm",
+        "lg" => "modal-lg",
+        "xl" => "modal-xl",
+        _ => ""
+    };
+
+    Task Close() => SetOpen(false, OnCancel);
+    Task Confirm() => SetOpen(false, OnConfirm);
+
+    async Task HandleBackdrop() { if (CloseOnBackdrop) await Close(); }
+    async Task SetOpen(bool value, EventCallback cb)
+    {
+        Open = value; await OpenChanged.InvokeAsync(Open);
+        if (cb.HasDelegate) await cb.InvokeAsync();
+    }
+}
