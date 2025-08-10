@@ -4,40 +4,35 @@
 
 @if (_message != null && !string.IsNullOrEmpty(_message.Message))
 {
-    <div class="toast-container">
-        <div class="toast-message @GetCssClass(_message.Type) @(_isClosing ? "toast-hide" : "")">
+    <div class="position-fixed top-0 end-0 p-3" style="z-index:1100;">
+        <div class="toast toast-modern align-items-stretch border-0 @GetBgClass(_message.Type) text-white fade @(_isClosing ? "" : "show")"
+             role="alert" aria-live="assertive" aria-atomic="true">
 
-            <div class="toast-icon">
-                @if (_message.Type == NotificationType.Error)
-                {
-                    <span class="icon">❗</span>
-                }
-                else if (_message.Type == NotificationType.Warning)
-                {
-                    <span class="icon">⚠️</span>
-                }
-                else if (_message.Type == NotificationType.Success)
-                {
-                    <span class="icon">✅</span>
-                }
-                else
-                {
-                    <span class="icon">ℹ️</span>
-                }
+            <div class="d-flex">
+                <!-- Icono SVG limpio -->
+                <div class="icon-stack">
+                    @((MarkupString)GetIconSvg(_message.Type))
+                </div>
+
+                <!-- Contenido -->
+                <div class="toast-body">
+                    <div class="fw-semibold mb-1">@GetTitle(_message.Type)</div>
+                    <div class="mb-1">@_message.Message</div>
+
+                    @if (_message.Type == NotificationType.Error && !string.IsNullOrEmpty(_message.ErrorCode))
+                    {
+                        <div class="small text-white-75 mb-2">[Código: @_message.ErrorCode]</div>
+                        <button type="button"
+                                class="btn btn-light btn-sm rounded-pill fw-semibold shadow-sm btn-more"
+                                @onclick="OnMoreInfoClick">
+                            Más información
+                        </button>
+                    }
+                </div>
             </div>
-
-            <strong>@GetTitle(_message.Type)</strong>
-            <div>@_message.Message</div>
-
-            @if (_message.Type == NotificationType.Error && !string.IsNullOrEmpty(_message.ErrorCode))
-            {
-                <div class="error-code">[Código: @_message.ErrorCode]</div>
-                <button class="info-btn" type="button" @onclick="OnMoreInfoClick">
-                    Más información
-                </button>
-            }
         </div>
     </div>
+
 }
 
 @code {
@@ -45,7 +40,7 @@
     [Inject] private NavigationManager Navigation { get; set; } = default!;
 
     private ResultMessage? _message;
-    private bool _isClosing = false;
+    private bool _isClosing;
 
     protected override void OnInitialized()
     {
@@ -55,20 +50,23 @@
     private async Task HandleNotification(ResultMessage message)
     {
         _message = message;
+
         _ = Task.Run(async () =>
         {
             await Task.Delay(5000);
             await InvokeAsync(ClearMessage);
         });
+
         await InvokeAsync(StateHasChanged);
     }
 
     private async Task ClearMessage()
     {
         if (_message == null) return;
-        _isClosing = true;
+
+        _isClosing = true; // quita "show" -> fade out
         StateHasChanged();
-        await Task.Delay(500);
+        await Task.Delay(300);
         _message = null;
         _isClosing = false;
         StateHasChanged();
@@ -76,23 +74,47 @@
 
     private async Task OnMoreInfoClick()
     {
-        // Cerrar el toast inmediatamente
+        if (!string.IsNullOrEmpty(_message?.ErrorCode))
+            Navigation.NavigateTo($"/error-details/{_message!.ErrorCode}");
 
-        // Navegar a la página de detalles
-        if (_message?.ErrorCode != null)
-        {
-            Navigation.NavigateTo($"/error-details/{_message.ErrorCode}");
-        }
         await ClearMessage();
     }
 
-    private string GetCssClass(NotificationType type) => type switch
+    private string GetBgClass(NotificationType type) => type switch
     {
-        NotificationType.Success => "toast-success",
-        NotificationType.Error => "toast-danger",
-        NotificationType.Info => "toast-info",
-        NotificationType.Warning => "toast-warning",
-        _ => string.Empty
+        NotificationType.Success => "text-bg-success",
+        NotificationType.Error => "text-bg-danger",
+        NotificationType.Info => "text-bg-info",
+        NotificationType.Warning => "text-bg-warning",
+        _ => "text-bg-secondary"
+    };
+
+    // Iconos SVG sutiles (blancos) para cada tipo
+    private string GetIconSvg(NotificationType type) => type switch
+    {
+        NotificationType.Success => @"
+<svg width='22' height='22' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg' class='icon'>
+  <circle cx='12' cy='12' r='11' stroke='white' opacity='.3' stroke-width='2'/>
+  <path d='M7 12.5l3.3 3.3L17 9' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/>
+</svg>",
+        NotificationType.Error => @"
+<svg width='22' height='22' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg' class='icon'>
+  <circle cx='12' cy='12' r='11' stroke='white' opacity='.3' stroke-width='2'/>
+  <path d='M12 7v7' stroke='white' stroke-width='2.2' stroke-linecap='round'/>
+  <circle cx='12' cy='17' r='1.5' fill='white'/>
+</svg>",
+        NotificationType.Warning => @"
+<svg width='22' height='22' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg' class='icon'>
+  <circle cx='12' cy='12' r='11' stroke='white' opacity='.3' stroke-width='2'/>
+  <path d='M12 7v7' stroke='white' stroke-width='2.2' stroke-linecap='round'/>
+  <circle cx='12' cy='17' r='1.5' fill='white'/>
+</svg>",
+        _ => @"
+<svg width='22' height='22' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg' class='icon'>
+  <circle cx='12' cy='12' r='11' stroke='white' opacity='.3' stroke-width='2'/>
+  <path d='M12 10.5c1.93 0 3.5 1.57 3.5 3.5s-1.57 3.5-3.5 3.5-3.5-1.57-3.5-3.5' stroke='white' stroke-width='2' stroke-linecap='round'/>
+  <circle cx='12' cy='7' r='1.6' fill='white'/>
+</svg>"
     };
 
     private string GetTitle(NotificationType type) => type switch
@@ -109,4 +131,3 @@
         NotificationService.OnNotify -= HandleNotification;
     }
 }
-

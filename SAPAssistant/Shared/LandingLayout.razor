@@ -1,6 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
 
 <nav class="navbar navbar-expand-lg navbar-light nav-glass fixed-top">
     <div class="container">
@@ -32,7 +33,7 @@
                 @if (!isAuthenticated)
                 {
                     <li class="nav-item">
-                        <a class="btn btn-login ms-lg-2 mt-3 mt-lg-0" href="/login">Iniciar Sesión</a>
+                        <a class="btn btn-login ms-lg-2 mt-3 mt-lg-0" href="/login?returnUrl=%2Fapp">Iniciar Sesión</a>
                     </li>
                 }
             </ul>
@@ -60,5 +61,11 @@
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+
+        if (isAuthenticated)
+        {
+            // Cambia "/app" por la ruta real de tu programa principal
+            Nav.NavigateTo("/chat", replace: true);
+        }
     }
 }

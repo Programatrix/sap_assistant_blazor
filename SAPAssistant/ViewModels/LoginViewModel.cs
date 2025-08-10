@@ -66,7 +66,7 @@ public partial class LoginViewModel : BaseViewModel
         if (result.Success)
         {
             _stateContainer.AuthenticatedUser = result.Data;
-            _navigation.NavigateTo("/");
+            _navigation.NavigateTo("/chat");
         }
         else
         {
