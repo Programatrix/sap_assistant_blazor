@@ -50,7 +50,7 @@ docker build --no-cache -t asistente-frontend .
 bash
 Copiar
 Editar
-docker run -d -p 5000:80 --name asistente-frontend asistente-frontend
+docker run -d -p 5000:8080 --name asistente-frontend asistente-frontend
 Esto levanta el contenedor y expone la aplicación en el puerto 5000.
 
 🌐 6. Acceder a la aplicación desde el navegador
