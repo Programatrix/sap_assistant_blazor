@@ -95,16 +95,14 @@ public partial class ChatViewModel : BaseViewModel
             };
         }
 
-        if (CurrentSession?.MensajesRaw != null)
+        if (CurrentSession?.Messages  != null)
         {
-            foreach (var msgRaw in CurrentSession.MensajesRaw)
+            foreach (var msgRaw in CurrentSession.Messages)
             {
                 try
                 {
                     var json = JsonSerializer.Serialize(msgRaw);
-                    var tipo = msgRaw.TryGetValue("tipo", out var typeObj)
-                               ? typeObj?.ToString()?.ToLower()
-                               : null;
+                    var tipo = msgRaw.Tipo;
 
                     if (tipo == null) continue;
 

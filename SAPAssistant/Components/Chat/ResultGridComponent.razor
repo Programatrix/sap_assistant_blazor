@@ -1,94 +1,119 @@
 ﻿@using SAPAssistant.Models.Chat
 @inject IJSRuntime JS
 
+<div class="card bg-dark text-light border-0 shadow-sm">
+    <div class="card-header bg-dark border-0 d-flex align-items-center justify-content-between">
+        <h3 class="h5 mb-0">🧠 Resumen generado</h3>
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+            @M.Data.Count @("fila" + (M.Data.Count == 1 ? "" : "s"))
+        </span>
+    </div>
 
-<div class="resultado-panel">
-    <h3>🧠 Resumen generado</h3>
-    <p>@((MarkupString)M.Resumen)</p>
+    <div class="card-body">
+        <p class="text-info">@((MarkupString)M.Resumen)</p>
 
-    <div class="botones-acciones">
-        <button class="toggle-sql-btn" @onclick="() => MostrarSql = !MostrarSql">
-            @(MostrarSql ? "Ocultar consulta SQL" : "Ver consulta SQL")
-        </button>
+        <!-- Toolbar -->
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+            <div class="btn-group" role="group" aria-label="acciones">
+                <button class="btn btn-outline-success btn-sm"
+                        @onclick="() => MostrarSql = !MostrarSql">
+                    @(MostrarSql ? "Ocultar consulta SQL" : "Ver consulta SQL")
+                </button>
+
+                @if (M.Data.Any())
+                {
+                    <button class="btn btn-outline-primary btn-sm" @onclick="ExportarCsv">
+                        Exportar CSV
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" @onclick="CopiarTabla">
+                        Copiar tabla
+                    </button>
+                }
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <label class="text-secondary small mb-0">Vista</label>
+                <select class="form-select form-select-sm bg-dark text-light border-secondary"
+                        @onchange="ChangeViewType" value="@M.ViewType" style="min-width:120px">
+                    <option value="grid">Grid</option>
+                    <option value="cards">Cards</option>
+                    <option value="kpi">KPI</option>
+                    <option value="chart">Chart</option>
+                </select>
+            </div>
+        </div>
+
+        @if (MostrarSql)
+        {
+            <div class="card bg-body-tertiary border-0 mb-3">
+                <div class="card-header d-flex align-items-center justify-content-between py-2">
+                    <span class="fw-semibold">Consulta SQL</span>
+                    <button class="btn btn-sm btn-outline-secondary" @onclick="CopiarSql">Copiar</button>
+                </div>
+                <div class="card-body py-2">
+                    <pre class="mb-0 text-body-emphasis" style="white-space:pre-wrap;">@M.Sql</pre>
+                </div>
+            </div>
+        }
 
         @if (M.Data.Any())
         {
-            <button class="export-btn" @onclick="ExportarCsv">⬇️ Exportar CSV</button>
-            <button class="copy-table-btn" @onclick="CopiarTabla">📋 Copiar tabla</button>
-        }
-        <select class="view-select" @onchange="ChangeViewType" value="@M.ViewType">
-            <option value="grid">Grid</option>
-            <option value="cards">Cards</option>
-            <option value="kpi">KPI</option>
-            <option value="chart">Chart</option>
-        </select>
-    </div>
+            <h4 class="h6 text-info mb-2">📊 Resultados</h4>
 
-    @if (MostrarSql)
-    {
-        <div class="sql-block">
-            <button class="copy-btn" @onclick="CopiarSql" title="Copiar">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M10 1.5A1.5 1.5 0 0 1 11.5 3v10A1.5 1.5 0 0 1 10 14.5H4A1.5 1.5 0 0 1 2.5 13V4.707a1 1 0 0 1 .293-.707l3.207-3.207a1 1 0 0 1 .707-.293H10zm-1 1H7v2.5a.5.5 0 0 1-.5.5H4v7a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-10A.5.5 0 0 0 9 2.5z" />
-                </svg>
-            </button>
-
-            @if (Copiado)
-            {
-                <div class="copiado-alert">✅ Copiada</div>
-            }
-
-            <pre>@M.Sql</pre>
-        </div>
-    }
-
-    @if (M.Data.Any())
-    {
-        <h4>📊 Resultados</h4>
-        <table class="table">
-            <thead>
-                <tr>
-                    @foreach (var col in M.Data[0].Keys)
-                    {
-                        <th>@col</th>
-                    }
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var row in M.Data)
-                {
-                    <tr>
-                        @foreach (var val in row.Values)
+            <div class="table-responsive">
+                <table class="table table-dark table-striped table-hover table-sm align-middle mb-0">
+                    <thead class="table-secondary text-dark">
+                        <tr>
+                            @foreach (var col in M.Data[0].Keys)
+                            {
+                                <th>@col</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in M.Data)
                         {
-                            <td>@val</td>
+                            <tr>
+                                @foreach (var val in row.Values)
+                                {
+                                    var (text, css) = FormatCell(val);
+                                    <td class="@css">@text</td>
+                                }
+                            </tr>
                         }
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
-    else
-    {
-        <p>No se encontraron resultados.</p>
-    }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p class="text-secondary mb-0">No se encontraron resultados.</p>
+        }
+    </div>
 </div>
+
+@* Alert Bootstrap fijo para feedback (copiado / exportado) *@
+@if (AlertText is not null)
+{
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index:1100;">
+        <div class="alert alert-success py-2 px-3 mb-0 shadow-sm" role="alert">
+            @AlertText
+        </div>
+    </div>
+}
 
 @code {
     [Parameter] public MessageBase Message { get; set; }
     [Parameter] public EventCallback<string> OnViewTypeChange { get; set; }
     private ResultMessage M => (ResultMessage)Message;
 
-    private bool MostrarSql { get; set; } = false;
-    private bool Copiado { get; set; } = false;
+    private bool MostrarSql { get; set; }
+    private string? AlertText { get; set; }
 
     private async Task CopiarSql()
     {
         await JS.InvokeVoidAsync("navigator.clipboard.writeText", M.Sql);
-        Copiado = true;
-        StateHasChanged();
-        await Task.Delay(2000);
-        Copiado = false;
-        StateHasChanged();
+        await ShowAlert("✅ SQL copiado");
     }
 
     private async Task CopiarTabla()
@@ -99,16 +124,10 @@
         var rows = M.Data.Select(row =>
             string.Join("\t", row.Values.Select(v => v?.ToString()?.Replace("\t", " ") ?? ""))
         );
+        var full = string.Join("\n", new[] { headers }.Concat(rows));
 
-        var fullText = string.Join("\n", new[] { headers }.Concat(rows));
-
-        await JS.InvokeVoidAsync("navigator.clipboard.writeText", fullText);
-
-        Copiado = true;
-        StateHasChanged();
-        await Task.Delay(2000);
-        Copiado = false;
-        StateHasChanged();
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", full);
+        await ShowAlert("✅ Tabla copiada");
     }
 
     private async Task ExportarCsv()
@@ -116,16 +135,15 @@
         if (M.Data.Count == 0) return;
 
         var headers = string.Join(",", M.Data[0].Keys.Select(EscapeCsv));
-        var rows = M.Data.Select(row =>
-            string.Join(",", row.Values.Select(v => EscapeCsv(v?.ToString() ?? "")))
-        );
+        var rows = M.Data.Select(row => string.Join(",", row.Values.Select(v => EscapeCsv(v?.ToString() ?? ""))));
+        var csv = string.Join("\n", new[] { headers }.Concat(rows));
 
-        var csvContent = string.Join("\n", new[] { headers }.Concat(rows));
-        var bytes = System.Text.Encoding.UTF8.GetBytes(csvContent);
+        var bytes = System.Text.Encoding.UTF8.GetBytes(csv);
         var base64 = Convert.ToBase64String(bytes);
         var fileName = $"resultado_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
 
         await JS.InvokeVoidAsync("downloadFile", fileName, base64);
+        await ShowAlert("📥 CSV exportado");
     }
 
     private string EscapeCsv(string input)
@@ -143,5 +161,37 @@
         var newType = e.Value?.ToString() ?? "grid";
         M.ViewType = newType;
         await OnViewTypeChange.InvokeAsync(newType);
+    }
+
+    // ---- formateo Bootstrap-friendly ----
+    private (string text, string css) FormatCell(object? val)
+    {
+        if (val is null) return ("", "");
+
+        var s = val.ToString() ?? "";
+
+        // número -> N2 y alineado a la derecha
+        if (decimal.TryParse(s, System.Globalization.NumberStyles.Any,
+            System.Globalization.CultureInfo.InvariantCulture, out var dec))
+        {
+            return (dec.ToString("N2"), "text-end");
+        }
+
+        // fecha -> dd/MM/yyyy y nowrap
+        if (DateTime.TryParse(s, out var dt))
+        {
+            return (dt.ToString("dd/MM/yyyy"), "text-nowrap");
+        }
+
+        return (s, ""); // texto normal
+    }
+
+    private async Task ShowAlert(string text)
+    {
+        AlertText = text;
+        StateHasChanged();
+        await Task.Delay(1600);
+        AlertText = null;
+        StateHasChanged();
     }
 }

@@ -1,45 +1,237 @@
-﻿@page "/error-details/{ErrorCode?}"
-@inject NavigationManager Navigation
+﻿@page "/error-codes"
+@layout PublicLayout
+<div class="container-xxl py-5">
+    <div class="row">
+        <!-- TOC lateral -->
+        <aside class="col-lg-3 d-none d-lg-block">
+            <div class="position-sticky" style="top: 84px;">
+                <nav id="toc" class="nav flex-column small gap-1 card border-0 shadow-sm rounded-3 p-3">
+                    <div class="text-uppercase text-muted fw-semibold mb-2">API errors</div>
+                    <a class="nav-link px-0" href="#err-401-auth">401 – Invalid Authentication</a>
+                    <a class="nav-link px-0" href="#err-401-key">401 – Incorrect API key provided</a>
+                    <a class="nav-link px-0" href="#err-403-region">403 – Region not supported</a>
+                    <a class="nav-link px-0" href="#err-429-rate">429 – Rate limit reached</a>
+                    <a class="nav-link px-0" href="#err-500-server">500 – Server error</a>
+                </nav>
+            </div>
+        </aside>
 
-<div class="error-page">
-    <div class="error-card @GetCssClass()">
-        <div class="icon">@GetIcon()</div>
-        <h2>@GetTitle()</h2>
-        <p>@GetMessage()</p>
+        <!-- Contenido con Scrollspy -->
+        <main class="col-lg-9">
+            <header class="mb-4">
+                <h1 class="fw-semibold">Error codes</h1>
+                <p class="text-muted mb-2">Explore API error codes and solutions.</p>
+                <p class="text-muted small">
+                    This guide includes an overview on error codes you might see from the API and our official libraries.
+                    Each error code below links to guidance on causes and solutions.
+                </p>
+            </header>
 
-        @if (!string.IsNullOrEmpty(ErrorCode))
-        {
-            <p class="error-code">[Código: @ErrorCode]</p>
-        }
+            <div id="content"
+                 data-bs-spy="scroll"
+                 data-bs-target="#toc"
+                 data-bs-smooth-scroll="true"
+                 tabindex="0">
 
-        <button class="primary-btn" @onclick="GoHome">Volver al inicio</button>
+                <!-- Tabla resumen -->
+                <section class="mb-5">
+                    <h4 class="fw-semibold mb-3">API errors</h4>
+                    <div class="table-responsive">
+                        <table class="table align-middle table-borderless">
+                            <thead class="border-bottom">
+                                <tr class="text-uppercase small text-muted">
+                                    <th scope="col" style="width: 26%">Code</th>
+                                    <th scope="col">Overview</th>
+                                </tr>
+                            </thead>
+                            <tbody class="border-bottom">
+                                <tr id="err-401-auth">
+                                    <td class="fw-medium">401 – Invalid Authentication</td>
+                                    <td>
+                                        <strong>Cause:</strong> Invalid Authentication.<br />
+                                        <strong>Solution:</strong> Ensure the correct <a href="#">API key</a> and requesting organization are used.
+                                    </td>
+                                </tr>
+                                <tr id="err-401-key">
+                                    <td class="fw-medium">401 – Incorrect API key provided</td>
+                                    <td>
+                                        <strong>Cause:</strong> The API key is incorrect.<br />
+                                        <strong>Solution:</strong> Verify the key, clear browser cache, or <a href="#">generate a new one</a>.
+                                    </td>
+                                </tr>
+                                <tr id="err-403-region">
+                                    <td class="fw-medium">403 – Region not supported</td>
+                                    <td>
+                                        <strong>Cause:</strong> Access from an unsupported country/region.<br />
+                                        <strong>Solution:</strong> See <a href="#">supported regions</a>.
+                                    </td>
+                                </tr>
+                                <tr id="err-429-rate">
+                                    <td class="fw-medium">429 – Rate limit reached</td>
+                                    <td>
+                                        <strong>Cause:</strong> Too many requests in a short time.<br />
+                                        <strong>Solution:</strong> Pace requests. Read the <a href="#">rate limit guide</a>.
+                                    </td>
+                                </tr>
+                                <tr id="err-500-server">
+                                    <td class="fw-medium">500 – Server error</td>
+                                    <td>
+                                        <strong>Cause:</strong> Issue on our servers.<br />
+                                        <strong>Solution:</strong> Retry after a brief wait and check the <a href="#">status page</a>.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Secciones detalladas (si quieres ampliar contenido por anchor) -->
+                <section class="mb-5" aria-label="Details">
+                    <h5 class="fw-semibold mb-3">Details</h5>
+
+                    <article class="mb-4" aria-labelledby="h-401-auth">
+                        <h6 id="h-401-auth" class="fw-semibold mb-2">401 – Invalid Authentication</h6>
+                        <p class="text-muted mb-2">Typical when the token is missing/expired or header is malformed.</p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="list-group small shadow-sm rounded-3">
+                                    <div class="list-group-item">
+                                        <strong class="d-block">Check</strong>
+                                        <code>Authorization: Bearer &lt;token&gt;</code> is present and well-formed.
+                                    </div>
+                                    <div class="list-group-item">
+                                        <strong class="d-block">Token</strong>
+                                        Not expired and issued for the correct organization.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted small text-uppercase mb-2">Request example</h6>
+                                <div class="doc-code position-relative bg-body-tertiary border rounded-3 p-3">
+<pre class="mb-0"><code>GET /v1/data HTTP/1.1
+Host: api.example.com
+Authorization: Bearer eyJhbGciOi...
+</code></pre>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill position-absolute top-0 end-0 m-2"
+                                            data-copy="#code-401-auth">
+                                        Copy
+                                    </button>
+                                </div>
+                                <span id="code-401-auth" class="visually-hidden">
+                                    GET /v1/data HTTP/1.1
+                                    Host: api.example.com
+                                    Authorization: Bearer eyJhbGciOi...
+                                </span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="mb-4" aria-labelledby="h-429-rate">
+                        <h6 id="h-429-rate" class="fw-semibold mb-2">429 – Rate limit reached</h6>
+                        <p class="text-muted mb-2">Back off and respect retry headers.</p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="list-group small shadow-sm rounded-3">
+                                    <div class="list-group-item">
+                                        <strong class="d-block">Headers</strong>
+                                        <code>X-RateLimit-Remaining</code>, <code>Retry-After</code>
+                                    </div>
+                                    <div class="list-group-item">
+                                        <strong class="d-block">Strategy</strong>
+                                        Exponential backoff and jitter.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted small text-uppercase mb-2">Response example</h6>
+                                <div class="doc-code position-relative bg-body-tertiary border rounded-3 p-3">
+<pre class="mb-0"><code>{ "error": "Too Many Requests", "retry_after_sec": 30 }</code></pre>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill position-absolute top-0 end-0 m-2"
+                                            data-copy="#code-429-resp">
+                                        Copy
+                                    </button>
+                                </div>
+                                <span id="code-429-resp" class="visually-hidden">{ "error": "Too Many Requests", "retry_after_sec": 30 }</span>
+                            </div>
+                        </div>
+                    </article>
+                </section>
+            </div>
+        </main>
     </div>
 </div>
 
-@code {
-    [Parameter] public string? ErrorCode { get; set; }
+@code { }
 
-    private string GetTitle() =>
-        ErrorCode?.StartsWith("NET") == true ? "Problema de conexión" :
-        ErrorCode?.StartsWith("AUTH") == true ? "Error de autenticación" :
-        "Ocurrió un error";
-
-    private string GetMessage() =>
-        ErrorCode?.StartsWith("NET") == true
-            ? "Parece que hay un problema con la red o el servidor."
-            : "Intenta nuevamente o contacta al administrador.";
-
-    private string GetIcon() =>
-        ErrorCode?.StartsWith("NET") == true ? "🌐" :
-        ErrorCode?.StartsWith("AUTH") == true ? "🔒" : "⚠️";
-
-    private string GetCssClass() =>
-        ErrorCode?.StartsWith("NET") == true ? "error-net" :
-        ErrorCode?.StartsWith("AUTH") == true ? "error-auth" :
-        "error-generic";
-
-    private void GoHome()
-    {
-        Navigation.NavigateTo("/");
+<style>
+    /* Espaciado/legibilidad estilo OpenAI */
+    table.table td, table.table th {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        vertical-align: top;
     }
-}
+
+    a {
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+
+    h1, h4, h5, h6 {
+        letter-spacing: -.3px;
+    }
+
+    /* TOC lateral */
+    #toc .nav-link {
+        color: var(--bs-body-color);
+        opacity: .75;
+    }
+
+        #toc .nav-link:hover {
+            opacity: 1;
+        }
+
+        #toc .nav-link.active {
+            font-weight: 600;
+            opacity: 1;
+        }
+
+    /* Bloque de código */
+    .doc-code pre {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    .doc-code .btn {
+        border-width: 2px;
+    }
+
+    /* Mejor foco accesible en el contenedor scrollspy */
+    #content:focus {
+        outline: none;
+    }
+</style>
+
+<script>
+    // Botones "Copy"
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('[data-copy]');
+        if (!btn) return;
+        const sel = btn.getAttribute('data-copy');
+        const src = document.querySelector(sel);
+        if (!src) return;
+        const text = (src.innerText || src.textContent || '').trim();
+        navigator.clipboard.writeText(text);
+        const old = btn.textContent;
+        btn.textContent = 'Copied';
+        setTimeout(() => btn.textContent = old, 1200);
+    }, { passive: true });
+
+    // Inicializa scrollspy por si el layout no lo hace automáticamente
+    document.addEventListener('DOMContentLoaded', () => {
+        const content = document.querySelector('#content');
+        if (content && bootstrap?.ScrollSpy) {
+            new bootstrap.ScrollSpy(document.body, { target: '#toc', rootMargin: '0px 0px -60%' });
+        }
+    });
+</script>
