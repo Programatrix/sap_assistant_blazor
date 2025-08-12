@@ -21,7 +21,8 @@ public static class EnvelopeMapper
     {
         if (env.Success && env.Data is not null)
         {
-            var ok = ServiceResult<T>.Ok(env.Data, localizer[okKey]);
+            var type = env.NotificationType ?? NotificationType.Success;
+            var ok = ServiceResult<T>.Ok(env.Data, localizer[okKey], type);
             ok.ErrorCode = "OK";
             ok.CorrelationId = correlationId;
             ok.TraceId = env.TraceId;
@@ -35,7 +36,8 @@ public static class EnvelopeMapper
             ? localizer[code].Value
             : (!string.IsNullOrWhiteSpace(env.Error) ? env.Error! : localizer["GENERIC_ERROR"].Value);
 
-        var fail = ServiceResult<T>.Fail(message, code);
+        var failType = env.NotificationType ?? NotificationType.Error;
+        var fail = ServiceResult<T>.Fail(message, code, failType);
         fail.CorrelationId = correlationId;
         fail.TraceId = env.TraceId;
         return fail;
