@@ -31,9 +31,27 @@ public class ServiceResult<T> : ServiceResult
 
 public static class ServiceResultExtensions
 {
+    public static ServiceResult WithCorrelation(this ServiceResult result, string correlationId)
+    {
+        result.CorrelationId = correlationId;
+        return result;
+    }
+
     public static ServiceResult<T> WithCorrelation<T>(this ServiceResult<T> result, string correlationId)
     {
         result.CorrelationId = correlationId;
+        return result;
+    }
+
+    public static ServiceResult WithTrace(this ServiceResult result, string traceId)
+    {
+        result.TraceId = traceId;
+        return result;
+    }
+
+    public static ServiceResult<T> WithTrace<T>(this ServiceResult<T> result, string traceId)
+    {
+        result.TraceId = traceId;
         return result;
     }
 }
