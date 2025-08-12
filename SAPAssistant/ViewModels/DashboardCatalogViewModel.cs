@@ -112,9 +112,10 @@ public partial class DashboardCatalogViewModel : BaseViewModel
         };
 
         DashboardService.KPIs.Add(copy);
-        await TryNotifyAsync(async () =>
+        var result = await _userDashboardService.AddKpiAsync(copy);
+        if (!result.Success)
         {
-            await _userDashboardService.AddKpiAsync(copy);
-        }, "Error al agregar KPI");
+            await NotificationService.Notify(result);
+        }
     }
 }

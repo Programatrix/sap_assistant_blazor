@@ -1,10 +1,11 @@
 using SAPAssistant.Models;
+using SAPAssistant.Exceptions;
 
 namespace SAPAssistant.Service.Interfaces
 {
     public interface IUserDashboardService
     {
-        Task AddKpiAsync(DashboardCardModel kpi);
+        Task<ServiceResult> AddKpiAsync(DashboardCardModel kpi);
     }
 }
 

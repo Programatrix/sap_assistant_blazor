@@ -143,44 +143,43 @@ public partial class ChatViewModel : BaseViewModel
 
         Messages.Add(userMsg);
 
-        try
-        {            
-            QueryResponse? resultado = isDemo
+        var resultado = isDemo
             ? await _assistantService.ConsultarDemoAsync(message)
             : await _assistantService.ConsultarAsync(message, CurrentSession!.Id);
 
-            MessageBase responseMsg = resultado?.Tipo switch
+        if (!resultado.Success || resultado.Data == null)
+        {
+            Messages.Add(new ErrorMessage { Mensaje = resultado.Message });
+            await NotificationService.Notify(resultado);
+        }
+        else
+        {
+            var data = resultado.Data;
+            MessageBase responseMsg = data.Tipo switch
             {
                 "aclaracion" or "assistant" => new TextMessage
                 {
                     Role = "assistant",
-                    Mensaje = resultado.Mensaje
+                    Mensaje = data.Mensaje
                 },
                 "resumen" => new TextMessage
                 {
-                    Mensaje = resultado.Resumen
+                    Mensaje = data.Resumen
                 },
                 "system" => new SystemMessage
                 {
-                    Mensaje = resultado.Mensaje
+                    Mensaje = data.Mensaje
                 },
                 _ => new ChatResultMessage
                 {
-                    Resumen = resultado?.Resumen ?? "",
-                    Sql = resultado?.Sql ?? "",
-                    Data = resultado?.Resultados ?? new(),
-                    ViewType = preferredViewType ?? resultado?.ViewType ?? "grid"
+                    Resumen = data.Resumen ?? "",
+                    Sql = data.Sql ?? "",
+                    Data = data.Resultados ?? new(),
+                    ViewType = preferredViewType ?? data.ViewType ?? "grid"
                 }
             };
 
             Messages.Add(responseMsg);
-        }
-        catch (Exception ex)
-        {
-            Messages.Add(new ErrorMessage
-            {
-                Mensaje = ex.Message
-            });
         }
 
         IsProcessing = false;
