@@ -73,8 +73,9 @@ namespace SAPAssistant.Service
                 ok.ErrorCode = ErrorCodes.CONNECTIONS_FETCH_SUCCESS;
                 return ok;
             }
-            catch (HttpRequestException)
+            catch (HttpRequestException ex)
             {
+                _logger.LogError(ex, "Error de red al obtener conexiones");
                 const string code = ErrorCodes.NET_ERROR;
                 return ServiceResult<List<ConnectionDTO>>.Fail(_localizer[code], code);
             }
@@ -121,8 +122,9 @@ namespace SAPAssistant.Service
                 ok.ErrorCode = ErrorCodes.CONNECTION_FETCH_SUCCESS;
                 return ok;
             }
-            catch (HttpRequestException)
+            catch (HttpRequestException ex)
             {
+                _logger.LogError(ex, "Error de red al obtener conexión {ConnectionId}", connectionId);
                 const string code = ErrorCodes.NET_ERROR;
                 return ServiceResult<ConnectionDTO>.Fail(_localizer[code], code);
             }
@@ -163,8 +165,9 @@ namespace SAPAssistant.Service
                 ok.ErrorCode = ErrorCodes.CONNECTION_UPDATED;
                 return ok;
             }
-            catch (HttpRequestException)
+            catch (HttpRequestException ex)
             {
+                _logger.LogError(ex, "Error de red al actualizar conexión {ConnectionId}", connection.ConnectionId);
                 const string code = ErrorCodes.NET_ERROR;
                 return ServiceResult.Fail(_localizer[code], code);
             }
@@ -205,8 +208,9 @@ namespace SAPAssistant.Service
                 ok.ErrorCode = ErrorCodes.CONNECTION_CREATED;
                 return ok;
             }
-            catch (HttpRequestException)
+            catch (HttpRequestException ex)
             {
+                _logger.LogError(ex, "Error de red al crear conexión");
                 const string code = ErrorCodes.NET_ERROR;
                 return ServiceResult.Fail(_localizer[code], code);
             }
@@ -250,8 +254,9 @@ namespace SAPAssistant.Service
                 ok.ErrorCode = ErrorCodes.CONNECTION_VALID;
                 return ok;
             }
-            catch (HttpRequestException)
+            catch (HttpRequestException ex)
             {
+                _logger.LogError(ex, "Error de red al validar conexión {ConnectionId}", connectionId);
                 const string code = ErrorCodes.NET_ERROR;
                 return ServiceResult.Fail(_localizer[code], code);
             }

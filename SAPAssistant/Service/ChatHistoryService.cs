@@ -97,8 +97,9 @@ namespace SAPAssistant.Service
                 ok.ErrorCode = ErrorCodes.CHAT_FETCH_SUCCESS;
                 return ok;
             }
-            catch (HttpRequestException)
+            catch (HttpRequestException ex)
             {
+                _logger.LogError(ex, "[ChatService] Error de red al obtener el chat '{ChatId}'", chatId);
                 const string code = ErrorCodes.NET_ERROR;
                 return ServiceResult<ChatSession>.Fail(_localizer[code], code);
             }
