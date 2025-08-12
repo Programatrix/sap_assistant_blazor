@@ -79,7 +79,7 @@
     [Parameter] public MessageBase Message { get; set; }
     [Parameter] public EventCallback<string> OnViewTypeChange { get; set; }
 
-    private ResultMessage M => (ResultMessage)Message;
+    private ChatResultMessage M => (ChatResultMessage)Message;
     private bool MostrarSql { get; set; }
 
     private ChartType SelectedChartType = ChartType.Bar;
