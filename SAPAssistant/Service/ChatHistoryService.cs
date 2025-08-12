@@ -32,29 +32,38 @@ namespace SAPAssistant.Service
             return userId;
         }
 
-        public async Task<List<ChatSession>> GetChatHistoryAsync()
+        public async Task<ServiceResult<List<ChatSession>>> GetChatHistoryAsync()
         {
-            var userId = await GetUserIdAsync();
-
-            var request = new HttpRequestMessage(HttpMethod.Get, "/assistant/chats");
-            request.Headers.Add("X-User-Id", userId);
-
-            var response = await _http.SendAsync(request);
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new ChatHistoryServiceException($"{_localizer["CHAT-HISTORY-LOAD-ERROR"]}: {response.StatusCode} - {error}");
-            }
-            List<ChatSession> result = null;
             try
             {
-                result = await response.Content.ReadFromJsonAsync<List<ChatSession>>() ?? new List<ChatSession>();
+                var userId = await GetUserIdAsync();
+
+                var request = new HttpRequestMessage(HttpMethod.Get, "/assistant/chats");
+                request.Headers.Add("X-User-Id", userId);
+
+                var response = await _http.SendAsync(request);
+                if (!response.IsSuccessStatusCode)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("[ChatService] Error HTTP {StatusCode}: {Error}", response.StatusCode, error);
+                    const string code = "CHAT-HISTORY-LOAD-ERROR";
+                    return ServiceResult<List<ChatSession>>.Fail(_localizer[code], code);
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<List<ChatSession>>() ?? new List<ChatSession>();
+                return ServiceResult<List<ChatSession>>.Ok(result);
             }
-            catch (Exception)
+            catch (ChatHistoryServiceException ex)
             {
-                throw;
+                const string code = "SESSION-USER-NOT-FOUND";
+                return ServiceResult<List<ChatSession>>.Fail(ex.Message, code);
             }
-            return result;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[ChatService] Excepción al obtener historial");
+                const string code = "CHAT-HISTORY-LOAD-ERROR";
+                return ServiceResult<List<ChatSession>>.Fail(_localizer[code], code);
+            }
         }
 
         public async Task<ServiceResult<ChatSession>> GetChatSessionAsync(string chatId)
@@ -100,45 +109,93 @@ namespace SAPAssistant.Service
             }
         }
 
-        public async Task SaveChatSessionAsync(ChatSession session, List<MessageBase> mensajes)
+        public async Task<ServiceResult> SaveChatSessionAsync(ChatSession session, List<MessageBase> mensajes)
         {
-            var userId = await GetUserIdAsync();
-
-            // Serializar mensajes a diccionarios planos para MensajesRaw
-            var json = JsonSerializer.Serialize(mensajes);
-            session.MensajesRaw = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(json)!;
-
-            var request = new HttpRequestMessage(HttpMethod.Post, "/user-chats");
-            request.Headers.Add("X-User-Id", userId);
-            request.Content = JsonContent.Create(session);
-
-            var response = await _http.SendAsync(request);
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new ChatHistoryServiceException($"{_localizer["CHAT-SAVE-ERROR"]}: {response.StatusCode} - {error}");
+                var userId = await GetUserIdAsync();
+
+                // Serializar mensajes a diccionarios planos para MensajesRaw
+                var json = JsonSerializer.Serialize(mensajes);
+                session.MensajesRaw = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(json)!;
+
+                var request = new HttpRequestMessage(HttpMethod.Post, "/user-chats");
+                request.Headers.Add("X-User-Id", userId);
+                request.Content = JsonContent.Create(session);
+
+                var response = await _http.SendAsync(request);
+                if (!response.IsSuccessStatusCode)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("[ChatService] Error HTTP {StatusCode}: {Error}", response.StatusCode, error);
+                    const string code = "CHAT-SAVE-ERROR";
+                    return ServiceResult.Fail(_localizer[code], code);
+                }
+
+                return ServiceResult.Ok();
+            }
+            catch (ChatHistoryServiceException ex)
+            {
+                const string code = "SESSION-USER-NOT-FOUND";
+                return ServiceResult.Fail(ex.Message, code);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[ChatService] Excepción al guardar chat");
+                const string code = "CHAT-SAVE-ERROR";
+                return ServiceResult.Fail(_localizer[code], code);
             }
         }
 
-        public async Task DeleteChatSessionAsync(string chatId)
+        public async Task<ServiceResult> DeleteChatSessionAsync(string chatId)
         {
-            var userId = await GetUserIdAsync();
-
-            var request = new HttpRequestMessage(HttpMethod.Delete, $"/user-chats/{chatId}");
-            request.Headers.Add("X-User-Id", userId);
-
-            var response = await _http.SendAsync(request);
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new ChatHistoryServiceException($"{_localizer["CHAT-DELETE-ERROR"]}: {response.StatusCode} - {error}");
+                var userId = await GetUserIdAsync();
+
+                var request = new HttpRequestMessage(HttpMethod.Delete, $"/user-chats/{chatId}");
+                request.Headers.Add("X-User-Id", userId);
+
+                var response = await _http.SendAsync(request);
+                if (!response.IsSuccessStatusCode)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("[ChatService] Error HTTP {StatusCode}: {Error}", response.StatusCode, error);
+                    const string code = "CHAT-DELETE-ERROR";
+                    return ServiceResult.Fail(_localizer[code], code);
+                }
+
+                return ServiceResult.Ok();
+            }
+            catch (ChatHistoryServiceException ex)
+            {
+                const string code = "SESSION-USER-NOT-FOUND";
+                return ServiceResult.Fail(ex.Message, code);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[ChatService] Excepción al eliminar chat");
+                const string code = "CHAT-DELETE-ERROR";
+                return ServiceResult.Fail(_localizer[code], code);
             }
         }
 
-        public async Task<ChatSession?> GetLastChatSessionAsync()
+        public async Task<ServiceResult<ChatSession>> GetLastChatSessionAsync()
         {
-            var sessions = await GetChatHistoryAsync();
-            return sessions.OrderByDescending(s => s.Fecha).FirstOrDefault();
+            var history = await GetChatHistoryAsync();
+            if (!history.Success)
+            {
+                return ServiceResult<ChatSession>.Fail(history.Message, history.ErrorCode);
+            }
+
+            var last = history.Data?.OrderByDescending(s => s.Fecha).FirstOrDefault();
+            if (last == null)
+            {
+                const string code = "EMPTY-RESPONSE";
+                return ServiceResult<ChatSession>.Fail(_localizer[code], code);
+            }
+
+            return ServiceResult<ChatSession>.Ok(last);
         }
     }
 }

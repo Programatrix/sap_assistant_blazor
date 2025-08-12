@@ -2,6 +2,7 @@
 using System.Text.Json;
 using SAPAssistant.Models;
 using SAPAssistant.Service.Interfaces;
+using SAPAssistant.Exceptions;
 
 namespace SAPAssistant.Service
 {
@@ -20,7 +21,7 @@ namespace SAPAssistant.Service
             _logger = logger;
         }
 
-        public async Task<QueryResponse?> ConsultarAsync(string mensaje, string chatId)
+        public async Task<ServiceResult<QueryResponse>> ConsultarAsync(string mensaje, string chatId)
         {
             try
             {
@@ -50,20 +51,25 @@ namespace SAPAssistant.Service
                 request.Headers.Add("X-User-Id", username);
                 request.Headers.Add("x-remote-ip", remoteIp);
 
-                return await SendAndParseAsync(request);
+                var response = await SendAndParseAsync(request);
+                if (response == null)
+                {
+                    return ServiceResult<QueryResponse>.Fail("Respuesta vacía", "EMPTY_RESPONSE");
+                }
+                return ServiceResult<QueryResponse>.Ok(response);
             }
-            catch (AssistantException)
+            catch (AssistantException ex)
             {
-                throw;
+                return ServiceResult<QueryResponse>.Fail(ex.Message, ex.ErrorCode);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error inesperado en ConsultarAsync");
-                throw new AssistantException("Error interno del cliente", "CLIENT_ERROR");
+                return ServiceResult<QueryResponse>.Fail("Error interno del cliente", "CLIENT_ERROR");
             }
         }
 
-        public async Task<QueryResponse?> ConsultarDemoAsync(string mensaje)
+        public async Task<ServiceResult<QueryResponse>> ConsultarDemoAsync(string mensaje)
         {
             try
             {
@@ -75,12 +81,21 @@ namespace SAPAssistant.Service
                     })
                 };
 
-                return await SendAndParseAsync(request);
+                var response = await SendAndParseAsync(request);
+                if (response == null)
+                {
+                    return ServiceResult<QueryResponse>.Fail("Respuesta vacía", "EMPTY_RESPONSE");
+                }
+                return ServiceResult<QueryResponse>.Ok(response);
+            }
+            catch (AssistantException ex)
+            {
+                return ServiceResult<QueryResponse>.Fail(ex.Message, ex.ErrorCode);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error en ConsultarDemoAsync");
-                throw new AssistantException("Error en modo demo", "DEMO_ERROR");
+                return ServiceResult<QueryResponse>.Fail("Error en modo demo", "DEMO_ERROR");
             }
         }
 

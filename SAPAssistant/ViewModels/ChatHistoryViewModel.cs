@@ -29,14 +29,15 @@ public partial class ChatHistoryViewModel : BaseViewModel
     public async Task LoadHistoryAsync()
     {
         IsLoading = true;
-        var success = await TryNotifyAsync(async () =>
+        var result = await _chatService.GetChatHistoryAsync();
+        if (result.Success && result.Data != null)
         {
-            Sessions = await _chatService.GetChatHistoryAsync();
-        }, "Error al cargar el historial");
-
-        if (!success)
+            Sessions = result.Data;
+        }
+        else
         {
             Sessions = new List<ChatSession>();
+            await NotificationService.Notify(result);
         }
         IsLoading = false;
     }
@@ -53,11 +54,14 @@ public partial class ChatHistoryViewModel : BaseViewModel
 
     public async Task DeleteChat(string chatId)
     {
-        await TryNotifyAsync(async () =>
+        var result = await _chatService.DeleteChatSessionAsync(chatId);
+        if (!result.Success)
         {
-            await _chatService.DeleteChatSessionAsync(chatId);
-            await LoadHistoryAsync();
-        }, "Error al eliminar el chat");
+            await NotificationService.Notify(result);
+            return;
+        }
+
+        await LoadHistoryAsync();
     }
 }
 
