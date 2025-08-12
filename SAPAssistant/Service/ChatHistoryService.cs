@@ -57,7 +57,7 @@ namespace SAPAssistant.Service
             return result;
         }
 
-        public async Task<OperationResult<ChatSession>> GetChatSessionAsync(string chatId)
+        public async Task<ServiceResult<ChatSession>> GetChatSessionAsync(string chatId)
         {
             try
             {
@@ -73,30 +73,30 @@ namespace SAPAssistant.Service
                     var errorMessage = await response.Content.ReadAsStringAsync();
                     _logger.LogError("[ChatService] Error HTTP {StatusCode}: {Error}", response.StatusCode, errorMessage);
                     const string code = "CHAT-FETCH-ERROR";
-                    return OperationResult<ChatSession>.Fail(_localizer[code], code);
+                    return ServiceResult<ChatSession>.Fail(_localizer[code], code);
                 }
 
                 var chat = await response.Content.ReadFromJsonAsync<ChatSession>();
                 if (chat == null)
                 {
                     const string code = "EMPTY-RESPONSE";
-                    return OperationResult<ChatSession>.Fail(_localizer[code], code);
+                    return ServiceResult<ChatSession>.Fail(_localizer[code], code);
                 }
 
-                var ok = OperationResult<ChatSession>.Ok(chat, _localizer["CHAT-FETCH-SUCCESS"]);
+                var ok = ServiceResult<ChatSession>.Ok(chat, _localizer["CHAT-FETCH-SUCCESS"]);
                 ok.ErrorCode = "CHAT-FETCH-SUCCESS";
                 return ok;
             }
             catch (HttpRequestException)
             {
                 const string code = "NET-ERROR";
-                return OperationResult<ChatSession>.Fail(_localizer[code], code);
+                return ServiceResult<ChatSession>.Fail(_localizer[code], code);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[ChatService] Excepción inesperada al obtener el chat '{ChatId}'", chatId);
                 const string code = "UNEXPECTED-ERROR";
-                return OperationResult<ChatSession>.Fail(_localizer[code], code);
+                return ServiceResult<ChatSession>.Fail(_localizer[code], code);
             }
         }
 

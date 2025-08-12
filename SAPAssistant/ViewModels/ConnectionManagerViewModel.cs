@@ -83,14 +83,7 @@ public partial class ConnectionManagerViewModel : BaseViewModel
             if (!result.Success)
             {
                 MostrarError = true;
-                var notify = new ResultMessage
-                {
-                    Success = result.Success,
-                    Message = result.Message,
-                    ErrorCode = result.ErrorCode,
-                    Type = NotificationType.Error
-                };
-                await NotificationService.Notify(notify);
+                await NotificationService.Notify(result);
                 await Task.Delay(3000);
                 MostrarError = false;
                 return false;

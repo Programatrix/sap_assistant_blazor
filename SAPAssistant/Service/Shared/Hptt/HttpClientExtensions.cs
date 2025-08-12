@@ -18,7 +18,7 @@ public class ApiClient
         _localizer = localizer;
     }
 
-    public async Task<ResultMessage<TRes>> PostAsResultAsync<TReq, TRes>(
+    public async Task<ServiceResult<TRes>> PostAsResultAsync<TReq, TRes>(
         string url,
         TReq body,
         string okKey = "OK",
@@ -43,31 +43,26 @@ public class ApiClient
             catch { /* respuesta no parseable → trataremos abajo */ }
 
             if (env is not null)
-                return env.ToResultMessage(_localizer, correlationId: corr, okKey: okKey);
+                return env.ToServiceResult(_localizer, correlationId: corr, okKey: okKey);
 
             // Sin envelope → errores “físicos” del front
             if ((int)res.StatusCode is 502 or 503 or 504)
-                return ResultMessage<TRes>.Fail(_localizer["SVC_UNAVAILABLE"], "SVC_UNAVAILABLE")
+                return ServiceResult<TRes>.Fail(_localizer["SVC_UNAVAILABLE"], "SVC_UNAVAILABLE")
                                           .WithCorrelation(corr);
 
-            return ResultMessage<TRes>.Fail(_localizer["FE_NETWORK_HTTP"], "FE_NETWORK_HTTP")
+            return ServiceResult<TRes>.Fail(_localizer["FE_NETWORK_HTTP"], "FE_NETWORK_HTTP")
                                       .WithCorrelation(corr);
         }
         catch (TaskCanceledException)
         {
-            return ResultMessage<TRes>.Fail(_localizer["FE_NETWORK_TIMEOUT"], "FE_NETWORK_TIMEOUT")
+            return ServiceResult<TRes>.Fail(_localizer["FE_NETWORK_TIMEOUT"], "FE_NETWORK_TIMEOUT")
                                       .WithCorrelation(corr);
         }
         catch (HttpRequestException)
         {
-            return ResultMessage<TRes>.Fail(_localizer["FE_NETWORK_ERROR"], "FE_NETWORK_ERROR")
+            return ServiceResult<TRes>.Fail(_localizer["FE_NETWORK_ERROR"], "FE_NETWORK_ERROR")
                                       .WithCorrelation(corr);
         }
     }
 }
 
-public static class ResultMessageExt
-{
-    public static ResultMessage<T> WithCorrelation<T>(this ResultMessage<T> r, string corr)
-    { r.CorrelationId = corr; return r; }
-}

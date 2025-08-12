@@ -5,21 +5,21 @@
 @if (_message != null && !string.IsNullOrEmpty(_message.Message))
 {
     <div class="position-fixed top-0 end-0 p-3" style="z-index:1100;">
-        <div class="toast toast-modern align-items-stretch border-0 @GetBgClass(_message.Type) text-white fade @(_isClosing ? "" : "show")"
+        <div class="toast toast-modern align-items-stretch border-0 @GetBgClass(_message.NotificationType) text-white fade @(_isClosing ? "" : "show")"
              role="alert" aria-live="assertive" aria-atomic="true">
 
             <div class="d-flex">
                 <!-- Icono SVG limpio -->
                 <div class="icon-stack">
-                    @((MarkupString)GetIconSvg(_message.Type))
+                    @((MarkupString)GetIconSvg(_message.NotificationType))
                 </div>
 
                 <!-- Contenido -->
                 <div class="toast-body">
-                    <div class="fw-semibold mb-1">@GetTitle(_message.Type)</div>
+                    <div class="fw-semibold mb-1">@GetTitle(_message.NotificationType)</div>
                     <div class="mb-1">@_message.Message</div>
 
-                    @if (_message.Type == NotificationType.Error && !string.IsNullOrEmpty(_message.ErrorCode))
+                    @if (_message.NotificationType == NotificationType.Error && !string.IsNullOrEmpty(_message.ErrorCode))
                     {
                         <div class="small text-white-75 mb-2">[Código: @_message.ErrorCode]</div>
                         <button type="button"
@@ -39,7 +39,7 @@
     [Inject] private INotificationService NotificationService { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
 
-    private ResultMessage? _message;
+    private ServiceResult? _message;
     private bool _isClosing;
 
     protected override void OnInitialized()
@@ -47,7 +47,7 @@
         NotificationService.OnNotify += HandleNotification;
     }
 
-    private async Task HandleNotification(ResultMessage message)
+    private async Task HandleNotification(ServiceResult message)
     {
         _message = message;
 
