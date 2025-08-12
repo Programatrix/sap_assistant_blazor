@@ -48,20 +48,24 @@ public class ApiClient
             // Sin envelope → errores “físicos” del front
             if ((int)res.StatusCode is 502 or 503 or 504)
                 return ServiceResult<TRes>.Fail(_localizer["SVC_UNAVAILABLE"], "SVC_UNAVAILABLE")
-                                          .WithCorrelation(corr);
+                                          .WithCorrelation(corr)
+                                          .WithTrace(corr);
 
             return ServiceResult<TRes>.Fail(_localizer["FE_NETWORK_HTTP"], "FE_NETWORK_HTTP")
-                                      .WithCorrelation(corr);
+                                      .WithCorrelation(corr)
+                                      .WithTrace(corr);
         }
         catch (TaskCanceledException)
         {
             return ServiceResult<TRes>.Fail(_localizer["FE_NETWORK_TIMEOUT"], "FE_NETWORK_TIMEOUT")
-                                      .WithCorrelation(corr);
+                                      .WithCorrelation(corr)
+                                      .WithTrace(corr);
         }
         catch (HttpRequestException)
         {
             return ServiceResult<TRes>.Fail(_localizer["FE_NETWORK_ERROR"], "FE_NETWORK_ERROR")
-                                      .WithCorrelation(corr);
+                                      .WithCorrelation(corr)
+                                      .WithTrace(corr);
         }
     }
 }
