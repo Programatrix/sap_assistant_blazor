@@ -1,46 +1,209 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
+  
+  
   <resheader name="resmimetype">
+    
+    
     <value>text/microsoft-resx</value>
+    
+  
   </resheader>
+  
+  
   <resheader name="version">
+    
+    
     <value>2.0</value>
+    
+  
   </resheader>
+  
+  
   <resheader name="reader">
+    
+    
     <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    
+  
   </resheader>
+  
+  
   <resheader name="writer">
+    
+    
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    
+  
   </resheader>
-  <data name="AUTH-401" xml:space="preserve"><value>Usuario o contraseña incorrectos.</value></data>
-  <data name="SVC-UNAVAILABLE" xml:space="preserve"><value>El sistema no está disponible. Intenta más tarde.</value></data>
-  <data name="AUTH-INVALID-RESPONSE" xml:space="preserve"><value>No se pudo procesar la respuesta del servidor.</value></data>
-  <data name="LOGIN-SUCCESS" xml:space="preserve"><value>Inicio de sesión exitoso.</value></data>
-  <data name="NET-ERROR" xml:space="preserve"><value>Problema de conexión. Verifique su conexión a Internet.</value></data>
-  <data name="UNEXPECTED-ERROR" xml:space="preserve"><value>Error inesperado. Por favor, intente nuevamente.</value></data>
-  <data name="SESSION-TOKEN-NOT-FOUND" xml:space="preserve"><value>Token no encontrado en la sesión.</value></data>
-  <data name="SESSION-USER-NOT-FOUND" xml:space="preserve"><value>Usuario no encontrado en la sesión.</value></data>
-  <data name="SESSION-REMOTE_IP-NOT-FOUND" xml:space="preserve"><value>IP remota del usuario no encontrada en la sesión.</value></data>
-  <data name="CONNECTIONS-FETCH-ERROR" xml:space="preserve"><value>Error al obtener las conexiones desde el servidor.</value></data>
-  <data name="CONNECTIONS-FETCH-SUCCESS" xml:space="preserve"><value>Conexiones obtenidas exitosamente.</value></data>
-  <data name="SESSION-DATA-NOT-FOUND" xml:space="preserve"><value>Usuario o IP remota no encontrada en la sesión.</value></data>
-  <data name="CONNECTION-FETCH-ERROR" xml:space="preserve"><value>Error al obtener la conexión desde el servidor.</value></data>
-  <data name="EMPTY-RESPONSE" xml:space="preserve"><value>Respuesta vacía del servidor.</value></data>
-  <data name="CONNECTION-FETCH-SUCCESS" xml:space="preserve"><value>Conexión obtenida exitosamente.</value></data>
-  <data name="UPDATE-CONNECTION-ERROR" xml:space="preserve"><value>Error al actualizar la conexión.</value></data>
-  <data name="CONNECTION-UPDATED" xml:space="preserve"><value>Conexión actualizada correctamente.</value></data>
-  <data name="CREATE-CONNECTION-ERROR" xml:space="preserve"><value>Error al crear la conexión.</value></data>
-  <data name="CONNECTION-CREATED" xml:space="preserve"><value>Conexión creada correctamente.</value></data>
-  <data name="VALIDATION-CONNECTION-ERROR" xml:space="preserve"><value>Conexión inválida.</value></data>
-  <data name="CONNECTION-VALID" xml:space="preserve"><value>Conexión válida.</value></data>
-  <data name="CHAT-FETCH-ERROR" xml:space="preserve"><value>Error al obtener el chat.</value></data>
-  <data name="CHAT-FETCH-SUCCESS" xml:space="preserve"><value>Chat obtenido exitosamente.</value></data>
-  <data name="CHAT-HISTORY-LOAD-ERROR" xml:space="preserve"><value>Error al cargar historial.</value></data>
-  <data name="CHAT-SAVE-ERROR" xml:space="preserve"><value>Error al guardar chat.</value></data>
-  <data name="CHAT-DELETE-ERROR" xml:space="preserve"><value>Error al eliminar chat.</value></data>
-  <data name="UNKNOWN-MESSAGE-TYPE" xml:space="preserve"><value>Tipo de mensaje desconocido.</value></data>
-  <data name="NEW-CHAT-TITLE" xml:space="preserve"><value>Nuevo chat</value></data>
-  <data name="AUTH-USER-REQUIRED" xml:space="preserve"><value>El usuario es obligatorio.</value></data>
-  <data name="AUTH-PASSWORD-REQUIRED" xml:space="preserve"><value>La contraseña es obligatoria.</value></data>
-  <data name="NET-ERROR" xml:space="preserve"><value>No se ha podido conectar con el servidor. Inténtalo más tarde.</value></data>
+  
+  
+  <data name="AUTH_401" xml:space="preserve">
+    <value>Usuario o contraseña incorrectos.</value>
+  </data>
+  
+  
+  <data name="SVC_UNAVAILABLE" xml:space="preserve">
+    <value>El sistema no está disponible. Intenta más tarde.</value>
+  </data>
+  
+  
+  <data name="AUTH_INVALID_RESPONSE" xml:space="preserve">
+    <value>No se pudo procesar la respuesta del servidor.</value>
+  </data>
+  
+  
+  <data name="LOGIN_SUCCESS" xml:space="preserve">
+    <value>Inicio de sesión exitoso.</value>
+  </data>
+  
+  
+  <data name="NET_ERROR" xml:space="preserve">
+    <value>Problema de conexión. Verifique su conexión a Internet.</value>
+  </data>
+  
+  
+  <data name="UNEXPECTED_ERROR" xml:space="preserve">
+    <value>Error inesperado. Por favor, intente nuevamente.</value>
+  </data>
+  
+  
+  <data name="SESSION_TOKEN_NOT_FOUND" xml:space="preserve">
+    <value>Token no encontrado en la sesión.</value>
+  </data>
+  
+  
+  <data name="SESSION_USER_NOT_FOUND" xml:space="preserve">
+    <value>Usuario no encontrado en la sesión.</value>
+  </data>
+  
+  
+  <data name="SESSION_REMOTE_IP_NOT_FOUND" xml:space="preserve">
+    <value>IP remota del usuario no encontrada en la sesión.</value>
+  </data>
+  
+  
+  <data name="CONNECTIONS_FETCH_ERROR" xml:space="preserve">
+    <value>Error al obtener las conexiones desde el servidor.</value>
+  </data>
+  
+  
+  <data name="CONNECTIONS_FETCH_SUCCESS" xml:space="preserve">
+    <value>Conexiones obtenidas exitosamente.</value>
+  </data>
+  
+  
+  <data name="SESSION_DATA_NOT_FOUND" xml:space="preserve">
+    <value>Usuario o IP remota no encontrada en la sesión.</value>
+  </data>
+  
+  
+  <data name="CONNECTION_FETCH_ERROR" xml:space="preserve">
+    <value>Error al obtener la conexión desde el servidor.</value>
+  </data>
+  
+  
+  <data name="EMPTY_RESPONSE" xml:space="preserve">
+    <value>Respuesta vacía del servidor.</value>
+  </data>
+  
+  
+  <data name="CONNECTION_FETCH_SUCCESS" xml:space="preserve">
+    <value>Conexión obtenida exitosamente.</value>
+  </data>
+  
+  
+  <data name="UPDATE_CONNECTION_ERROR" xml:space="preserve">
+    <value>Error al actualizar la conexión.</value>
+  </data>
+  
+  
+  <data name="CONNECTION_UPDATED" xml:space="preserve">
+    <value>Conexión actualizada correctamente.</value>
+  </data>
+  
+  
+  <data name="CREATE_CONNECTION_ERROR" xml:space="preserve">
+    <value>Error al crear la conexión.</value>
+  </data>
+  
+  
+  <data name="CONNECTION_CREATED" xml:space="preserve">
+    <value>Conexión creada correctamente.</value>
+  </data>
+  
+  
+  <data name="VALIDATION_CONNECTION_ERROR" xml:space="preserve">
+    <value>Conexión inválida.</value>
+  </data>
+  
+  
+  <data name="CONNECTION_VALID" xml:space="preserve">
+    <value>Conexión válida.</value>
+  </data>
+  
+  
+  <data name="CHAT_FETCH_ERROR" xml:space="preserve">
+    <value>Error al obtener el chat.</value>
+  </data>
+  
+  
+  <data name="CHAT_FETCH_SUCCESS" xml:space="preserve">
+    <value>Chat obtenido exitosamente.</value>
+  </data>
+  
+  
+  <data name="CHAT_HISTORY_LOAD_ERROR" xml:space="preserve">
+    <value>Error al cargar historial.</value>
+  </data>
+  
+  
+  <data name="CHAT_SAVE_ERROR" xml:space="preserve">
+    <value>Error al guardar chat.</value>
+  </data>
+  
+  
+  <data name="CHAT_DELETE_ERROR" xml:space="preserve">
+    <value>Error al eliminar chat.</value>
+  </data>
+  
+  
+  <data name="UNKNOWN_MESSAGE_TYPE" xml:space="preserve">
+    <value>Tipo de mensaje desconocido.</value>
+  </data>
+  
+  
+  <data name="NEW_CHAT_TITLE" xml:space="preserve">
+    <value>Nuevo chat</value>
+  </data>
+  
+  
+  <data name="AUTH_USER_REQUIRED" xml:space="preserve">
+    <value>El usuario es obligatorio.</value>
+  </data>
+  
+  
+  <data name="AUTH_PASSWORD_REQUIRED" xml:space="preserve">
+    <value>La contraseña es obligatoria.</value>
+  </data>
+  
+  
+  <data name="FE_NETWORK_HTTP" xml:space="preserve">
+    <value>Error de red HTTP en el frontend.</value>
+  </data>
+  <data name="FE_NETWORK_TIMEOUT" xml:space="preserve">
+    <value>Tiempo de espera agotado en el frontend.</value>
+  </data>
+  <data name="FE_NETWORK_ERROR" xml:space="preserve">
+    <value>Error de red en el frontend.</value>
+  </data>
+  <data name="GENERIC_ERROR" xml:space="preserve">
+    <value>Ocurrió un error.</value>
+  </data>
+  <data name="INTERNAL_ERROR" xml:space="preserve">
+    <value>Error interno.</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>Operación exitosa.</value>
+  </data>
 </root>

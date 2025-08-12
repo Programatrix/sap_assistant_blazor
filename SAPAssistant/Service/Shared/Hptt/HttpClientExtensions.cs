@@ -6,6 +6,7 @@ using Infrastructure.Mapping;
 using SAPAssistant.Exceptions;
 using SAPAssistant.Service.Shared.Transport;
 using SAPAssistant;
+using SAPAssistant.Constants;
 
 public class ApiClient
 {
@@ -21,7 +22,7 @@ public class ApiClient
     public async Task<ServiceResult<TRes>> PostAsResultAsync<TReq, TRes>(
         string url,
         TReq body,
-        string okKey = "OK",
+        string okKey = ErrorCodes.OK,
         CancellationToken ct = default)
     {
         var corr = Guid.NewGuid().ToString();
@@ -47,23 +48,23 @@ public class ApiClient
 
             // Sin envelope → errores “físicos” del front
             if ((int)res.StatusCode is 502 or 503 or 504)
-                return ServiceResult<TRes>.Fail(_localizer["SVC_UNAVAILABLE"], "SVC_UNAVAILABLE")
+                return ServiceResult<TRes>.Fail(_localizer[ErrorCodes.SVC_UNAVAILABLE], ErrorCodes.SVC_UNAVAILABLE)
                                           .WithCorrelation(corr)
                                           .WithTrace(corr);
 
-            return ServiceResult<TRes>.Fail(_localizer["FE_NETWORK_HTTP"], "FE_NETWORK_HTTP")
+            return ServiceResult<TRes>.Fail(_localizer[ErrorCodes.FE_NETWORK_HTTP], ErrorCodes.FE_NETWORK_HTTP)
                                       .WithCorrelation(corr)
                                       .WithTrace(corr);
         }
         catch (TaskCanceledException)
         {
-            return ServiceResult<TRes>.Fail(_localizer["FE_NETWORK_TIMEOUT"], "FE_NETWORK_TIMEOUT")
+            return ServiceResult<TRes>.Fail(_localizer[ErrorCodes.FE_NETWORK_TIMEOUT], ErrorCodes.FE_NETWORK_TIMEOUT)
                                       .WithCorrelation(corr)
                                       .WithTrace(corr);
         }
         catch (HttpRequestException)
         {
-            return ServiceResult<TRes>.Fail(_localizer["FE_NETWORK_ERROR"], "FE_NETWORK_ERROR")
+            return ServiceResult<TRes>.Fail(_localizer[ErrorCodes.FE_NETWORK_ERROR], ErrorCodes.FE_NETWORK_ERROR)
                                       .WithCorrelation(corr)
                                       .WithTrace(corr);
         }

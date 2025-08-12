@@ -10,6 +10,7 @@ using System.Text.Json;
 using SAPAssistant.Exceptions;
 using Microsoft.Extensions.Localization;
 using SAPAssistant;
+using SAPAssistant.Constants;
 
 namespace SAPAssistant.ViewModels;
 
@@ -83,7 +84,7 @@ public partial class ChatViewModel : BaseViewModel
             {
                 Id = Guid.NewGuid().ToString(),
                 Fecha = DateTime.Now,
-                Titulo = _localizer["NEW-CHAT-TITLE"]
+                Titulo = _localizer[ErrorCodes.NEW_CHAT_TITLE]
             };
         }
 

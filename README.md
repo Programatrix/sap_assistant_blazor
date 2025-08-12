@@ -37,6 +37,10 @@ sap_assistant_blazor/
 └── Program.cs / Startup.cs  # Configuración de la aplicación
 ```
 
+### Manejo de errores
+
+Las claves de error utilizadas en los servicios y la interfaz se centralizan en `Constants/ErrorCodes.cs`. Estas constantes se utilizan como referencias para las claves de localización definidas en los archivos `Resources/ErrorMessages*.resx`.
+
 ---
 
 ## 📚 Funcionalidades

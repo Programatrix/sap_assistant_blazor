@@ -3,6 +3,7 @@ using SAPAssistant.Models;
 using SAPAssistant.Security;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Localization;
+using SAPAssistant.Constants;
 
 
 namespace SAPAssistant.Service
@@ -25,7 +26,7 @@ namespace SAPAssistant.Service
             var r = await _api.PostAsResultAsync<LoginRequest, LoginResponse>(
                 "login",            // SIN /api/v1/ porque ya va en BaseAddress
                 request,
-                okKey: "LOGIN_SUCCESS",
+                okKey: ErrorCodes.LOGIN_SUCCESS,
                 ct
             );
 
