@@ -17,6 +17,9 @@ namespace SAPAssistant.Exceptions
         public string ErrorCode { get; set; } = string.Empty;
         public T? Data { get; set; }
         public NotificationType Type { get; set; } = NotificationType.Success;
+        public string CorrelationId = string.Empty;
+        public string TraceId = string.Empty;
+
 
         public static ResultMessage<T> Ok(T data, string message = "", NotificationType type = NotificationType.Success) => new()
         {

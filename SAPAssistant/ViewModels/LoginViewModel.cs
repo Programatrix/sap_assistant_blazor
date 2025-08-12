@@ -50,43 +50,53 @@ public partial class LoginViewModel : BaseViewModel
     /// </summary>
     public async Task HandleLogin()
     {
+        if (IsLoading) return; // evita doble submit
         IsLoading = true;
 
-        // 1️⃣ Validación visual
-        ValidateFields();
-        if (UserNameError || PasswordError)
+        try
         {
-            IsLoading = false;
-            return; // No mostramos toasts, solo resaltamos campos
-        }
+            // 1) Validación visual
+            ValidateFields();
+            if (UserNameError || PasswordError)
+                return; // no toasts; feedback inline
 
-        // 2️⃣ Llamada al servicio de autenticación
-        var result = await _authService.LoginAsync(LoginModel);
+            // 2) Llamada al servicio (ya devuelve ResultMessage sin lanzar)
+            var result = await _authService.LoginAsync(LoginModel);
 
-        if (result.Success)
-        {
-            _stateContainer.AuthenticatedUser = result.Data;
-            _navigation.NavigateTo("/chat");
-        }
-        else
-        {
-            // 3️⃣ Notificación de error de negocio / autenticación
-            var notify = new ResultMessage
+            if (result.Success)
             {
-                Success = result.Success,
-                Message = result.Message,
+                _stateContainer.AuthenticatedUser = result.Data;
+                _navigation.NavigateTo("/chat");
+                return;
+            }
+
+            // 3) Notificación de error (backend o FE_*)
+            var msg = string.IsNullOrWhiteSpace(result.Message) ? "Ocurrió un error." : result.Message!;
+            if (!string.IsNullOrWhiteSpace(result.TraceId))
+                msg += $" (trace: {result.TraceId})";
+
+            await _notificationService.Notify(new ResultMessage
+            {
+                Success = false,
+                Message = msg,
                 ErrorCode = result.ErrorCode,
                 Type = result.Type
-            };
+            });
 
-            await _notificationService.Notify(notify);
-
-            // Marcar solo la contraseña como errónea para feedback visual
+            // feedback visual mínimo
             PasswordError = true;
         }
-
-        IsLoading = false;
+        catch (Exception ex)
+        {
+            // Último cinturón de seguridad: nada se escapa al circuito
+            await _notificationService.NotifyError(ex.Message, "FE_RENDER_UNCAUGHT");            
+        }
+        finally
+        {
+            IsLoading = false;            
+        }
     }
+
 
     /// <summary>
     /// Alterna la visibilidad de la contraseña

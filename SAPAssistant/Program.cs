@@ -13,6 +13,9 @@ using SAPAssistant.ViewModels;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 
+// ⮕ si ApiClient está en tu proyecto, importa su namespace
+// using YourNamespace.Infrastructure.Http;  // donde esté ApiClient
+
 var builder = WebApplication.CreateBuilder(args);
 
 var apiBaseUrl = builder.Configuration["ApiBaseUrl"]
@@ -22,39 +25,46 @@ var apiBaseUrl = builder.Configuration["ApiBaseUrl"]
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor()
- .AddCircuitOptions(options => { options.DetailedErrors = true; });
+    .AddCircuitOptions(options => { options.DetailedErrors = true; });
+
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+// Cliente “Default” (si lo usas en otros sitios)
 builder.Services.AddHttpClient("Default", client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
-// API principal
-builder.Services.AddScoped(sp => new HttpClient
-{
-    BaseAddress = new Uri(apiBaseUrl)
-});
+// ❌ Eliminado el scoped genérico de HttpClient si ya no se usa directamente
+// builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseUrl) });
 
-// Servicios API específicos
+// Servicios API específicos → apuntan a /api/v1/
 builder.Services.AddHttpClient<IConnectionService, ConnectionService>(client =>
 {
-    client.BaseAddress = new Uri(apiBaseUrl);
+    client.BaseAddress = new Uri($"{apiBaseUrl.TrimEnd('/')}/api/v1/");
 });
 
 builder.Services.AddHttpClient<IAssistantService, AssistantService>(client =>
 {
-    client.BaseAddress = new Uri(apiBaseUrl);
+    client.BaseAddress = new Uri($"{apiBaseUrl.TrimEnd('/')}/api/v1/");
 });
 
+// ✅ ApiClient (typed) con BaseAddress que incluye /api/v1/
+builder.Services.AddHttpClient<ApiClient>(client =>
+{
+    client.BaseAddress = new Uri($"{apiBaseUrl.TrimEnd('/')}/api/v1/");
+});
+//builder.Services.AddScoped<ApiClient>();
 
+// Resto de servicios de la app
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<SessionContextService>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<CustomAuthStateProvider>();
-    builder.Services.AddScoped<DashboardService>();
-    builder.Services.AddSingleton<KpiCatalogService>();
-    builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
+builder.Services.AddScoped<DashboardService>();
+builder.Services.AddSingleton<KpiCatalogService>();
+builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
 builder.Services.AddSingleton<INotificationService, NotificationService>();
 builder.Services.AddScoped<IChatHistoryService, ChatHistoryService>();
 builder.Services.AddMudServices();
@@ -70,7 +80,6 @@ builder.Services.AddScoped<ConnectionManagerViewModel>();
 builder.Services.AddScoped<DashboardPageViewModel>();
 builder.Services.AddScoped<DashboardCatalogViewModel>();
 builder.Services.AddScoped<DashboardWizardViewModel>();
-
 
 // ✅ Política de conexión activa
 builder.Services.AddAuthorizationCore(options =>
@@ -93,6 +102,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 var supportedCultures = new[] { new CultureInfo("en"), new CultureInfo("es") };
 var localizationOptions = new RequestLocalizationOptions
 {
@@ -101,6 +111,7 @@ var localizationOptions = new RequestLocalizationOptions
     SupportedUICultures = supportedCultures
 };
 app.UseRequestLocalization(localizationOptions);
+
 app.UseRouting();
 
 app.MapBlazorHub();
