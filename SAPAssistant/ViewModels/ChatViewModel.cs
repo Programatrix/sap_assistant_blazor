@@ -8,7 +8,6 @@ using SAPAssistant.Service;
 using SAPAssistant.Service.Interfaces;
 using System.Text.Json;
 using SAPAssistant.Exceptions;
-using ChatResultMessage = SAPAssistant.Models.Chat.ResultMessage;
 using Microsoft.Extensions.Localization;
 using SAPAssistant;
 

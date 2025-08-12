@@ -1,6 +1,6 @@
 ﻿namespace SAPAssistant.Models.Chat
 {
-    public class ResultMessage : MessageBase
+    public class ChatResultMessage : MessageBase
     {
         public string Resumen { get; set; } = string.Empty;
         public string Sql { get; set; } = string.Empty;
