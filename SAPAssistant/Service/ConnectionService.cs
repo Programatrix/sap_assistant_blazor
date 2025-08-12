@@ -7,6 +7,7 @@ using SAPAssistant.Service.Interfaces;
 
 using Microsoft.Extensions.Localization;
 using SAPAssistant;
+using SAPAssistant.Constants;
 
 namespace SAPAssistant.Service
 {
@@ -38,19 +39,19 @@ namespace SAPAssistant.Service
 
                 if (string.IsNullOrWhiteSpace(token))
                 {
-                    const string code = "SESSION-TOKEN-NOT-FOUND";
+                    const string code = ErrorCodes.SESSION_TOKEN_NOT_FOUND;
                     return ServiceResult<List<ConnectionDTO>>.Fail(_localizer[code], code);
                 }
 
                 if (string.IsNullOrWhiteSpace(userId))
                 {
-                    const string code = "SESSION-USER-NOT-FOUND";
+                    const string code = ErrorCodes.SESSION_USER_NOT_FOUND;
                     return ServiceResult<List<ConnectionDTO>>.Fail(_localizer[code], code);
                 }
 
                 if (string.IsNullOrWhiteSpace(remoteIp))
                 {
-                    const string code = "SESSION-REMOTE_IP-NOT-FOUND";
+                    const string code = ErrorCodes.SESSION_REMOTE_IP_NOT_FOUND;
                     return ServiceResult<List<ConnectionDTO>>.Fail(_localizer[code], code);
                 }
 
@@ -61,26 +62,26 @@ namespace SAPAssistant.Service
                 var response = await _http.SendAsync(request);
                 if (!response.IsSuccessStatusCode)
                 {
-                    const string code = "CONNECTIONS-FETCH-ERROR";
+                    const string code = ErrorCodes.CONNECTIONS_FETCH_ERROR;
                     return ServiceResult<List<ConnectionDTO>>.Fail(_localizer[code], code);
                 }
 
                 var rawList = await response.Content.ReadFromJsonAsync<List<Dictionary<string, ConnectionDTO>>>();
                 var connections = ConnectionMapper.FromRawList(rawList ?? new());
 
-                var ok = ServiceResult<List<ConnectionDTO>>.Ok(connections, _localizer["CONNECTIONS-FETCH-SUCCESS"]);
-                ok.ErrorCode = "CONNECTIONS-FETCH-SUCCESS";
+                var ok = ServiceResult<List<ConnectionDTO>>.Ok(connections, _localizer[ErrorCodes.CONNECTIONS_FETCH_SUCCESS]);
+                ok.ErrorCode = ErrorCodes.CONNECTIONS_FETCH_SUCCESS;
                 return ok;
             }
             catch (HttpRequestException)
             {
-                const string code = "NET-ERROR";
+                const string code = ErrorCodes.NET_ERROR;
                 return ServiceResult<List<ConnectionDTO>>.Fail(_localizer[code], code);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener conexiones");
-                const string code = "UNEXPECTED-ERROR";
+                const string code = ErrorCodes.UNEXPECTED_ERROR;
                 return ServiceResult<List<ConnectionDTO>>.Fail(_localizer[code], code);
             }
         }
@@ -94,7 +95,7 @@ namespace SAPAssistant.Service
 
                 if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp))
                 {
-                    const string code = "SESSION-DATA-NOT-FOUND";
+                    const string code = ErrorCodes.SESSION_DATA_NOT_FOUND;
                     return ServiceResult<ConnectionDTO>.Fail(_localizer[code], code);
                 }
 
@@ -105,30 +106,30 @@ namespace SAPAssistant.Service
                 var response = await _http.SendAsync(request);
                 if (!response.IsSuccessStatusCode)
                 {
-                    const string code = "CONNECTION-FETCH-ERROR";
+                    const string code = ErrorCodes.CONNECTION_FETCH_ERROR;
                     return ServiceResult<ConnectionDTO>.Fail(_localizer[code], code);
                 }
 
                 var dto = await response.Content.ReadFromJsonAsync<ConnectionDTO>();
                 if (dto == null)
                 {
-                    const string code = "EMPTY-RESPONSE";
+                    const string code = ErrorCodes.EMPTY_RESPONSE;
                     return ServiceResult<ConnectionDTO>.Fail(_localizer[code], code);
                 }
 
-                var ok = ServiceResult<ConnectionDTO>.Ok(dto, _localizer["CONNECTION-FETCH-SUCCESS"]);
-                ok.ErrorCode = "CONNECTION-FETCH-SUCCESS";
+                var ok = ServiceResult<ConnectionDTO>.Ok(dto, _localizer[ErrorCodes.CONNECTION_FETCH_SUCCESS]);
+                ok.ErrorCode = ErrorCodes.CONNECTION_FETCH_SUCCESS;
                 return ok;
             }
             catch (HttpRequestException)
             {
-                const string code = "NET-ERROR";
+                const string code = ErrorCodes.NET_ERROR;
                 return ServiceResult<ConnectionDTO>.Fail(_localizer[code], code);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener conexión {ConnectionId}", connectionId);
-                const string code = "UNEXPECTED-ERROR";
+                const string code = ErrorCodes.UNEXPECTED_ERROR;
                 return ServiceResult<ConnectionDTO>.Fail(_localizer[code], code);
             }
         }
@@ -142,7 +143,7 @@ namespace SAPAssistant.Service
 
                 if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp))
                 {
-                    const string code = "SESSION-DATA-NOT-FOUND";
+                    const string code = ErrorCodes.SESSION_DATA_NOT_FOUND;
                     return ServiceResult.Fail(_localizer[code], code);
                 }
 
@@ -154,23 +155,23 @@ namespace SAPAssistant.Service
                 var response = await _http.SendAsync(request);
                 if (!response.IsSuccessStatusCode)
                 {
-                    const string code = "UPDATE-CONNECTION-ERROR";
+                    const string code = ErrorCodes.UPDATE_CONNECTION_ERROR;
                     return ServiceResult.Fail(_localizer[code], code);
                 }
 
-                var ok = ServiceResult.Ok(_localizer["CONNECTION-UPDATED"]);
-                ok.ErrorCode = "CONNECTION-UPDATED";
+                var ok = ServiceResult.Ok(_localizer[ErrorCodes.CONNECTION_UPDATED]);
+                ok.ErrorCode = ErrorCodes.CONNECTION_UPDATED;
                 return ok;
             }
             catch (HttpRequestException)
             {
-                const string code = "NET-ERROR";
+                const string code = ErrorCodes.NET_ERROR;
                 return ServiceResult.Fail(_localizer[code], code);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al actualizar conexión {ConnectionId}", connection.ConnectionId);
-                const string code = "UNEXPECTED-ERROR";
+                const string code = ErrorCodes.UNEXPECTED_ERROR;
                 return ServiceResult.Fail(_localizer[code], code);
             }
         }
@@ -184,7 +185,7 @@ namespace SAPAssistant.Service
 
                 if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp))
                 {
-                    const string code = "SESSION-DATA-NOT-FOUND";
+                    const string code = ErrorCodes.SESSION_DATA_NOT_FOUND;
                     return ServiceResult.Fail(_localizer[code], code);
                 }
 
@@ -196,23 +197,23 @@ namespace SAPAssistant.Service
                 var response = await _http.SendAsync(request);
                 if (!response.IsSuccessStatusCode)
                 {
-                    const string code = "CREATE-CONNECTION-ERROR";
+                    const string code = ErrorCodes.CREATE_CONNECTION_ERROR;
                     return ServiceResult.Fail(_localizer[code], code);
                 }
 
-                var ok = ServiceResult.Ok(_localizer["CONNECTION-CREATED"]);
-                ok.ErrorCode = "CONNECTION-CREATED";
+                var ok = ServiceResult.Ok(_localizer[ErrorCodes.CONNECTION_CREATED]);
+                ok.ErrorCode = ErrorCodes.CONNECTION_CREATED;
                 return ok;
             }
             catch (HttpRequestException)
             {
-                const string code = "NET-ERROR";
+                const string code = ErrorCodes.NET_ERROR;
                 return ServiceResult.Fail(_localizer[code], code);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al crear conexión");
-                const string code = "UNEXPECTED-ERROR";
+                const string code = ErrorCodes.UNEXPECTED_ERROR;
                 return ServiceResult.Fail(_localizer[code], code);
             }
         }
@@ -225,7 +226,7 @@ namespace SAPAssistant.Service
                 var remoteIp = await _sessionContext.GetRemoteIpAsync();
                 if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp))
                 {
-                    const string code = "SESSION-DATA-NOT-FOUND";
+                    const string code = ErrorCodes.SESSION_DATA_NOT_FOUND;
                     return ServiceResult.Fail(_localizer[code], code);
                 }
 
@@ -241,23 +242,23 @@ namespace SAPAssistant.Service
                                      connectionId,
                                      response.StatusCode,
                                      errorContent);
-                    const string code = "VALIDATION-CONNECTION-ERROR";
+                    const string code = ErrorCodes.VALIDATION_CONNECTION_ERROR;
                     return ServiceResult.Fail(_localizer[code], code);
                 }
 
-                var ok = ServiceResult.Ok(_localizer["CONNECTION-VALID"]);
-                ok.ErrorCode = "CONNECTION-VALID";
+                var ok = ServiceResult.Ok(_localizer[ErrorCodes.CONNECTION_VALID]);
+                ok.ErrorCode = ErrorCodes.CONNECTION_VALID;
                 return ok;
             }
             catch (HttpRequestException)
             {
-                const string code = "NET-ERROR";
+                const string code = ErrorCodes.NET_ERROR;
                 return ServiceResult.Fail(_localizer[code], code);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al validar conexión {ConnectionId}", connectionId);
-                const string code = "UNEXPECTED-ERROR";
+                const string code = ErrorCodes.UNEXPECTED_ERROR;
                 return ServiceResult.Fail(_localizer[code], code);
             }
         }
