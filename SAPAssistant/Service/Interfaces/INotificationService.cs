@@ -6,9 +6,9 @@ namespace SAPAssistant.Service.Interfaces
 {
     public interface INotificationService
     {
-        event Func<ResultMessage, Task>? OnNotify;
+        event Func<ServiceResult, Task>? OnNotify;
 
-        Task Notify(ResultMessage message);
+        Task Notify(ServiceResult message);
         Task NotifyError(string message, string errorCode = "");
         Task NotifySuccess(string message);
         Task NotifyInfo(string message);

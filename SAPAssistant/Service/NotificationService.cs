@@ -20,10 +20,10 @@ public class NotificationService : INotificationService
     }
 
     // Evento al que se suscriben los componentes que muestran mensajes
-    public event Func<ResultMessage, Task>? OnNotify;
+    public event Func<ServiceResult, Task>? OnNotify;
 
     // Método para emitir mensajes de notificación
-    public async Task Notify(ResultMessage message)
+    public async Task Notify(ServiceResult message)
     {
         if (!string.IsNullOrEmpty(message.ErrorCode))
         {
@@ -43,25 +43,25 @@ public class NotificationService : INotificationService
     // Atajo para errores
     public Task NotifyError(string message, string errorCode = "")
     {
-        return Notify(ResultMessage.Fail(message, errorCode, NotificationType.Error));
+        return Notify(ServiceResult.Fail(message, errorCode, NotificationType.Error));
     }
 
     // Atajo para éxitos
     public Task NotifySuccess(string message)
     {
-        return Notify(ResultMessage.Ok(message, NotificationType.Success));
+        return Notify(ServiceResult.Ok(message, NotificationType.Success));
     }
 
     // Atajo para información
     public Task NotifyInfo(string message)
     {
-        return Notify(ResultMessage.Ok(message, NotificationType.Info));
+        return Notify(ServiceResult.Ok(message, NotificationType.Info));
     }
 
     // Atajo para advertencias
     public Task NotifyWarning(string message)
     {
-        return Notify(ResultMessage.Ok(message, NotificationType.Warning));
+        return Notify(ServiceResult.Ok(message, NotificationType.Warning));
     }
 
     // Registra un error y dispara una notificación

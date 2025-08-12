@@ -44,14 +44,7 @@ public partial class ConnectionSelectionViewModel : BaseViewModel
                 HayConexionActiva = false;
                 MostrarAviso = true;
                 await _sessionContext.DeleteActiveConnectionIdAsync();
-                var notify = new ResultMessage
-                {
-                    Success = result.Success,
-                    Message = result.Message,
-                    ErrorCode = result.ErrorCode,
-                    Type = NotificationType.Error
-                };
-                await NotificationService.Notify(notify);
+                await NotificationService.Notify(result);
             }
         }
     }

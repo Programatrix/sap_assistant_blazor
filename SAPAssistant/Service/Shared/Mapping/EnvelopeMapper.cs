@@ -8,12 +8,12 @@ namespace Infrastructure.Mapping;
 public static class EnvelopeMapper
 {
     /// <summary>
-    /// Adapta el envelope del backend a tu ResultMessage{T}.
+    /// Adapta el envelope del backend a tu ServiceResult{T}.
     /// Reglas:
     /// - success=true → OK con mensaje localizable (okKey).
     /// - success=false → usa localizer si hay clave para errorCode; si no, usa env.Error; si tampoco hay, usa GENERIC_ERROR.
     /// </summary>
-    public static ResultMessage<T> ToResultMessage<T>(
+    public static ServiceResult<T> ToServiceResult<T>(
         this StdResponse<T> env,
         IStringLocalizer<ErrorMessages> localizer,
         string? correlationId = null,
@@ -21,7 +21,7 @@ public static class EnvelopeMapper
     {
         if (env.Success && env.Data is not null)
         {
-            var ok = ResultMessage<T>.Ok(env.Data, localizer[okKey]);
+            var ok = ServiceResult<T>.Ok(env.Data, localizer[okKey]);
             ok.ErrorCode = "OK";
             ok.CorrelationId = correlationId;
             ok.TraceId = env.TraceId;
@@ -35,7 +35,7 @@ public static class EnvelopeMapper
             ? localizer[code].Value
             : (!string.IsNullOrWhiteSpace(env.Error) ? env.Error! : localizer["GENERIC_ERROR"].Value);
 
-        var fail = ResultMessage<T>.Fail(message, code);
+        var fail = ServiceResult<T>.Fail(message, code);
         fail.CorrelationId = correlationId;
         fail.TraceId = env.TraceId;
         return fail;

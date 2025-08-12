@@ -74,14 +74,7 @@ public partial class ChatViewModel : BaseViewModel
             }
             else
             {
-                var notify = new SAPAssistant.Exceptions.ResultMessage
-                {
-                    Success = result.Success,
-                    Message = result.Message,
-                    ErrorCode = result.ErrorCode,
-                    Type = NotificationType.Error
-                };
-                await NotificationService.Notify(notify);
+                await NotificationService.Notify(result);
                 return;
             }
         }

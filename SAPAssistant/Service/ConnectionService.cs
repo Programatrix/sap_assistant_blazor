@@ -28,7 +28,7 @@ namespace SAPAssistant.Service
             _localizer = localizer;
         }
 
-        public async Task<ResultMessage<List<ConnectionDTO>>> GetConnectionsAsync()
+        public async Task<ServiceResult<List<ConnectionDTO>>> GetConnectionsAsync()
         {
             try
             {
@@ -39,19 +39,19 @@ namespace SAPAssistant.Service
                 if (string.IsNullOrWhiteSpace(token))
                 {
                     const string code = "SESSION-TOKEN-NOT-FOUND";
-                    return ResultMessage<List<ConnectionDTO>>.Fail(_localizer[code], code);
+                    return ServiceResult<List<ConnectionDTO>>.Fail(_localizer[code], code);
                 }
 
                 if (string.IsNullOrWhiteSpace(userId))
                 {
                     const string code = "SESSION-USER-NOT-FOUND";
-                    return ResultMessage<List<ConnectionDTO>>.Fail(_localizer[code], code);
+                    return ServiceResult<List<ConnectionDTO>>.Fail(_localizer[code], code);
                 }
 
                 if (string.IsNullOrWhiteSpace(remoteIp))
                 {
                     const string code = "SESSION-REMOTE_IP-NOT-FOUND";
-                    return ResultMessage<List<ConnectionDTO>>.Fail(_localizer[code], code);
+                    return ServiceResult<List<ConnectionDTO>>.Fail(_localizer[code], code);
                 }
 
                 var request = new HttpRequestMessage(HttpMethod.Get, "/connection/user-connections");
@@ -62,30 +62,30 @@ namespace SAPAssistant.Service
                 if (!response.IsSuccessStatusCode)
                 {
                     const string code = "CONNECTIONS-FETCH-ERROR";
-                    return ResultMessage<List<ConnectionDTO>>.Fail(_localizer[code], code);
+                    return ServiceResult<List<ConnectionDTO>>.Fail(_localizer[code], code);
                 }
 
                 var rawList = await response.Content.ReadFromJsonAsync<List<Dictionary<string, ConnectionDTO>>>();
                 var connections = ConnectionMapper.FromRawList(rawList ?? new());
 
-                var ok = ResultMessage<List<ConnectionDTO>>.Ok(connections, _localizer["CONNECTIONS-FETCH-SUCCESS"]);
+                var ok = ServiceResult<List<ConnectionDTO>>.Ok(connections, _localizer["CONNECTIONS-FETCH-SUCCESS"]);
                 ok.ErrorCode = "CONNECTIONS-FETCH-SUCCESS";
                 return ok;
             }
             catch (HttpRequestException)
             {
                 const string code = "NET-ERROR";
-                return ResultMessage<List<ConnectionDTO>>.Fail(_localizer[code], code);
+                return ServiceResult<List<ConnectionDTO>>.Fail(_localizer[code], code);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener conexiones");
                 const string code = "UNEXPECTED-ERROR";
-                return ResultMessage<List<ConnectionDTO>>.Fail(_localizer[code], code);
+                return ServiceResult<List<ConnectionDTO>>.Fail(_localizer[code], code);
             }
         }
 
-        public async Task<OperationResult<ConnectionDTO>> GetConnectionByIdAsync(string connectionId)
+        public async Task<ServiceResult<ConnectionDTO>> GetConnectionByIdAsync(string connectionId)
         {
             try
             {
@@ -95,7 +95,7 @@ namespace SAPAssistant.Service
                 if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp))
                 {
                     const string code = "SESSION-DATA-NOT-FOUND";
-                    return OperationResult<ConnectionDTO>.Fail(_localizer[code], code);
+                    return ServiceResult<ConnectionDTO>.Fail(_localizer[code], code);
                 }
 
                 var request = new HttpRequestMessage(HttpMethod.Get, $"/connection/connections/{connectionId}");
@@ -106,34 +106,34 @@ namespace SAPAssistant.Service
                 if (!response.IsSuccessStatusCode)
                 {
                     const string code = "CONNECTION-FETCH-ERROR";
-                    return OperationResult<ConnectionDTO>.Fail(_localizer[code], code);
+                    return ServiceResult<ConnectionDTO>.Fail(_localizer[code], code);
                 }
 
                 var dto = await response.Content.ReadFromJsonAsync<ConnectionDTO>();
                 if (dto == null)
                 {
                     const string code = "EMPTY-RESPONSE";
-                    return OperationResult<ConnectionDTO>.Fail(_localizer[code], code);
+                    return ServiceResult<ConnectionDTO>.Fail(_localizer[code], code);
                 }
 
-                var ok = OperationResult<ConnectionDTO>.Ok(dto, _localizer["CONNECTION-FETCH-SUCCESS"]);
+                var ok = ServiceResult<ConnectionDTO>.Ok(dto, _localizer["CONNECTION-FETCH-SUCCESS"]);
                 ok.ErrorCode = "CONNECTION-FETCH-SUCCESS";
                 return ok;
             }
             catch (HttpRequestException)
             {
                 const string code = "NET-ERROR";
-                return OperationResult<ConnectionDTO>.Fail(_localizer[code], code);
+                return ServiceResult<ConnectionDTO>.Fail(_localizer[code], code);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener conexión {ConnectionId}", connectionId);
                 const string code = "UNEXPECTED-ERROR";
-                return OperationResult<ConnectionDTO>.Fail(_localizer[code], code);
+                return ServiceResult<ConnectionDTO>.Fail(_localizer[code], code);
             }
         }
 
-        public async Task<OperationResult> UpdateConnectionAsync(ConnectionDTO connection)
+        public async Task<ServiceResult> UpdateConnectionAsync(ConnectionDTO connection)
         {
             try
             {
@@ -143,7 +143,7 @@ namespace SAPAssistant.Service
                 if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp))
                 {
                     const string code = "SESSION-DATA-NOT-FOUND";
-                    return OperationResult.Fail(_localizer[code], code);
+                    return ServiceResult.Fail(_localizer[code], code);
                 }
 
                 var request = new HttpRequestMessage(HttpMethod.Put, $"/connection/connections/{connection.ConnectionId}");
@@ -155,27 +155,27 @@ namespace SAPAssistant.Service
                 if (!response.IsSuccessStatusCode)
                 {
                     const string code = "UPDATE-CONNECTION-ERROR";
-                    return OperationResult.Fail(_localizer[code], code);
+                    return ServiceResult.Fail(_localizer[code], code);
                 }
 
-                var ok = OperationResult.Ok(_localizer["CONNECTION-UPDATED"]);
+                var ok = ServiceResult.Ok(_localizer["CONNECTION-UPDATED"]);
                 ok.ErrorCode = "CONNECTION-UPDATED";
                 return ok;
             }
             catch (HttpRequestException)
             {
                 const string code = "NET-ERROR";
-                return OperationResult.Fail(_localizer[code], code);
+                return ServiceResult.Fail(_localizer[code], code);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al actualizar conexión {ConnectionId}", connection.ConnectionId);
                 const string code = "UNEXPECTED-ERROR";
-                return OperationResult.Fail(_localizer[code], code);
+                return ServiceResult.Fail(_localizer[code], code);
             }
         }
 
-        public async Task<OperationResult> CreateConnectionAsync(ConnectionDTO connection)
+        public async Task<ServiceResult> CreateConnectionAsync(ConnectionDTO connection)
         {
             try
             {
@@ -185,7 +185,7 @@ namespace SAPAssistant.Service
                 if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp))
                 {
                     const string code = "SESSION-DATA-NOT-FOUND";
-                    return OperationResult.Fail(_localizer[code], code);
+                    return ServiceResult.Fail(_localizer[code], code);
                 }
 
                 var request = new HttpRequestMessage(HttpMethod.Post, "/connection/connections");
@@ -197,27 +197,27 @@ namespace SAPAssistant.Service
                 if (!response.IsSuccessStatusCode)
                 {
                     const string code = "CREATE-CONNECTION-ERROR";
-                    return OperationResult.Fail(_localizer[code], code);
+                    return ServiceResult.Fail(_localizer[code], code);
                 }
 
-                var ok = OperationResult.Ok(_localizer["CONNECTION-CREATED"]);
+                var ok = ServiceResult.Ok(_localizer["CONNECTION-CREATED"]);
                 ok.ErrorCode = "CONNECTION-CREATED";
                 return ok;
             }
             catch (HttpRequestException)
             {
                 const string code = "NET-ERROR";
-                return OperationResult.Fail(_localizer[code], code);
+                return ServiceResult.Fail(_localizer[code], code);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al crear conexión");
                 const string code = "UNEXPECTED-ERROR";
-                return OperationResult.Fail(_localizer[code], code);
+                return ServiceResult.Fail(_localizer[code], code);
             }
         }
 
-        public async Task<OperationResult> ValidateConnectionAsync(string connectionId)
+        public async Task<ServiceResult> ValidateConnectionAsync(string connectionId)
         {
             try
             {
@@ -226,7 +226,7 @@ namespace SAPAssistant.Service
                 if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp))
                 {
                     const string code = "SESSION-DATA-NOT-FOUND";
-                    return OperationResult.Fail(_localizer[code], code);
+                    return ServiceResult.Fail(_localizer[code], code);
                 }
 
                 var request = new HttpRequestMessage(HttpMethod.Post, $"/connection/connections/{connectionId}/validate");
@@ -242,23 +242,23 @@ namespace SAPAssistant.Service
                                      response.StatusCode,
                                      errorContent);
                     const string code = "VALIDATION-CONNECTION-ERROR";
-                    return OperationResult.Fail(_localizer[code], code);
+                    return ServiceResult.Fail(_localizer[code], code);
                 }
 
-                var ok = OperationResult.Ok(_localizer["CONNECTION-VALID"]);
+                var ok = ServiceResult.Ok(_localizer["CONNECTION-VALID"]);
                 ok.ErrorCode = "CONNECTION-VALID";
                 return ok;
             }
             catch (HttpRequestException)
             {
                 const string code = "NET-ERROR";
-                return OperationResult.Fail(_localizer[code], code);
+                return ServiceResult.Fail(_localizer[code], code);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al validar conexión {ConnectionId}", connectionId);
                 const string code = "UNEXPECTED-ERROR";
-                return OperationResult.Fail(_localizer[code], code);
+                return ServiceResult.Fail(_localizer[code], code);
             }
         }
 

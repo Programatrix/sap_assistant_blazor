@@ -60,7 +60,7 @@ public partial class LoginViewModel : BaseViewModel
             if (UserNameError || PasswordError)
                 return; // no toasts; feedback inline
 
-            // 2) Llamada al servicio (ya devuelve ResultMessage sin lanzar)
+            // 2) Llamada al servicio (ya devuelve ServiceResult sin lanzar)
             var result = await _authService.LoginAsync(LoginModel);
 
             if (result.Success)
@@ -71,17 +71,12 @@ public partial class LoginViewModel : BaseViewModel
             }
 
             // 3) Notificación de error (backend o FE_*)
-            var msg = string.IsNullOrWhiteSpace(result.Message) ? "Ocurrió un error." : result.Message!;
             if (!string.IsNullOrWhiteSpace(result.TraceId))
-                msg += $" (trace: {result.TraceId})";
+                result.Message = string.IsNullOrWhiteSpace(result.Message) ?
+                    $"Ocurrió un error. (trace: {result.TraceId})" :
+                    $"{result.Message} (trace: {result.TraceId})";
 
-            await _notificationService.Notify(new ResultMessage
-            {
-                Success = false,
-                Message = msg,
-                ErrorCode = result.ErrorCode,
-                Type = result.Type
-            });
+            await _notificationService.Notify(result);
 
             // feedback visual mínimo
             PasswordError = true;

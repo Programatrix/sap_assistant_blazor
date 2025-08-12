@@ -20,7 +20,7 @@ namespace SAPAssistant.Service
             _localizer = localizer;
         }
 
-        public async Task<ResultMessage<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken ct = default)
+        public async Task<ServiceResult<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken ct = default)
         {
             var r = await _api.PostAsResultAsync<LoginRequest, LoginResponse>(
                 "login",            // SIN /api/v1/ porque ya va en BaseAddress
