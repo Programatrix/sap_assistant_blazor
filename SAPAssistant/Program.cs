@@ -27,7 +27,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor()
     .AddCircuitOptions(options => { options.DetailedErrors = true; });
 
-builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+builder.Services.AddLocalization(options => options.ResourcesPath = "");
 
 // Cliente “Default” (si lo usas en otros sitios)
 builder.Services.AddHttpClient("Default", client =>
