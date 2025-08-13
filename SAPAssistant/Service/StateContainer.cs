@@ -25,5 +25,11 @@ namespace SAPAssistant.Service
         /// </summary>
         [ObservableProperty]
         private ChatSession? currentChat;
+
+        /// <summary>
+        /// URL a la que se redirige tras autenticarse.
+        /// </summary>
+        [ObservableProperty]
+        private string? returnUrl;
     }
 }

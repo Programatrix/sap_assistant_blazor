@@ -4,6 +4,7 @@ using SAPAssistant.Models;
 using SAPAssistant.Exceptions;
 using SAPAssistant.Service;
 using SAPAssistant.Service.Interfaces;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace SAPAssistant.ViewModels;
 
@@ -69,7 +70,23 @@ public partial class LoginViewModel : BaseViewModel
             if (result.Success)
             {
                 _stateContainer.AuthenticatedUser = result.Data;
-                _navigation.NavigateTo("/chat");
+
+                var uri = new Uri(_navigation.Uri);
+                var query = QueryHelpers.ParseQuery(uri.Query);
+                string? returnUrl = null;
+
+                if (query.TryGetValue("ReturnUrl", out var url) ||
+                    query.TryGetValue("returnUrl", out url))
+                {
+                    returnUrl = url.ToString();
+                }
+
+                if (string.IsNullOrWhiteSpace(returnUrl))
+                {
+                    returnUrl = _stateContainer.ReturnUrl;
+                }
+
+                _navigation.NavigateTo(string.IsNullOrWhiteSpace(returnUrl) ? "/dashboard" : returnUrl);
                 return;
             }
 
