@@ -47,10 +47,10 @@ namespace SAPAssistant.Security
         }
 
 
-        public async Task MarkUserAsAuthenticated(string username, string token)
+        public async Task MarkUserAsAuthenticated(string username, string token, bool persistent = false)
         {
-            await _sessionContext.SetUserIdAsync(username);
-            await _sessionContext.SetTokenAsync(token);
+            await _sessionContext.SetUserIdAsync(username, persistent);
+            await _sessionContext.SetTokenAsync(token, persistent);
 
             var identity = new ClaimsIdentity(new[]
             {
@@ -60,9 +60,9 @@ namespace SAPAssistant.Security
             var user = new ClaimsPrincipal(identity);
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
         }
-        public async Task SaveRemoteUrlAsync(string remoteUrl)
+        public async Task SaveRemoteUrlAsync(string remoteUrl, bool persistent = false)
         {
-            await _sessionContext.SetRemoteIpAsync(remoteUrl);
+            await _sessionContext.SetRemoteIpAsync(remoteUrl, persistent);
         }
         public async Task<string?> GetRemoteUrlAsync()
         {
