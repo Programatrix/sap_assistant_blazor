@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using SAPAssistant.Service;
 using System.Security.Claims;
+using Microsoft.JSInterop;
 
 namespace SAPAssistant.Security
 {
@@ -47,10 +48,10 @@ namespace SAPAssistant.Security
         }
 
 
-        public async Task MarkUserAsAuthenticated(string username, string token, bool persistent = false)
+        public async Task MarkUserAsAuthenticated(string username, string token, bool persistent = false, IJSRuntime? js = null)
         {
-            await _sessionContext.SetUserIdAsync(username, persistent);
-            await _sessionContext.SetTokenAsync(token, persistent);
+            await _sessionContext.SetUserIdAsync(username, persistent, js);
+            await _sessionContext.SetTokenAsync(token, persistent, js);
 
             var identity = new ClaimsIdentity(new[]
             {
@@ -60,9 +61,9 @@ namespace SAPAssistant.Security
             var user = new ClaimsPrincipal(identity);
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
         }
-        public async Task SaveRemoteUrlAsync(string remoteUrl, bool persistent = false)
+        public async Task SaveRemoteUrlAsync(string remoteUrl, bool persistent = false, IJSRuntime? js = null)
         {
-            await _sessionContext.SetRemoteIpAsync(remoteUrl, persistent);
+            await _sessionContext.SetRemoteIpAsync(remoteUrl, persistent, js);
         }
         public async Task<string?> GetRemoteUrlAsync()
         {
