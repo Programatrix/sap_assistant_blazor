@@ -11,6 +11,8 @@ using MudBlazor.Services;
 using SAPAssistant.ViewModels;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Http;
 
 // ⮕ si ApiClient está en tu proyecto, importa su namespace
 // using YourNamespace.Infrastructure.Http;  // donde esté ApiClient
@@ -27,6 +29,13 @@ builder.Services.AddServerSideBlazor()
     .AddCircuitOptions(options => { options.DetailedErrors = true; });
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "");
+
+builder.Services.AddAntiforgery(options =>
+{
+    options.Cookie.Name = "XSRF-TOKEN";
+    options.Cookie.HttpOnly = false;
+    options.HeaderName = "X-CSRF-TOKEN";
+});
 
 // Cliente “Default” (si lo usas en otros sitios)
 builder.Services.AddHttpClient("Default", client =>
@@ -112,6 +121,20 @@ var localizationOptions = new RequestLocalizationOptions
 app.UseRequestLocalization(localizationOptions);
 
 app.UseRouting();
+
+app.MapGet("/csrf-token", (HttpContext context, IAntiforgery antiforgery) =>
+{
+    var tokens = antiforgery.GetAndStoreTokens(context);
+    context.Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!, new CookieOptions { HttpOnly = false });
+    context.Response.Headers.Append("X-CSRF-TOKEN", tokens.RequestToken!);
+    return Results.Ok(new { token = tokens.RequestToken });
+});
+
+app.MapPost("/api/v1/login", async (HttpContext context, IAntiforgery antiforgery) =>
+{
+    await antiforgery.ValidateRequestAsync(context);
+    return Results.Ok();
+});
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
