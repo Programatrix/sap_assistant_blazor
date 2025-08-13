@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using SAPAssistant.Models;
 using System.Text.Json;
+using Microsoft.JSInterop;
 
 namespace SAPAssistant.Service
 {
@@ -34,9 +35,20 @@ namespace SAPAssistant.Service
         private string? GetCookie(string key)
             => Request?.Cookies.TryGetValue(key, out var value) == true ? value : null;
 
-        private ValueTask SetCookie(string key, string value, bool persistent = false)
+        private ValueTask SetCookie(string key, string value, bool persistent = false, IJSRuntime? js = null)
         {
-            Response?.Cookies.Append(key, value, BuildOptions(persistent));
+            if (Response is { HasStarted: false })
+            {
+                Response.Cookies.Append(key, value, BuildOptions(persistent));
+                return ValueTask.CompletedTask;
+            }
+
+            if (js is not null)
+            {
+                var days = persistent ? 30 : 0;
+                return js.InvokeVoidAsync("setCookie", key, value, days);
+            }
+
             return ValueTask.CompletedTask;
         }
 
@@ -49,15 +61,15 @@ namespace SAPAssistant.Service
         // ----- Autenticación -----
         public Task<string?> GetUserIdAsync() => Task.FromResult(GetCookie("username"));
 
-        public ValueTask SetUserIdAsync(string username, bool persistent = false)
-            => SetCookie("username", username, persistent);
+        public ValueTask SetUserIdAsync(string username, bool persistent = false, IJSRuntime? js = null)
+            => SetCookie("username", username, persistent, js);
 
         public ValueTask DeleteUserIdAsync() => DeleteCookie("username");
 
         public Task<string?> GetTokenAsync() => Task.FromResult(GetCookie("token"));
 
-        public ValueTask SetTokenAsync(string token, bool persistent = false)
-            => SetCookie("token", token, persistent);
+        public ValueTask SetTokenAsync(string token, bool persistent = false, IJSRuntime? js = null)
+            => SetCookie("token", token, persistent, js);
 
         public ValueTask DeleteTokenAsync() => DeleteCookie("token");
 
@@ -67,8 +79,8 @@ namespace SAPAssistant.Service
             return Task.FromResult(value?.TrimEnd('/'));
         }
 
-        public ValueTask SetRemoteIpAsync(string remoteUrl, bool persistent = false)
-            => SetCookie("remote_url", remoteUrl, persistent);
+        public ValueTask SetRemoteIpAsync(string remoteUrl, bool persistent = false, IJSRuntime? js = null)
+            => SetCookie("remote_url", remoteUrl, persistent, js);
 
         public ValueTask DeleteRemoteIpAsync() => DeleteCookie("remote_url");
 
