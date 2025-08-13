@@ -14,15 +14,18 @@
 
         <EditForm Model="VM.LoginModel" OnValidSubmit="VM.HandleLogin">
             <DataAnnotationsValidator />
-            <ValidationSummary />
+            <div role="status" aria-live="polite">
+                <ValidationSummary />
+            </div>
 
             <div class="flex flex-col gap-4">
                 <!-- Usuario -->
                 <label class="text-sm text-left" for="username">Usuario *</label>
-                <InputText id="username" class="@VM.GetInputClass(VM.UserNameError)"
-                           @bind-Value="VM.LoginModel.Username"
-                           @oninput="VM.ValidateFields"
-                           placeholder="Introduce tu usuario" />
+                <input id="username" class="@VM.GetInputClass(VM.UserNameError)"
+                       @bind="VM.LoginModel.Username"
+                       @oninput="VM.ValidateFields"
+                       placeholder="Introduce tu usuario"
+                       @ref="usernameInput" />
 
                 <!-- Contraseña -->
                 <label class="text-sm text-left" for="password">Contraseña *</label>
@@ -78,9 +81,19 @@
 }
 
 @code {
+    private ElementReference usernameInput;
+
     protected override void OnInitialized()
     {
         State.PropertyChanged += HandleStateChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await usernameInput.FocusAsync();
+        }
     }
 
     private void HandleStateChanged(object? sender, PropertyChangedEventArgs e)
