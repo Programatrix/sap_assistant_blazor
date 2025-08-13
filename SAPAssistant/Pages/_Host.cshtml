@@ -80,18 +80,8 @@
         };
     </script>
 
-    <script>
-        window.viewTypePref = {
-            set: function (value) {
-                localStorage.setItem('preferred_view_type', value);
-            },
-            get: function () {
-                return localStorage.getItem('preferred_view_type');
-            }
-        };
-    </script>
+    <script src="js/view-type-pref.js"></script>
 
-        
     <script src="_content/MudBlazor/MudBlazor.min.js?v=8.9.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
     <script src="js/dashboard.js"></script>
