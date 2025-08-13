@@ -123,7 +123,11 @@ app.UseRequestLocalization(localizationOptions);
 app.Use(async (context, next) =>
 {
     context.Response.Headers["Content-Security-Policy"] =
-        "default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none';";
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; " +
+        "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; " +
+        "frame-ancestors 'none';";
     context.Response.Headers["X-Content-Type-Options"] = "nosniff";
     context.Response.Headers["X-Frame-Options"] = "DENY";
     await next();
