@@ -21,7 +21,7 @@ namespace SAPAssistant.Service
             _localizer = localizer;
         }
 
-        public async Task<ServiceResult<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken ct = default)
+        public async Task<ServiceResult<LoginResponse>> LoginAsync(LoginRequest request, bool rememberMe = false, CancellationToken ct = default)
         {
             var r = await _api.PostAsResultAsync<LoginRequest, LoginResponse>(
                 "login",            // SIN /api/v1/ porque ya va en BaseAddress
@@ -32,8 +32,8 @@ namespace SAPAssistant.Service
 
             if (r.Success && r.Data is not null)
             {
-                await _authProvider.MarkUserAsAuthenticated(r.Data.Username, r.Data.Token);
-                await _authProvider.SaveRemoteUrlAsync(r.Data.remote_url);
+                await _authProvider.MarkUserAsAuthenticated(r.Data.Username, r.Data.Token, rememberMe);
+                await _authProvider.SaveRemoteUrlAsync(r.Data.remote_url, rememberMe);
             }
             return r;
         }

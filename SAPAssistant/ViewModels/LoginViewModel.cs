@@ -29,6 +29,9 @@ public partial class LoginViewModel : BaseViewModel
     [ObservableProperty]
     private bool showPassword;
 
+    [ObservableProperty]
+    private bool rememberMe;
+
     //public bool CanSubmit =>
     //    !string.IsNullOrWhiteSpace(LoginModel.Username) &&
     //    !string.IsNullOrWhiteSpace(LoginModel.Password);
@@ -61,7 +64,7 @@ public partial class LoginViewModel : BaseViewModel
                 return; // no toasts; feedback inline
 
             // 2) Llamada al servicio (ya devuelve ServiceResult sin lanzar)
-            var result = await _authService.LoginAsync(LoginModel);
+            var result = await _authService.LoginAsync(LoginModel, RememberMe);
 
             if (result.Success)
             {

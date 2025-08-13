@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Components.Web;
 using SAPAssistant.Security;
 using SAPAssistant.Service;
@@ -58,7 +57,7 @@ builder.Services.AddHttpClient<ApiClient>(client =>
 
 // Resto de servicios de la app
 builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<ProtectedSessionStorage>();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<SessionContextService>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<CustomAuthStateProvider>();
