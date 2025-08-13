@@ -18,16 +18,16 @@
 
             <div class="flex flex-col gap-4">
                 <!-- Usuario -->
-                <label class="text-sm text-left">Usuario *</label>
-                <InputText class="@VM.GetInputClass(VM.UserNameError)"
+                <label class="text-sm text-left" for="username">Usuario *</label>
+                <InputText id="username" class="@VM.GetInputClass(VM.UserNameError)"
                            @bind-Value="VM.LoginModel.Username"
                            @oninput="VM.ValidateFields"
                            placeholder="Introduce tu usuario" />
 
                 <!-- Contraseña -->
-                <label class="text-sm text-left">Contraseña *</label>
+                <label class="text-sm text-left" for="password">Contraseña *</label>
                 <div class="password-wrapper">
-                    <InputText @bind-Value="VM.LoginModel.Password"
+                    <InputText id="password" @bind-Value="VM.LoginModel.Password"
                                @oninput="VM.ValidateFields"
                                class="@VM.GetInputClass(VM.PasswordError)"
                                type="@(VM.ShowPassword ? "text" : "password")"
