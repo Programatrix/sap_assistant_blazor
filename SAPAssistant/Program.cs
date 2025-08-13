@@ -13,6 +13,7 @@ using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 // ⮕ si ApiClient está en tu proyecto, importa su namespace
 // using YourNamespace.Infrastructure.Http;  // donde esté ApiClient
@@ -75,6 +76,8 @@ builder.Services.AddSingleton<KpiCatalogService>();
 builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
 builder.Services.AddSingleton<INotificationService, NotificationService>();
 builder.Services.AddScoped<IChatHistoryService, ChatHistoryService>();
+builder.Services.Configure<CspOptions>(builder.Configuration.GetSection("Csp"));
+builder.Services.AddSingleton<ICspBuilder, CspBuilder>();
 builder.Services.AddMudServices();
 
 builder.Services.AddScoped<StateContainer>();
@@ -100,6 +103,7 @@ builder.Services.AddAuthorizationCore(options =>
 builder.Services.AddScoped<IAuthorizationHandler, ConnectionAuthorizationHandler>();
 
 var app = builder.Build();
+var cspBuilder = app.Services.GetRequiredService<ICspBuilder>();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -122,10 +126,7 @@ app.UseRequestLocalization(localizationOptions);
 
 app.Use(async (context, next) =>
 {
-    context.Response.Headers["Content-Security-Policy"] =
-        "default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none';";
-    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
-    context.Response.Headers["X-Frame-Options"] = "DENY";
+    context.Response.Headers["Content-Security-Policy"] = cspBuilder.Build();
     await next();
 });
 
