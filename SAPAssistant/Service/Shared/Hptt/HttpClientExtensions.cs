@@ -7,17 +7,29 @@ using SAPAssistant.Exceptions;
 using SAPAssistant.Service.Shared.Transport;
 using SAPAssistant;
 using SAPAssistant.Constants;
+using Microsoft.AspNetCore.Http;
 
 
 public class ApiClient
 {
     private readonly HttpClient _http;
     private readonly IStringLocalizer<ErrorMessages> _localizer;
+    private readonly IHttpContextAccessor _contextAccessor;
 
-    public ApiClient(HttpClient http, IStringLocalizer<ErrorMessages> localizer)
+    public ApiClient(HttpClient http, IStringLocalizer<ErrorMessages> localizer, IHttpContextAccessor contextAccessor)
     {
         _http = http;
         _localizer = localizer;
+        _contextAccessor = contextAccessor;
+    }
+
+    private void AttachCsrfToken(HttpRequestMessage req)
+    {
+        var token = _contextAccessor.HttpContext?.Request.Cookies["XSRF-TOKEN"];
+        if (!string.IsNullOrEmpty(token))
+        {
+            req.Headers.TryAddWithoutValidation("X-CSRF-TOKEN", token);
+        }
     }
 
     public async Task<ServiceResult<TRes>> PostAsResultAsync<TReq, TRes>(
@@ -31,6 +43,7 @@ public class ApiClient
         using var req = new HttpRequestMessage(HttpMethod.Post, url)
         { Content = JsonContent.Create(body, options: new(JsonSerializerDefaults.Web)) };
         req.Headers.TryAddWithoutValidation("x-correlation-id", corr);
+        AttachCsrfToken(req);
 
         try
         {
