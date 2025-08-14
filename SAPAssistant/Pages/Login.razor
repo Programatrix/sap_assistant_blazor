@@ -1,12 +1,8 @@
 @page "/login"
 @using SAPAssistant.ViewModels
-@using SAPAssistant.Service
-@using System.ComponentModel
 @attribute [AllowAnonymous]
 @layout PublicLayout
 @inject LoginViewModel VM
-@inject StateContainer State
-@implements IDisposable
 
 <div class="flex-center">
     <div class="card">
@@ -89,11 +85,6 @@
 @code {
     private ElementReference usernameInput;
 
-    protected override void OnInitialized()
-    {
-        State.PropertyChanged += HandleStateChanged;
-    }
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -101,15 +92,5 @@
             await usernameInput.FocusAsync();
         }
     }
-
-    private void HandleStateChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(State.AuthenticatedUser))
-        {
-            InvokeAsync(StateHasChanged);
-        }
-    }
-
-    public void Dispose() => State.PropertyChanged -= HandleStateChanged;
 }
 
