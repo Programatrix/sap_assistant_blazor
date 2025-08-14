@@ -36,7 +36,12 @@ builder.Services.AddServerSideBlazor()
 builder.Services.AddLocalization(options => options.ResourcesPath = "");
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie();
+    .AddCookie(options =>
+    {
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Strict;
+    });
 
 builder.Services.AddAuthorization();
 
