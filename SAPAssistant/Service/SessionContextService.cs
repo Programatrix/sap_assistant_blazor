@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using SAPAssistant.Models;
 using System.Text.Json;
-using Microsoft.JSInterop;
 
 namespace SAPAssistant.Service
 {
@@ -35,20 +34,14 @@ namespace SAPAssistant.Service
         private string? GetCookie(string key)
             => Request?.Cookies.TryGetValue(key, out var value) == true ? value : null;
 
-        private ValueTask SetCookie(string key, string value, bool persistent = false, IJSRuntime? js = null)
+        private ValueTask SetCookie(string key, string value, bool persistent = false)
         {
-            if (Response is { HasStarted: false })
+            if (Response is null || Response.HasStarted)
             {
-                Response.Cookies.Append(key, value, BuildOptions(persistent));
                 return ValueTask.CompletedTask;
             }
 
-            if (js is not null)
-            {
-                var days = persistent ? 30 : 0;
-                return js.InvokeVoidAsync("setCookie", key, value, days);
-            }
-
+            Response.Cookies.Append(key, value, BuildOptions(persistent));
             return ValueTask.CompletedTask;
         }
 
@@ -69,8 +62,8 @@ namespace SAPAssistant.Service
             return Task.FromResult(value?.TrimEnd('/'));
         }
 
-        public ValueTask SetRemoteIpAsync(string remoteUrl, bool persistent = false, IJSRuntime? js = null)
-            => SetCookie("remote_url", remoteUrl, persistent, js);
+        public ValueTask SetRemoteIpAsync(string remoteUrl, bool persistent = false)
+            => SetCookie("remote_url", remoteUrl, persistent);
 
         public ValueTask DeleteRemoteIpAsync() => DeleteCookie("remote_url");
 
