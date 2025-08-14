@@ -14,13 +14,15 @@ namespace SAPAssistant.Service
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IStringLocalizer<ErrorMessages> _localizer;
+        private readonly SessionContextService _sessionContext;
 
         public AuthService(IHttpClientFactory httpClientFactory, IHttpContextAccessor contextAccessor,
-            IStringLocalizer<ErrorMessages> localizer)
+            IStringLocalizer<ErrorMessages> localizer, SessionContextService sessionContext)
         {
             _httpClientFactory = httpClientFactory;
             _contextAccessor = contextAccessor;
             _localizer = localizer;
+            _sessionContext = sessionContext;
         }
 
         public async Task<ServiceResult<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken ct = default)
@@ -73,6 +75,14 @@ namespace SAPAssistant.Service
             catch
             {
                 // ignore errors on logout
+            }
+            finally
+            {
+                await _sessionContext.DeleteTokenAsync();
+                await _sessionContext.DeleteUserIdAsync();
+                await _sessionContext.DeleteRemoteIpAsync();
+                await _sessionContext.DeleteActiveConnectionIdAsync();
+                await _sessionContext.DeleteDatabaseTypeAsync();
             }
         }
     }

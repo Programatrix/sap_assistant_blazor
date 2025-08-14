@@ -52,7 +52,13 @@ namespace SAPAssistant.Service
         }
 
         // ----- Autenticación -----
+        public ValueTask SetUserIdAsync(string userId, bool persistent = false)
+            => SetCookie("username", userId, persistent);
+
         public ValueTask DeleteUserIdAsync() => DeleteCookie("username");
+
+        public ValueTask SetTokenAsync(string token, bool persistent = false)
+            => SetCookie("token", token, persistent);
 
         public ValueTask DeleteTokenAsync() => DeleteCookie("token");
 
