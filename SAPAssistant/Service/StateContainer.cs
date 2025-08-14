@@ -9,12 +9,6 @@ namespace SAPAssistant.Service
     public partial class StateContainer : ObservableObject
     {
         /// <summary>
-        /// Usuario autenticado actual.
-        /// </summary>
-        [ObservableProperty]
-        private LoginResponse? authenticatedUser;
-
-        /// <summary>
         /// Conexión activa seleccionada.
         /// </summary>
         [ObservableProperty]

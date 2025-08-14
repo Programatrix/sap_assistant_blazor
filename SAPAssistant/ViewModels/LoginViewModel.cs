@@ -72,7 +72,6 @@ public partial class LoginViewModel : BaseViewModel
 
             if (result.Success && result.Data is not null)
             {
-                _stateContainer.AuthenticatedUser = result.Data;
                 await _sessionContext.SetUserIdAsync(result.Data.Username, RememberMe);
                 await _sessionContext.SetTokenAsync(result.Data.Token, RememberMe);
                 await _sessionContext.SetRemoteIpAsync(result.Data.remote_url, RememberMe);
