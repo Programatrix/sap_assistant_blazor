@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using SAPAssistant.Security;
 using SAPAssistant.Service;
@@ -77,8 +76,6 @@ builder.Services.AddHttpClient<ApiClient>(client =>
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<SessionContextService>();
-builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
-builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddScoped<DashboardService>();
 builder.Services.AddSingleton<KpiCatalogService>();
 builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
@@ -167,6 +164,12 @@ app.MapPost("/auth/login", async (LoginRequest request, ApiClient api, HttpConte
     }
 
     return Results.Ok(result);
+});
+
+app.MapPost("/auth/logout", async (HttpContext context) =>
+{
+    await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    return Results.Ok();
 });
 
 app.MapBlazorHub();
