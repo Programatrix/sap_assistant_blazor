@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 // ⮕ si ApiClient está en tu proyecto, importa su namespace
 // using YourNamespace.Infrastructure.Http;  // donde esté ApiClient
@@ -30,6 +31,9 @@ builder.Services.AddServerSideBlazor()
     .AddCircuitOptions(options => { options.DetailedErrors = true; });
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "");
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie();
 
 builder.Services.AddAntiforgery(options =>
 {
@@ -93,7 +97,7 @@ builder.Services.AddScoped<DashboardCatalogViewModel>();
 builder.Services.AddScoped<DashboardWizardViewModel>();
 
 // ✅ Política de conexión activa
-builder.Services.AddAuthorizationCore(options =>
+builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("Conectado", policy =>
         policy.Requirements.Add(new ConnectionRequirement()));
@@ -130,6 +134,8 @@ app.Use(async (context, next) =>
     await next();
 });
 
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseRouting();
 
 app.MapGet("/csrf-token", (HttpContext context, IAntiforgery antiforgery) =>
