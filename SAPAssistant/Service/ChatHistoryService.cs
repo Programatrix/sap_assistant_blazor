@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using SAPAssistant.Exceptions;
 using SAPAssistant.Models;
 using SAPAssistant.Models.Chat;
 using SAPAssistant.Service.Interfaces;
@@ -26,22 +25,11 @@ namespace SAPAssistant.Service
             _localizer = localizer;
         }
 
-        private async Task<string> GetUserIdAsync()
-        {
-            var userId = await _sessionContext.GetUserIdAsync();
-            if (string.IsNullOrEmpty(userId)) throw new ChatHistoryServiceException(_localizer[ErrorCodes.SESSION_USER_NOT_FOUND]);
-            return userId;
-        }
-
         public async Task<ServiceResult<List<ChatSession>>> GetChatHistoryAsync()
         {
             try
             {
-                var userId = await GetUserIdAsync();
-
                 var request = new HttpRequestMessage(HttpMethod.Get, "/assistant/chats");
-                request.Headers.Add("X-User-Id", userId);
-
                 var response = await _http.SendAsync(request);
                 if (!response.IsSuccessStatusCode)
                 {
@@ -53,11 +41,6 @@ namespace SAPAssistant.Service
 
                 var result = await response.Content.ReadFromJsonAsync<List<ChatSession>>() ?? new List<ChatSession>();
                 return ServiceResult<List<ChatSession>>.Ok(result);
-            }
-            catch (ChatHistoryServiceException ex)
-            {
-                const string code = ErrorCodes.SESSION_USER_NOT_FOUND;
-                return ServiceResult<List<ChatSession>>.Fail(ex.Message, code);
             }
             catch (Exception ex)
             {
@@ -71,10 +54,7 @@ namespace SAPAssistant.Service
         {
             try
             {
-                var userId = await GetUserIdAsync();
-
                 var request = new HttpRequestMessage(HttpMethod.Get, $"assistant/chats/{chatId}");
-                request.Headers.Add("X-User-Id", userId);
 
                 var response = await _http.SendAsync(request);
 
@@ -115,14 +95,10 @@ namespace SAPAssistant.Service
         {
             try
             {
-                var userId = await GetUserIdAsync();
-
                 // Serializar mensajes a diccionarios planos para MensajesRaw
                 var json = JsonSerializer.Serialize(mensajes);
                 session.MensajesRaw = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(json)!;
-
                 var request = new HttpRequestMessage(HttpMethod.Post, "/user-chats");
-                request.Headers.Add("X-User-Id", userId);
                 request.Content = JsonContent.Create(session);
 
                 var response = await _http.SendAsync(request);
@@ -136,11 +112,6 @@ namespace SAPAssistant.Service
 
                 return ServiceResult.Ok();
             }
-            catch (ChatHistoryServiceException ex)
-            {
-                const string code = ErrorCodes.SESSION_USER_NOT_FOUND;
-                return ServiceResult.Fail(ex.Message, code);
-            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[ChatService] Excepción al guardar chat");
@@ -153,10 +124,7 @@ namespace SAPAssistant.Service
         {
             try
             {
-                var userId = await GetUserIdAsync();
-
                 var request = new HttpRequestMessage(HttpMethod.Delete, $"/user-chats/{chatId}");
-                request.Headers.Add("X-User-Id", userId);
 
                 var response = await _http.SendAsync(request);
                 if (!response.IsSuccessStatusCode)
@@ -168,11 +136,6 @@ namespace SAPAssistant.Service
                 }
 
                 return ServiceResult.Ok();
-            }
-            catch (ChatHistoryServiceException ex)
-            {
-                const string code = ErrorCodes.SESSION_USER_NOT_FOUND;
-                return ServiceResult.Fail(ex.Message, code);
             }
             catch (Exception ex)
             {

@@ -25,8 +25,6 @@ namespace SAPAssistant.Service
         {
             try
             {
-                var username = await _sessionContext.GetUserIdAsync() ??
-                    throw new AssistantException("Usuario no autenticado", "UNAUTHENTICATED");
                 var connectionId = await _sessionContext.GetActiveConnectionIdAsync() ??
                     throw new AssistantException("No hay conexión activa", "NO_ACTIVE_CONNECTION");
                 var remoteIp = await _sessionContext.GetRemoteIpAsync() ??
@@ -48,7 +46,6 @@ namespace SAPAssistant.Service
                     })
                 };
 
-                request.Headers.Add("X-User-Id", username);
                 request.Headers.Add("x-remote-ip", remoteIp);
 
                 var response = await SendAndParseAsync(request);
