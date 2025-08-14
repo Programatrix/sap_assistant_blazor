@@ -15,6 +15,10 @@ using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using System.Security.Claims;
+using SAPAssistant.Models;
+using SAPAssistant.Constants;
 
 // ⮕ si ApiClient está en tu proyecto, importa su namespace
 // using YourNamespace.Infrastructure.Http;  // donde esté ApiClient
@@ -146,10 +150,23 @@ app.MapGet("/csrf-token", (HttpContext context, IAntiforgery antiforgery) =>
     return Results.Ok(new { token = tokens.RequestToken });
 });
 
-app.MapPost("/api/v1/login", async (HttpContext context, IAntiforgery antiforgery) =>
+app.MapPost("/auth/login", async (LoginRequest request, ApiClient api, HttpContext context, IAntiforgery antiforgery) =>
 {
     await antiforgery.ValidateRequestAsync(context);
-    return Results.Ok();
+
+    var result = await api.PostAsResultAsync<LoginRequest, LoginResponse>(
+        "login",
+        request,
+        okKey: ErrorCodes.LOGIN_SUCCESS);
+
+    if (result.Success && result.Data is not null)
+    {
+        var claims = new List<Claim> { new Claim(ClaimTypes.Name, result.Data.Username) };
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+    }
+
+    return Results.Ok(result);
 });
 
 app.MapBlazorHub();
