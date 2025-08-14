@@ -52,6 +52,29 @@ namespace SAPAssistant.Service
                 return ServiceResult<LoginResponse>.Fail(_localizer[ErrorCodes.FE_NETWORK_ERROR], ErrorCodes.FE_NETWORK_ERROR);
             }
         }
+
+        public async Task LogoutAsync(CancellationToken ct = default)
+        {
+            var client = _httpClientFactory.CreateClient();
+            var httpContext = _contextAccessor.HttpContext;
+            var baseUri = $"{httpContext?.Request.Scheme}://{httpContext?.Request.Host}";
+            client.BaseAddress = new Uri(baseUri);
+
+            var token = httpContext?.Request.Cookies["XSRF-TOKEN"];
+            if (!string.IsNullOrEmpty(token))
+            {
+                client.DefaultRequestHeaders.TryAddWithoutValidation("X-CSRF-TOKEN", token);
+            }
+
+            try
+            {
+                await client.PostAsync("/auth/logout", null, ct);
+            }
+            catch
+            {
+                // ignore errors on logout
+            }
+        }
     }
 
 }

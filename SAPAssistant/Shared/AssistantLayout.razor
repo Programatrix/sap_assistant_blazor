@@ -1,4 +1,3 @@
-@using SAPAssistant.Security
 @using SAPAssistant.Service
 @using SAPAssistant.Service.Interfaces
 @inherits LayoutComponentBase
@@ -58,7 +57,7 @@ else
     private bool ShowSettings = false;
     private bool validandoConexion = true;
 
-    [Inject] private CustomAuthStateProvider AuthProvider { get; set; } = default!;
+    [Inject] private AuthService AuthService { get; set; } = default!;
 
     private void ToggleMenu() => IsMenuOpen = !IsMenuOpen;
 
@@ -76,7 +75,7 @@ else
 
     private async Task Logout()
     {
-        await AuthProvider.MarkUserAsLoggedOut();
+        await AuthService.LogoutAsync();
         Navigation.NavigateTo("/login", true);
     }
 
