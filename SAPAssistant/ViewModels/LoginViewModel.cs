@@ -65,7 +65,7 @@ public partial class LoginViewModel : BaseViewModel
                 return; // no toasts; feedback inline
 
             // 2) Llamada al servicio (ya devuelve ServiceResult sin lanzar)
-            var result = await _authService.LoginAsync(LoginModel, RememberMe);
+            var result = await _authService.LoginAsync(LoginModel);
 
             if (result.Success)
             {
