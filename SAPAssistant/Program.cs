@@ -38,6 +38,8 @@ builder.Services.AddLocalization(options => options.ResourcesPath = "");
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie();
 
+builder.Services.AddAuthorization();
+
 builder.Services.AddAntiforgery(options =>
 {
     options.Cookie.Name = "XSRF-TOKEN";
