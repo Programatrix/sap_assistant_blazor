@@ -1,6 +1,5 @@
 using SAPAssistant.Models;
 using System.Net.Http.Json;
-using SAPAssistant.Exceptions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Localization;
 using SAPAssistant;
@@ -31,16 +30,7 @@ namespace SAPAssistant.Service
         {
             try
             {
-                var userId = await _sessionContext.GetUserIdAsync();
-                if (string.IsNullOrWhiteSpace(userId))
-                {
-                    const string code = ErrorCodes.SESSION_USER_NOT_FOUND;
-                    _logger.LogError("Usuario no encontrado en la sesión.");
-                    return ServiceResult.Fail(_localizer[code], code);
-                }
-
                 var request = new HttpRequestMessage(HttpMethod.Post, "/user-dashboard/kpis");
-                request.Headers.Add("X-User-Id", userId);
                 request.Content = JsonContent.Create(kpi);
 
                 var response = await _http.SendAsync(request);

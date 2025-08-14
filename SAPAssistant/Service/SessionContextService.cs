@@ -59,17 +59,7 @@ namespace SAPAssistant.Service
         }
 
         // ----- Autenticación -----
-        public Task<string?> GetUserIdAsync() => Task.FromResult(GetCookie("username"));
-
-        public ValueTask SetUserIdAsync(string username, bool persistent = false, IJSRuntime? js = null)
-            => SetCookie("username", username, persistent, js);
-
         public ValueTask DeleteUserIdAsync() => DeleteCookie("username");
-
-        public Task<string?> GetTokenAsync() => Task.FromResult(GetCookie("token"));
-
-        public ValueTask SetTokenAsync(string token, bool persistent = false, IJSRuntime? js = null)
-            => SetCookie("token", token, persistent, js);
 
         public ValueTask DeleteTokenAsync() => DeleteCookie("token");
 

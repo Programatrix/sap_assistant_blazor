@@ -1,6 +1,5 @@
 ﻿using SAPAssistant.Models;
 using System.Net.Http.Json;
-using SAPAssistant.Exceptions;
 using SAPAssistant.Mapper;
 using Microsoft.Extensions.Logging;
 using SAPAssistant.Service.Interfaces;
@@ -33,21 +32,7 @@ namespace SAPAssistant.Service
         {
             try
             {
-                var token = await _sessionContext.GetTokenAsync();
-                var userId = await _sessionContext.GetUserIdAsync();
                 var remoteIp = await _sessionContext.GetRemoteIpAsync();
-
-                if (string.IsNullOrWhiteSpace(token))
-                {
-                    const string code = ErrorCodes.SESSION_TOKEN_NOT_FOUND;
-                    return ServiceResult<List<ConnectionDTO>>.Fail(_localizer[code], code);
-                }
-
-                if (string.IsNullOrWhiteSpace(userId))
-                {
-                    const string code = ErrorCodes.SESSION_USER_NOT_FOUND;
-                    return ServiceResult<List<ConnectionDTO>>.Fail(_localizer[code], code);
-                }
 
                 if (string.IsNullOrWhiteSpace(remoteIp))
                 {
@@ -56,7 +41,6 @@ namespace SAPAssistant.Service
                 }
 
                 var request = new HttpRequestMessage(HttpMethod.Get, "/connection/user-connections");
-                request.Headers.Add("X-User-Id", userId);
                 request.Headers.Add("x-remote-ip", remoteIp);
 
                 var response = await _http.SendAsync(request);
@@ -91,17 +75,14 @@ namespace SAPAssistant.Service
         {
             try
             {
-                var userId = await _sessionContext.GetUserIdAsync();
                 var remoteIp = await _sessionContext.GetRemoteIpAsync();
-
-                if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp))
+                if (string.IsNullOrWhiteSpace(remoteIp))
                 {
                     const string code = ErrorCodes.SESSION_DATA_NOT_FOUND;
                     return ServiceResult<ConnectionDTO>.Fail(_localizer[code], code);
                 }
 
                 var request = new HttpRequestMessage(HttpMethod.Get, $"/connection/connections/{connectionId}");
-                request.Headers.Add("X-User-Id", userId);
                 request.Headers.Add("x_remote_ip", remoteIp);
 
                 var response = await _http.SendAsync(request);
@@ -140,17 +121,14 @@ namespace SAPAssistant.Service
         {
             try
             {
-                var userId = await _sessionContext.GetUserIdAsync();
                 var remoteIp = await _sessionContext.GetRemoteIpAsync();
-
-                if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp))
+                if (string.IsNullOrWhiteSpace(remoteIp))
                 {
                     const string code = ErrorCodes.SESSION_DATA_NOT_FOUND;
                     return ServiceResult.Fail(_localizer[code], code);
                 }
 
                 var request = new HttpRequestMessage(HttpMethod.Put, $"/connection/connections/{connection.ConnectionId}");
-                request.Headers.Add("X-User-Id", userId);
                 request.Headers.Add("x_remote_ip", remoteIp);
                 request.Content = JsonContent.Create(connection);
 
@@ -183,17 +161,14 @@ namespace SAPAssistant.Service
         {
             try
             {
-                var userId = await _sessionContext.GetUserIdAsync();
                 var remoteIp = await _sessionContext.GetRemoteIpAsync();
-
-                if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp))
+                if (string.IsNullOrWhiteSpace(remoteIp))
                 {
                     const string code = ErrorCodes.SESSION_DATA_NOT_FOUND;
                     return ServiceResult.Fail(_localizer[code], code);
                 }
 
                 var request = new HttpRequestMessage(HttpMethod.Post, "/connection/connections");
-                request.Headers.Add("X-User-Id", userId);
                 request.Headers.Add("x_remote_ip", remoteIp);
                 request.Content = JsonContent.Create(connection);
 
@@ -226,16 +201,14 @@ namespace SAPAssistant.Service
         {
             try
             {
-                var userId = await _sessionContext.GetUserIdAsync();
                 var remoteIp = await _sessionContext.GetRemoteIpAsync();
-                if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(remoteIp))
+                if (string.IsNullOrWhiteSpace(remoteIp))
                 {
                     const string code = ErrorCodes.SESSION_DATA_NOT_FOUND;
                     return ServiceResult.Fail(_localizer[code], code);
                 }
 
                 var request = new HttpRequestMessage(HttpMethod.Post, $"/connection/connections/{connectionId}/validate");
-                request.Headers.Add("X-User-Id", userId);
                 request.Headers.Add("x-remote-ip", remoteIp);
 
                 var response = await _http.SendAsync(request);
