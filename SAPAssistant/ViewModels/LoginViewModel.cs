@@ -14,6 +14,7 @@ public partial class LoginViewModel : BaseViewModel
     private readonly NavigationManager _navigation;
     private readonly INotificationService _notificationService;
     private readonly StateContainer _stateContainer;
+    private readonly SessionContextService _sessionContext;
 
     [ObservableProperty]
     private LoginRequest loginModel = new();
@@ -41,12 +42,14 @@ public partial class LoginViewModel : BaseViewModel
         AuthService authService,
         NavigationManager navigation,
         INotificationService notificationService,
-        StateContainer stateContainer) : base(notificationService)
+        StateContainer stateContainer,
+        SessionContextService sessionContext) : base(notificationService)
     {
         _authService = authService;
         _navigation = navigation;
         _notificationService = notificationService;
         _stateContainer = stateContainer;
+        _sessionContext = sessionContext;
     }
 
     /// <summary>
@@ -67,9 +70,12 @@ public partial class LoginViewModel : BaseViewModel
             // 2) Llamada al servicio (ya devuelve ServiceResult sin lanzar)
             var result = await _authService.LoginAsync(LoginModel);
 
-            if (result.Success)
+            if (result.Success && result.Data is not null)
             {
                 _stateContainer.AuthenticatedUser = result.Data;
+                await _sessionContext.SetUserIdAsync(result.Data.Username, RememberMe);
+                await _sessionContext.SetTokenAsync(result.Data.Token, RememberMe);
+                await _sessionContext.SetRemoteIpAsync(result.Data.remote_url, RememberMe);
 
                 var uri = new Uri(_navigation.Uri);
                 var query = QueryHelpers.ParseQuery(uri.Query);
