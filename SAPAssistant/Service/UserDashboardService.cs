@@ -5,6 +5,8 @@ using Microsoft.Extensions.Localization;
 using SAPAssistant;
 using SAPAssistant.Constants;
 using SAPAssistant.Service.Interfaces;
+using System.Net.Http.Headers;
+using SAPAssistant.Exceptions;
 
 namespace SAPAssistant.Service
 {
@@ -30,7 +32,15 @@ namespace SAPAssistant.Service
         {
             try
             {
+                var token = await _sessionContext.GetTokenAsync();
+                if (string.IsNullOrWhiteSpace(token))
+                {
+                    const string code = ErrorCodes.SESSION_TOKEN_NOT_FOUND;
+                    return ServiceResult.Fail(_localizer[code], code);
+                }
+
                 var request = new HttpRequestMessage(HttpMethod.Post, "/user-dashboard/kpis");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 request.Content = JsonContent.Create(kpi);
 
                 var response = await _http.SendAsync(request);

@@ -3,6 +3,8 @@ using System.Text.Json;
 using SAPAssistant.Models;
 using SAPAssistant.Service.Interfaces;
 using SAPAssistant.Exceptions;
+using System.Net.Http.Headers;
+using SAPAssistant.Constants;
 
 namespace SAPAssistant.Service
 {
@@ -31,6 +33,8 @@ namespace SAPAssistant.Service
                     throw new AssistantException("Configuración remota faltante", "MISSING_REMOTE_IP");
                 var dbType = await _sessionContext.GetDatabaseTypeAsync() ??
                     throw new AssistantException("Tipo de base de datos no especificado", "MISSING_DB_TYPE");
+                var token = await _sessionContext.GetTokenAsync() ??
+                    throw new AssistantException("Token no encontrado", ErrorCodes.SESSION_TOKEN_NOT_FOUND);
 
                 if (string.IsNullOrWhiteSpace(chatId))
                     throw new AssistantException("ID de chat inválido", "INVALID_CHAT_ID");
@@ -47,6 +51,7 @@ namespace SAPAssistant.Service
                 };
 
                 request.Headers.Add("x-remote-ip", remoteIp);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                 var response = await SendAndParseAsync(request);
                 if (response == null)
@@ -70,6 +75,12 @@ namespace SAPAssistant.Service
         {
             try
             {
+                var token = await _sessionContext.GetTokenAsync();
+                if (string.IsNullOrWhiteSpace(token))
+                {
+                    throw new AssistantException("Token no encontrado", ErrorCodes.SESSION_TOKEN_NOT_FOUND);
+                }
+
                 var request = new HttpRequestMessage(HttpMethod.Post, "/assistant/demo")
                 {
                     Content = JsonContent.Create(new
@@ -77,6 +88,8 @@ namespace SAPAssistant.Service
                         mensaje
                     })
                 };
+
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                 var response = await SendAndParseAsync(request);
                 if (response == null)
