@@ -7,6 +7,8 @@ using System.Text.Json;
 using Microsoft.Extensions.Localization;
 using SAPAssistant;
 using SAPAssistant.Constants;
+using System.Net.Http.Headers;
+using SAPAssistant.Exceptions;
 
 namespace SAPAssistant.Service
 {
@@ -29,7 +31,15 @@ namespace SAPAssistant.Service
         {
             try
             {
+                var token = await _sessionContext.GetTokenAsync();
+                if (string.IsNullOrWhiteSpace(token))
+                {
+                    const string code = ErrorCodes.SESSION_TOKEN_NOT_FOUND;
+                    return ServiceResult<List<ChatSession>>.Fail(_localizer[code], code);
+                }
+
                 var request = new HttpRequestMessage(HttpMethod.Get, "/assistant/chats");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var response = await _http.SendAsync(request);
                 if (!response.IsSuccessStatusCode)
                 {
@@ -54,7 +64,15 @@ namespace SAPAssistant.Service
         {
             try
             {
+                var token = await _sessionContext.GetTokenAsync();
+                if (string.IsNullOrWhiteSpace(token))
+                {
+                    const string code = ErrorCodes.SESSION_TOKEN_NOT_FOUND;
+                    return ServiceResult<ChatSession>.Fail(_localizer[code], code);
+                }
+
                 var request = new HttpRequestMessage(HttpMethod.Get, $"assistant/chats/{chatId}");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                 var response = await _http.SendAsync(request);
 
@@ -98,7 +116,16 @@ namespace SAPAssistant.Service
                 // Serializar mensajes a diccionarios planos para MensajesRaw
                 var json = JsonSerializer.Serialize(mensajes);
                 session.MensajesRaw = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(json)!;
+
+                var token = await _sessionContext.GetTokenAsync();
+                if (string.IsNullOrWhiteSpace(token))
+                {
+                    const string code = ErrorCodes.SESSION_TOKEN_NOT_FOUND;
+                    return ServiceResult.Fail(_localizer[code], code);
+                }
+
                 var request = new HttpRequestMessage(HttpMethod.Post, "/user-chats");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 request.Content = JsonContent.Create(session);
 
                 var response = await _http.SendAsync(request);
@@ -124,7 +151,15 @@ namespace SAPAssistant.Service
         {
             try
             {
+                var token = await _sessionContext.GetTokenAsync();
+                if (string.IsNullOrWhiteSpace(token))
+                {
+                    const string code = ErrorCodes.SESSION_TOKEN_NOT_FOUND;
+                    return ServiceResult.Fail(_localizer[code], code);
+                }
+
                 var request = new HttpRequestMessage(HttpMethod.Delete, $"/user-chats/{chatId}");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                 var response = await _http.SendAsync(request);
                 if (!response.IsSuccessStatusCode)

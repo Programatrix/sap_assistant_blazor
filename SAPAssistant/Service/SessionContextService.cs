@@ -57,10 +57,16 @@ namespace SAPAssistant.Service
 
         public ValueTask DeleteUserIdAsync() => DeleteCookie("username");
 
+        public Task<string?> GetUserIdAsync()
+            => Task.FromResult(GetCookie("username"));
+
         public ValueTask SetTokenAsync(string token, bool persistent = false)
             => SetCookie("token", token, persistent);
 
         public ValueTask DeleteTokenAsync() => DeleteCookie("token");
+
+        public Task<string?> GetTokenAsync()
+            => Task.FromResult(GetCookie("token"));
 
         public Task<string?> GetRemoteIpAsync()
         {
