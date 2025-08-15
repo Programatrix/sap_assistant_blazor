@@ -5,6 +5,8 @@ using SAPAssistant.Exceptions;
 using SAPAssistant.Service;
 using SAPAssistant.Service.Interfaces;
 using Microsoft.AspNetCore.WebUtilities;
+using System.Net.Http;
+using System.Net.Http.Json;
 
 namespace SAPAssistant.ViewModels;
 
@@ -15,6 +17,7 @@ public partial class LoginViewModel : BaseViewModel
     private readonly INotificationService _notificationService;
     private readonly StateContainer _stateContainer;
     private readonly SessionContextService _sessionContext;
+    private readonly IHttpClientFactory _httpClientFactory;
 
     [ObservableProperty]
     private LoginRequest loginModel = new();
@@ -34,6 +37,9 @@ public partial class LoginViewModel : BaseViewModel
     [ObservableProperty]
     private bool rememberMe;
 
+    [ObservableProperty]
+    private string? csrfToken;
+
     //public bool CanSubmit =>
     //    !string.IsNullOrWhiteSpace(LoginModel.Username) &&
     //    !string.IsNullOrWhiteSpace(LoginModel.Password);
@@ -43,13 +49,35 @@ public partial class LoginViewModel : BaseViewModel
         NavigationManager navigation,
         INotificationService notificationService,
         StateContainer stateContainer,
-        SessionContextService sessionContext) : base(notificationService)
+        SessionContextService sessionContext,
+        IHttpClientFactory httpClientFactory) : base(notificationService)
     {
         _authService = authService;
         _navigation = navigation;
         _notificationService = notificationService;
         _stateContainer = stateContainer;
         _sessionContext = sessionContext;
+        _httpClientFactory = httpClientFactory;
+    }
+
+    public async Task InitializeAsync()
+    {
+        try
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_navigation.BaseUri);
+            var response = await client.GetFromJsonAsync<CsrfResponse>("csrf-token");
+            CsrfToken = response?.Token;
+        }
+        catch
+        {
+            // If the CSRF token cannot be obtained, continue without blocking the login page.
+        }
+    }
+
+    private class CsrfResponse
+    {
+        public string? Token { get; set; }
     }
 
     /// <summary>
@@ -68,7 +96,7 @@ public partial class LoginViewModel : BaseViewModel
                 return; // no toasts; feedback inline
 
             // 2) Llamada al servicio (ya devuelve ServiceResult sin lanzar)
-            var result = await _authService.LoginAsync(LoginModel);
+            var result = await _authService.LoginAsync(LoginModel, CsrfToken);
 
             if (result.Success && result.Data is not null)
             {

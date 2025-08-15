@@ -25,17 +25,18 @@ namespace SAPAssistant.Service
             _sessionContext = sessionContext;
         }
 
-        public async Task<ServiceResult<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken ct = default)
+        public async Task<ServiceResult<LoginResponse>> LoginAsync(LoginRequest request, string? csrfToken = null, CancellationToken ct = default)
         {
             var client = _httpClientFactory.CreateClient();
             var httpContext = _contextAccessor.HttpContext;
             var baseUri = $"{httpContext?.Request.Scheme}://{httpContext?.Request.Host}";
             client.BaseAddress = new Uri(baseUri);
 
-            var token = httpContext?.Request.Cookies["XSRF-TOKEN"];
+            var token = csrfToken ?? httpContext?.Request.Cookies["XSRF-TOKEN"];
             if (!string.IsNullOrEmpty(token))
             {
                 client.DefaultRequestHeaders.TryAddWithoutValidation("X-CSRF-TOKEN", token);
+                client.DefaultRequestHeaders.TryAddWithoutValidation("Cookie", $"XSRF-TOKEN={token}");
             }
 
             try
