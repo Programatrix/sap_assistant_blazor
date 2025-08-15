@@ -139,6 +139,8 @@ app.UseRequestLocalization(localizationOptions);
 app.Use(async (context, next) =>
 {
     context.Response.Headers["Content-Security-Policy"] = cspBuilder.Build();
+    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    context.Response.Headers["X-Frame-Options"] = "DENY";
     await next();
 });
 
