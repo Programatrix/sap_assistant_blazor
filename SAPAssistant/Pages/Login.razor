@@ -85,6 +85,11 @@
 @code {
     private ElementReference usernameInput;
 
+    protected override async Task OnInitializedAsync()
+    {
+        await VM.InitializeAsync();
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
