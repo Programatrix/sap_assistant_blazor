@@ -1,0 +1,35 @@
+﻿@using Microsoft.AspNetCore.Components
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - SAPAssistant</title>
+
+    <!-- Estilos globales -->
+    <link rel="stylesheet" href="/css/theme.css" />
+    <!-- Overrides específicos del login/logout -->
+    <link rel="stylesheet" href="/css/login.css" />
+</head>
+<body class="simple-layout">
+    <div class="login-page">
+
+        <!-- NotificationDisplay con mensaje inicial (TempData o ViewData) -->
+        <component type="typeof(SAPAssistant.Components.NotificationDisplay)"
+                   render-mode="ServerPrerendered"
+                   param-InitialMessage="@(TempData["ToastMessage"] as string ?? ViewData["ToastMessage"] as string)"
+                   param-InitialType="@(TempData["ToastType"] as string ?? ViewData["ToastType"] as string)"
+                   param-InitialCode="@(TempData["ToastCode"] as string ?? ViewData["ToastCode"] as string)" />
+
+        <component type="typeof(SAPAssistant.Components.Shared.ThemeSwitcher)"
+                   render-mode="ServerPrerendered" />
+
+        @RenderBody()
+    </div>
+
+    <!-- Necesario para que los componentes Blazor funcionen en Razor Pages -->
+    <script src="_framework/blazor.server.js"></script>
+</body>
+</html>

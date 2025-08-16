@@ -1,0 +1,39 @@
+﻿/* ===== Overr/* ===== Overrides fuertes para los inputs del login ===== */
+
+.login-card .input {
+    display: block;
+    width: 100%;
+    margin: 0 !important; /* pisa el margin-bottom del theme */
+    border-radius: 12px !important;
+    background: var(--input-bg) !important;
+    border: 1px solid color-mix(in oklab, var(--border) 70%, transparent) !important;
+    box-shadow: none !important; /* quita el inner shadow del theme */
+    padding: 0.7rem 0.9rem; /* por si el theme lo cambia */
+    color: var(--text);
+    outline: none;
+}
+
+    .login-card .input:focus {
+        border-color: color-mix(in oklab, var(--primary) 70%, white 0%) !important;
+        box-shadow: 0 0 0 3px rgba(59,130,246,.25) !important;
+        background: var(--input-bg) !important;
+    }
+
+/* separación y tipografía coherente */
+.login-card .field {
+    display: grid;
+    gap: .5rem;
+    margin: .65rem 0 1rem;
+}
+
+.login-card .label {
+    font-size: .95rem;
+    opacity: .9;
+}
+
+/* botón a ancho completo con mismo radio */
+.login-card .button-primary {
+    width: 100%;
+    max-width: none;
+    border-radius: 12px;
+}

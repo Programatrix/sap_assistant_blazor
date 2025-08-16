@@ -19,49 +19,63 @@ using System.Security.Claims;
 using SAPAssistant.Models;
 using SAPAssistant.Constants;
 
-// ⮕ si ApiClient está en tu proyecto, importa su namespace
-// using YourNamespace.Infrastructure.Http;  // donde esté ApiClient
-
 var builder = WebApplication.CreateBuilder(args);
 
 var apiBaseUrl = builder.Configuration["ApiBaseUrl"]
                  ?? Environment.GetEnvironmentVariable("API_BASE_URL")
                  ?? "http://127.0.0.1:8081";
 
-// Add services to the container.
-builder.Services.AddRazorPages();
+// Services
+builder.Services.AddRazorPages(); // ← necesario para la Razor Page de login
 builder.Services.AddServerSideBlazor()
-    .AddCircuitOptions(options => { options.DetailedErrors = true; });
+    .AddCircuitOptions(o => o.DetailedErrors = true);
 
-builder.Services.AddLocalization(options => options.ResourcesPath = "");
+builder.Services.AddLocalization(o => o.ResourcesPath = "");
 
+// 🔐 Autenticación por cookies (config dev/prod)
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
+        options.Cookie.Name = "sapassistant.auth";
         options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.Cookie.SameSite = SameSiteMode.Strict;
+
+        // En dev permite HTTP; en prod exige HTTPS
+        options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+            ? CookieSecurePolicy.SameAsRequest
+            : CookieSecurePolicy.Always;
+
+        // Buen default para mismo origen
+        options.Cookie.SameSite = SameSiteMode.Lax;
+
+        options.SlidingExpiration = true;
+        options.ExpireTimeSpan = TimeSpan.FromDays(7);
+
+        // ⬇️ la página Razor de login
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/denied";
     });
 
-builder.Services.AddAuthorization();
+// 🔐 Autorización (UNA sola vez) + tu política
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Conectado", policy =>
+        policy.Requirements.Add(new ConnectionRequirement()));
+});
 
+// Antiforgery (si lo usas en más sitios; Razor Pages añade el token al form automáticamente)
 builder.Services.AddAntiforgery(options =>
 {
     options.Cookie.Name = "XSRF-TOKEN";
-    options.Cookie.HttpOnly = false;
+    options.Cookie.HttpOnly = false; // legible por el TagHelper/cliente si hiciera falta
     options.HeaderName = "X-CSRF-TOKEN";
 });
 
-// Cliente “Default” (si lo usas en otros sitios)
+// HttpClients
 builder.Services.AddHttpClient("Default", client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
-// ❌ Eliminado el scoped genérico de HttpClient si ya no se usa directamente
-// builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseUrl) });
-
-// Servicios API específicos → apuntan a /api/v1/
 builder.Services.AddHttpClient<IConnectionService, ConnectionService>(client =>
 {
     client.BaseAddress = new Uri($"{apiBaseUrl.TrimEnd('/')}/api/v1/");
@@ -72,14 +86,12 @@ builder.Services.AddHttpClient<IAssistantService, AssistantService>(client =>
     client.BaseAddress = new Uri($"{apiBaseUrl.TrimEnd('/')}/api/v1/");
 });
 
-// ✅ ApiClient (typed) con BaseAddress que incluye /api/v1/
 builder.Services.AddHttpClient<ApiClient>(client =>
 {
     client.BaseAddress = new Uri($"{apiBaseUrl.TrimEnd('/')}/api/v1/");
 });
-//builder.Services.AddScoped<ApiClient>();
 
-// Resto de servicios de la app
+// App services
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<SessionContextService>();
@@ -103,21 +115,16 @@ builder.Services.AddScoped<ConnectionManagerViewModel>();
 builder.Services.AddScoped<DashboardPageViewModel>();
 builder.Services.AddScoped<DashboardCatalogViewModel>();
 builder.Services.AddScoped<DashboardWizardViewModel>();
+builder.Services.AddScoped<CurrentUserAccessor>();
 
-// ✅ Política de conexión activa
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("Conectado", policy =>
-        policy.Requirements.Add(new ConnectionRequirement()));
-});
 
-// ✅ Handler de autorización
+// Handlers de autorización
 builder.Services.AddScoped<IAuthorizationHandler, ConnectionAuthorizationHandler>();
 
 var app = builder.Build();
 var cspBuilder = app.Services.GetRequiredService<ICspBuilder>();
 
-// Configure the HTTP request pipeline.
+// Pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -136,6 +143,7 @@ var localizationOptions = new RequestLocalizationOptions
 };
 app.UseRequestLocalization(localizationOptions);
 
+// Cabeceras de seguridad
 app.Use(async (context, next) =>
 {
     context.Response.Headers["Content-Security-Policy"] = cspBuilder.Build();
@@ -144,43 +152,25 @@ app.Use(async (context, next) =>
     await next();
 });
 
+// ⚠️ Orden correcto:
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseRouting();
 
-app.MapGet("/csrf-token", (HttpContext context, IAntiforgery antiforgery) =>
-{
-    var tokens = antiforgery.GetAndStoreTokens(context);
-    context.Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!, new CookieOptions { HttpOnly = false });
-    context.Response.Headers.Append("X-CSRF-TOKEN", tokens.RequestToken!);
-    return Results.Ok(new { token = tokens.RequestToken });
-});
+// Endpoints
+// ❌ Eliminado: /csrf-token y /auth/login (la Razor Page los sustituye)
 
-app.MapPost("/auth/login", async (LoginRequest request, ApiClient api, HttpContext context, IAntiforgery antiforgery) =>
-{
-    await antiforgery.ValidateRequestAsync(context);
-
-    var result = await api.PostAsResultAsync<LoginRequest, LoginResponse>(
-        "login",
-        request,
-        okKey: ErrorCodes.LOGIN_SUCCESS);
-
-    if (result.Success && result.Data is not null)
-    {
-        var claims = new List<Claim> { new Claim(ClaimTypes.Name, result.Data.Username) };
-        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
-    }
-
-    return Results.Ok(result);
-});
-
+// (Opcional) Mantener logout temporalmente como endpoint minimal:
 app.MapPost("/auth/logout", async (HttpContext context) =>
 {
     await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-    return Results.Ok();
+    return Results.NoContent();
 });
 
+// Mapea Razor Pages (para /Account/Login)
+app.MapRazorPages();
+
+// Blazor
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 

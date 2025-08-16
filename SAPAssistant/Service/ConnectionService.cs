@@ -9,6 +9,7 @@ using SAPAssistant;
 using SAPAssistant.Constants;
 using SAPAssistant.Exceptions;
 
+
 namespace SAPAssistant.Service
 {
     public class ConnectionService : IConnectionService
@@ -17,24 +18,26 @@ namespace SAPAssistant.Service
         private readonly SessionContextService _sessionContext;
         private readonly ILogger<ConnectionService> _logger;
         private readonly IStringLocalizer<ErrorMessages> _localizer;
-
+        private readonly CurrentUserAccessor currentUserAccessor;
         public ConnectionService(HttpClient http,
                                  SessionContextService sessionContext,
                                  ILogger<ConnectionService> logger,
-                                 IStringLocalizer<ErrorMessages> localizer)
+                                 IStringLocalizer<ErrorMessages> localizer,
+                                 CurrentUserAccessor accessor)
         {
             _http = http;
             _sessionContext = sessionContext;
             _logger = logger;
             _localizer = localizer;
+            currentUserAccessor = accessor;
         }
 
         public async Task<ServiceResult<List<ConnectionDTO>>> GetConnectionsAsync()
         {
             try
             {
-                var remoteIp = await _sessionContext.GetRemoteIpAsync();
-                var token = await _sessionContext.GetTokenAsync();
+                var remoteIp = await currentUserAccessor.GetRemoteUrlAsync();
+                var token = await currentUserAccessor.GetAccessTokenAsync();
 
                 if (string.IsNullOrWhiteSpace(remoteIp))
                 {

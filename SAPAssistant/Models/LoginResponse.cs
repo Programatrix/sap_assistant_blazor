@@ -17,6 +17,7 @@ namespace SAPAssistant.Models
 
         [Required(ErrorMessage = "La contraseña es obligatoria")]
         public string Password { get; set; } = string.Empty;
+        public bool RememberMe { get; set; } = true;
     }
 
 }

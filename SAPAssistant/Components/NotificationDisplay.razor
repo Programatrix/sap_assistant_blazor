@@ -9,7 +9,7 @@
              role="alert" aria-live="assertive" aria-atomic="true">
 
             <div class="d-flex">
-                <!-- Icono SVG limpio -->
+                <!-- Icono SVG -->
                 <div class="icon-stack">
                     @((MarkupString)GetIconSvg(_message.NotificationType))
                 </div>
@@ -32,19 +32,48 @@
             </div>
         </div>
     </div>
-
 }
 
 @code {
     [Inject] private INotificationService NotificationService { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
 
+    // ⬇️ NUEVO: parámetros para permitir un “mensaje inicial” (desde Razor Pages)
+    [Parameter] public string? InitialMessage { get; set; }
+    [Parameter] public string? InitialType { get; set; }   // "success" | "error" | "info" | "warning"
+    [Parameter] public string? InitialCode { get; set; }
+
     private ServiceResult? _message;
     private bool _isClosing;
+    private bool _initialHandled; // evita mostrar dos veces el mensaje inicial
 
     protected override void OnInitialized()
     {
         NotificationService.OnNotify += HandleNotification;
+    }
+
+    // ⬇️ NUEVO: si hay mensaje inicial (ViewData/TempData → Layout), muéstralo una vez
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_initialHandled && !string.IsNullOrWhiteSpace(InitialMessage))
+        {
+            _initialHandled = true;
+
+            _message = new ServiceResult
+                {
+                    Message = InitialMessage!,
+                    ErrorCode = InitialCode,
+                    NotificationType = ParseType(InitialType)
+                };
+
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(5000);
+                await InvokeAsync(ClearMessage);
+            });
+
+            StateHasChanged();
+        }
     }
 
     private async Task HandleNotification(ServiceResult message)
@@ -124,6 +153,15 @@
         NotificationType.Info => "Información",
         NotificationType.Warning => "Advertencia",
         _ => "Notificación"
+    };
+
+    // ⬇️ NUEVO: traduce string → NotificationType
+    private static NotificationType ParseType(string? t) => (t ?? "info").ToLowerInvariant() switch
+    {
+        "success" => NotificationType.Success,
+        "error" => NotificationType.Error,
+        "warning" => NotificationType.Warning,
+        _ => NotificationType.Info
     };
 
     public void Dispose()

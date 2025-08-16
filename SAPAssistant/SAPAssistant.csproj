@@ -42,6 +42,7 @@
 
   <ItemGroup>
     <None Include="wwwroot\css\ChatHistoryItem.css" />
+    <None Include="wwwroot\css\login.css" />
   </ItemGroup>
 
   <ItemGroup>

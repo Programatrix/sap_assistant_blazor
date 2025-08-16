@@ -1,0 +1,17 @@
+﻿@page
+@model SAPAssistant.Areas.Account.Pages.LogoutModel
+@{
+    ViewData["Title"] = "Cerrar sesión";
+}
+<main class="login-wrap">
+    <form method="post" class="card login-card" novalidate>
+        <h1 class="title text-2xl font-semibold">¿Cerrar sesión?</h1>
+        <p style="opacity:.8">Se cerrará tu sesión en esta aplicación.</p>
+        <div style="display:flex;gap:.75rem; margin-top:1rem;">
+            <a href="/" class="button-primary" style="background: var(--border); text-align:center;">Cancelar</a>
+            <button type="submit" class="button-primary">Cerrar sesión</button>
+        </div>
+    </form>
+</main>
+
+

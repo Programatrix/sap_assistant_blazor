@@ -1,0 +1,35 @@
+﻿@page
+@model SAPAssistant.Areas.Account.Pages.LoginModel
+@{
+    ViewData["Title"] = "Iniciar sesión";
+}
+
+<main class="login-wrap">
+    <form method="post" class="card login-card" novalidate>
+        <h1 class="title text-2xl font-semibold">Iniciar sesión</h1>
+
+        <!-- Resumen (errores generales) -->
+        <div asp-validation-summary="ModelOnly"
+             class="validation-summary text-danger"
+             role="status" aria-live="polite"></div>
+
+        <div class="field">
+            <label asp-for="Input.Username" class="label">Usuario *</label>
+            <input asp-for="Input.Username" class="input" autocomplete="username" autofocus />
+            <span asp-validation-for="Input.Username" class="field-error"></span>
+        </div>
+
+        <div class="field">
+            <label asp-for="Input.Password" class="label">Contraseña *</label>
+            <input asp-for="Input.Password" class="input" type="password" autocomplete="current-password" />
+            <span asp-validation-for="Input.Password" class="field-error"></span>
+        </div>
+
+        <label class="remember-row">
+            <input asp-for="Input.RememberMe" />
+            <span>Recordarme</span>
+        </label>
+
+        <button type="submit" class="button-primary">Entrar</button>
+    </form>
+</main>
