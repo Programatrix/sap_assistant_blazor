@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using SAPAssistant.Models;
 using SAPAssistant.Constants;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -75,6 +76,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<CurrentUserAccessor>();   // actualizado para usar HttpContext primero
 builder.Services.AddScoped<SessionContextService>();
+builder.Services.AddScoped<ProtectedSessionStorage>();
 
 // === HttpClients ===
 // Cliente base sin handler (lo usa AuthService para /auth/refresh)

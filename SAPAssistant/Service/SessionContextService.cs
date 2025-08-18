@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using SAPAssistant.Models;
 using System.Text.Json;
 
@@ -7,15 +7,16 @@ namespace SAPAssistant.Service
     public class SessionContextService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ProtectedSessionStorage _sessionStorage;
 
-        public SessionContextService(IHttpContextAccessor httpContextAccessor)
+        public SessionContextService(IHttpContextAccessor httpContextAccessor, ProtectedSessionStorage sessionStorage)
         {
             _httpContextAccessor = httpContextAccessor;
+            _sessionStorage = sessionStorage;
         }
 
         private HttpRequest? Request => _httpContextAccessor.HttpContext?.Request;
         private HttpResponse? Response => _httpContextAccessor.HttpContext?.Response;
-        private ISession Session => _httpContextAccessor.HttpContext!.Session;
 
         private CookieOptions BuildOptions(bool persistent = false)
         {
@@ -52,7 +53,7 @@ namespace SAPAssistant.Service
             return ValueTask.CompletedTask;
         }
 
-        // ----- Autenticación -----
+        // ----- Autenticación (cookies igual que antes) -----
         public ValueTask SetUserIdAsync(string userId, bool persistent = false)
             => SetCookie("username", userId, persistent);
 
@@ -77,38 +78,34 @@ namespace SAPAssistant.Service
 
         public ValueTask DeleteRemoteIpAsync() => DeleteCookie("remote_url");
 
-        // ----- Conexión activa (MIGRADA A SESSION) -----
-        public Task<string?> GetActiveConnectionIdAsync()
-            => Task.FromResult(Session.GetString("active_connection_id"));
 
-        public Task SetActiveConnectionIdAsync(string connectionId)
+        // ----- Conexión activa (USANDO ProtectedSessionStorage) -----
+        public async Task<string?> GetActiveConnectionIdAsync()
         {
-            Session.SetString("active_connection_id", connectionId);
-            return Task.CompletedTask;
+            var result = await _sessionStorage.GetAsync<string>("active_connection_id");
+            return result.Success ? result.Value : null;
         }
 
-        public Task DeleteActiveConnectionIdAsync()
+        public ValueTask SetActiveConnectionIdAsync(string connectionId)
+            => _sessionStorage.SetAsync("active_connection_id", connectionId);
+
+        public ValueTask DeleteActiveConnectionIdAsync()
+            => _sessionStorage.DeleteAsync("active_connection_id");
+
+        public async Task<string?> GetDatabaseTypeAsync()
         {
-            Session.Remove("active_connection_id");
-            return Task.CompletedTask;
+            var result = await _sessionStorage.GetAsync<string>("active_db_type");
+            return result.Success ? result.Value : null;
         }
 
-        public Task<string?> GetDatabaseTypeAsync()
-            => Task.FromResult(Session.GetString("active_db_type"));
+        public ValueTask SetDatabaseTypeAsync(string dbType)
+            => _sessionStorage.SetAsync("active_db_type", dbType);
 
-        public Task SetDatabaseTypeAsync(string dbType)
-        {
-            Session.SetString("active_db_type", dbType);
-            return Task.CompletedTask;
-        }
+        public ValueTask DeleteDatabaseTypeAsync()
+            => _sessionStorage.DeleteAsync("active_db_type");
 
-        public Task DeleteDatabaseTypeAsync()
-        {
-            Session.Remove("active_db_type");
-            return Task.CompletedTask;
-        }
 
-        // ----- Edición de conexión -----
+        // ----- Edición de conexión (cookies, igual que antes) -----
         public async Task<ConnectionDTO?> GetConnectionToEditAsync()
         {
             var json = GetCookie("connection_to_edit");
