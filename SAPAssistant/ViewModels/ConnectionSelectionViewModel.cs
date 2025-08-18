@@ -56,6 +56,6 @@ public partial class ConnectionSelectionViewModel : BaseViewModel
         return Task.CompletedTask;
     }
 
-    public void VolverHome() => _navigation.NavigateTo("/");
+    public void VolverHome() => _navigation.NavigateTo("/chat");
 }
 

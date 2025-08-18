@@ -8,25 +8,24 @@ using Microsoft.Extensions.Localization;
 using SAPAssistant;
 using SAPAssistant.Constants;
 using SAPAssistant.Exceptions;
+using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 
 namespace SAPAssistant.Service
 {
     public class ConnectionService : IConnectionService
     {
-        private readonly HttpClient _http;
-        private readonly SessionContextService _sessionContext;
+        private readonly HttpClient _http;        
         private readonly ILogger<ConnectionService> _logger;
         private readonly IStringLocalizer<ErrorMessages> _localizer;
         private readonly CurrentUserAccessor currentUserAccessor;
-        public ConnectionService(HttpClient http,
-                                 SessionContextService sessionContext,
+        public ConnectionService(HttpClient http,                                 
                                  ILogger<ConnectionService> logger,
                                  IStringLocalizer<ErrorMessages> localizer,
                                  CurrentUserAccessor accessor)
         {
-            _http = http;
-            _sessionContext = sessionContext;
+            _http = http;            
             _logger = logger;
             _localizer = localizer;
             currentUserAccessor = accessor;
@@ -38,6 +37,7 @@ namespace SAPAssistant.Service
             {
                 var remoteIp = await currentUserAccessor.GetRemoteUrlAsync();
                 var token = await currentUserAccessor.GetAccessTokenAsync();
+                var userName = await currentUserAccessor.GetUserNameAsync();
 
                 if (string.IsNullOrWhiteSpace(remoteIp))
                 {
@@ -51,8 +51,9 @@ namespace SAPAssistant.Service
                     return ServiceResult<List<ConnectionDTO>>.Fail(_localizer[code], code);
                 }
 
-                var request = new HttpRequestMessage(HttpMethod.Get, "/connection/user-connections");
+                var request = new HttpRequestMessage(HttpMethod.Get, "connection/user-connections");               
                 request.Headers.Add("x-remote-ip", remoteIp);
+                request.Headers.Add("x-user-id", userName);
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                 var response = await _http.SendAsync(request);
@@ -62,7 +63,7 @@ namespace SAPAssistant.Service
                     return ServiceResult<List<ConnectionDTO>>.Fail(_localizer[code], code);
                 }
 
-                var rawList = await response.Content.ReadFromJsonAsync<List<Dictionary<string, ConnectionDTO>>>();
+                var rawList = await response.Content.ReadFromJsonAsync<ExecutorResponse>();                
                 var connections = ConnectionMapper.FromRawList(rawList ?? new());
 
                 var ok = ServiceResult<List<ConnectionDTO>>.Ok(connections, _localizer[ErrorCodes.CONNECTIONS_FETCH_SUCCESS]);
@@ -86,9 +87,9 @@ namespace SAPAssistant.Service
         public async Task<ServiceResult<ConnectionDTO>> GetConnectionByIdAsync(string connectionId)
         {
             try
-            {
-                var remoteIp = await _sessionContext.GetRemoteIpAsync();
-                var token = await _sessionContext.GetTokenAsync();
+            {                
+                var remoteIp = await currentUserAccessor.GetRemoteUrlAsync();
+                var token = await currentUserAccessor.GetAccessTokenAsync();
 
                 if (string.IsNullOrWhiteSpace(remoteIp))
                 {
@@ -142,8 +143,8 @@ namespace SAPAssistant.Service
         {
             try
             {
-                var remoteIp = await _sessionContext.GetRemoteIpAsync();
-                var token = await _sessionContext.GetTokenAsync();
+                var remoteIp = await currentUserAccessor.GetRemoteUrlAsync();
+                var token = await currentUserAccessor.GetAccessTokenAsync ();
                 if (string.IsNullOrWhiteSpace(remoteIp))
                 {
                     const string code = ErrorCodes.SESSION_DATA_NOT_FOUND;
@@ -190,8 +191,8 @@ namespace SAPAssistant.Service
         {
             try
             {
-                var remoteIp = await _sessionContext.GetRemoteIpAsync();
-                var token = await _sessionContext.GetTokenAsync();
+                var remoteIp = await currentUserAccessor.GetRemoteUrlAsync();
+                var token = await currentUserAccessor.GetAccessTokenAsync ();
                 if (string.IsNullOrWhiteSpace(remoteIp))
                 {
                     const string code = ErrorCodes.SESSION_DATA_NOT_FOUND;
@@ -238,8 +239,9 @@ namespace SAPAssistant.Service
         {
             try
             {
-                var remoteIp = await _sessionContext.GetRemoteIpAsync();
-                var token = await _sessionContext.GetTokenAsync();
+                var remoteIp = await currentUserAccessor.GetRemoteUrlAsync();
+                var token = await currentUserAccessor.GetAccessTokenAsync ();
+                var userId = await currentUserAccessor.GetUserNameAsync();
                 if (string.IsNullOrWhiteSpace(remoteIp))
                 {
                     const string code = ErrorCodes.SESSION_DATA_NOT_FOUND;
@@ -251,9 +253,10 @@ namespace SAPAssistant.Service
                     const string code = ErrorCodes.SESSION_TOKEN_NOT_FOUND;
                     return ServiceResult.Fail(_localizer[code], code);
                 }
-
-                var request = new HttpRequestMessage(HttpMethod.Post, $"/connection/connections/{connectionId}/validate");
+                //NO AÑADIR '/' al inicio o luego da un 404
+                var request = new HttpRequestMessage(HttpMethod.Post, $"connection/connections/{connectionId}/validate");
                 request.Headers.Add("x-remote-ip", remoteIp);
+                request.Headers.Add("x-user-id", userId);
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                 var response = await _http.SendAsync(request);

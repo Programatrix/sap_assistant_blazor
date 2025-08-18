@@ -62,39 +62,47 @@ builder.Services.AddAuthorization(options =>
         policy.Requirements.Add(new ConnectionRequirement()));
 });
 
-// Antiforgery (si lo usas en más sitios; Razor Pages añade el token al form automáticamente)
+// Antiforgery
 builder.Services.AddAntiforgery(options =>
 {
     options.Cookie.Name = "XSRF-TOKEN";
-    options.Cookie.HttpOnly = false; // legible por el TagHelper/cliente si hiciera falta
+    options.Cookie.HttpOnly = false;
     options.HeaderName = "X-CSRF-TOKEN";
 });
 
-// HttpClients
+// === HttpContext & Auth services ===
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<CurrentUserAccessor>();   // actualizado para usar HttpContext primero
+builder.Services.AddScoped<SessionContextService>();
+
+// === HttpClients ===
+// Cliente base sin handler (lo usa AuthService para /auth/refresh)
 builder.Services.AddHttpClient("Default", client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
+// Handler que adjunta Bearer y refresca en 401
+builder.Services.AddTransient<AuthHandler>();
+
+// Clientes de la API que deben enviar Bearer y refrescar
 builder.Services.AddHttpClient<IConnectionService, ConnectionService>(client =>
 {
     client.BaseAddress = new Uri($"{apiBaseUrl.TrimEnd('/')}/api/v1/");
-});
+}).AddHttpMessageHandler<AuthHandler>();
 
 builder.Services.AddHttpClient<IAssistantService, AssistantService>(client =>
 {
     client.BaseAddress = new Uri($"{apiBaseUrl.TrimEnd('/')}/api/v1/");
-});
+}).AddHttpMessageHandler<AuthHandler>();
 
 builder.Services.AddHttpClient<ApiClient>(client =>
 {
     client.BaseAddress = new Uri($"{apiBaseUrl.TrimEnd('/')}/api/v1/");
-});
+}).AddHttpMessageHandler<AuthHandler>();
 
-// App services
-builder.Services.AddScoped<AuthService>();
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<SessionContextService>();
+// App services extra
 builder.Services.AddScoped<DashboardService>();
 builder.Services.AddSingleton<KpiCatalogService>();
 builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
@@ -115,8 +123,6 @@ builder.Services.AddScoped<ConnectionManagerViewModel>();
 builder.Services.AddScoped<DashboardPageViewModel>();
 builder.Services.AddScoped<DashboardCatalogViewModel>();
 builder.Services.AddScoped<DashboardWizardViewModel>();
-builder.Services.AddScoped<CurrentUserAccessor>();
-
 
 // Handlers de autorización
 builder.Services.AddScoped<IAuthorizationHandler, ConnectionAuthorizationHandler>();
@@ -158,9 +164,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // Endpoints
-// ❌ Eliminado: /csrf-token y /auth/login (la Razor Page los sustituye)
-
-// (Opcional) Mantener logout temporalmente como endpoint minimal:
 app.MapPost("/auth/logout", async (HttpContext context) =>
 {
     await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);

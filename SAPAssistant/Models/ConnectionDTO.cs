@@ -14,6 +14,14 @@
         public string remote_ip { get; set; } = "";
     }
 
+    public class ExecutorResponse
+    {
+        public bool Success { get; set; }
+        public List<Dictionary<string, ConnectionDTO>> Data { get; set; } = new();
+        public string TraceId { get; set; }
+        public object Error { get; set; }
+    }
+
     public class RawConnection
     {
         public Dictionary<string, ConnectionDTO> ConnectionMap { get; set; } = new();

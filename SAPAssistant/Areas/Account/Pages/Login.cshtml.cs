@@ -76,8 +76,10 @@ namespace SAPAssistant.Areas.Account.Pages
                 new(ClaimTypes.Name, result.Data.Username),
                 // Si necesitas el token en el SERVIDOR:
                 new("access_token", result.Data.Token),
+                new("refresh_token", result.Data.refresh_token),
                 new("remote_url", result.Data.remote_url ?? "")
-            };
+
+        };
             // Ejemplo si tu API devuelve roles:
             // if (result.Data.Roles is { Length: >0 })
             //     claims.AddRange(result.Data.Roles.Select(r => new Claim(ClaimTypes.Role, r)));

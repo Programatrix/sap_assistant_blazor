@@ -15,6 +15,7 @@ namespace SAPAssistant.Service
 
         private HttpRequest? Request => _httpContextAccessor.HttpContext?.Request;
         private HttpResponse? Response => _httpContextAccessor.HttpContext?.Response;
+        private ISession Session => _httpContextAccessor.HttpContext!.Session;
 
         private CookieOptions BuildOptions(bool persistent = false)
         {
@@ -57,9 +58,6 @@ namespace SAPAssistant.Service
 
         public ValueTask DeleteUserIdAsync() => DeleteCookie("username");
 
-        public Task<string?> GetUserIdAsync()
-            => Task.FromResult(GetCookie("username"));
-
         public ValueTask SetTokenAsync(string token, bool persistent = false)
             => SetCookie("token", token, persistent);
 
@@ -79,24 +77,36 @@ namespace SAPAssistant.Service
 
         public ValueTask DeleteRemoteIpAsync() => DeleteCookie("remote_url");
 
-        // ----- Conexión activa -----
+        // ----- Conexión activa (MIGRADA A SESSION) -----
         public Task<string?> GetActiveConnectionIdAsync()
-            => Task.FromResult(GetCookie("active_connection_id"));
+            => Task.FromResult(Session.GetString("active_connection_id"));
 
-        public ValueTask SetActiveConnectionIdAsync(string connectionId)
-            => SetCookie("active_connection_id", connectionId);
+        public Task SetActiveConnectionIdAsync(string connectionId)
+        {
+            Session.SetString("active_connection_id", connectionId);
+            return Task.CompletedTask;
+        }
 
-        public ValueTask DeleteActiveConnectionIdAsync()
-            => DeleteCookie("active_connection_id");
+        public Task DeleteActiveConnectionIdAsync()
+        {
+            Session.Remove("active_connection_id");
+            return Task.CompletedTask;
+        }
 
         public Task<string?> GetDatabaseTypeAsync()
-            => Task.FromResult(GetCookie("active_db_type"));
+            => Task.FromResult(Session.GetString("active_db_type"));
 
-        public ValueTask SetDatabaseTypeAsync(string dbType)
-            => SetCookie("active_db_type", dbType);
+        public Task SetDatabaseTypeAsync(string dbType)
+        {
+            Session.SetString("active_db_type", dbType);
+            return Task.CompletedTask;
+        }
 
-        public ValueTask DeleteDatabaseTypeAsync()
-            => DeleteCookie("active_db_type");
+        public Task DeleteDatabaseTypeAsync()
+        {
+            Session.Remove("active_db_type");
+            return Task.CompletedTask;
+        }
 
         // ----- Edición de conexión -----
         public async Task<ConnectionDTO?> GetConnectionToEditAsync()
@@ -112,4 +122,3 @@ namespace SAPAssistant.Service
             => DeleteCookie("connection_to_edit");
     }
 }
-
