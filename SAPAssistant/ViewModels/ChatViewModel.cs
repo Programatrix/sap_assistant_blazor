@@ -14,7 +14,7 @@ using SAPAssistant.Constants;
 
 namespace SAPAssistant.ViewModels;
 
-public partial class ChatViewModel : BaseViewModel
+public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
 {
     private readonly IJSRuntime _js;
     private readonly IAssistantService _assistantService;
@@ -26,6 +26,14 @@ public partial class ChatViewModel : BaseViewModel
 
     private string? preferredViewType;
     private ChatSession? CurrentSession { get; set; }
+
+    private IJSObjectReference? _progressModule;
+    private IJSObjectReference? _eventSource;
+    private DotNetObjectReference<ChatViewModel>? _dotNetRef;
+    public string CurrentPhase { get; private set; } = string.Empty;
+    public double? ProgressValue { get; private set; }
+    public bool IsReconnecting { get; private set; }
+    public Action? StateHasChanged { get; set; }
 
     [ObservableProperty]
     private List<MessageBase> messages = new();
@@ -135,6 +143,9 @@ public partial class ChatViewModel : BaseViewModel
         if (string.IsNullOrWhiteSpace(message) || IsProcessing) return;
 
         IsProcessing = true;
+        CurrentPhase = string.Empty;
+        ProgressValue = null;
+        IsReconnecting = false;
 
         var userMsg = new TextMessage
         {
@@ -143,48 +154,66 @@ public partial class ChatViewModel : BaseViewModel
         };
 
         Messages.Add(userMsg);
-
-        var resultado = isDemo
-            ? await _assistantService.ConsultarDemoAsync(message)
-            : await _assistantService.ConsultarAsync(message, CurrentSession!.Id);
-
-        if (!resultado.Success || resultado.Data == null)
-        {
-            Messages.Add(new ErrorMessage { Mensaje = resultado.Message });
-            await NotificationService.Notify(resultado);
-        }
-        else
-        {
-            var data = resultado.Data;
-            MessageBase responseMsg = data.Tipo switch
-            {
-                "aclaracion" or "assistant" => new TextMessage
-                {
-                    Role = "assistant",
-                    Mensaje = data.Mensaje
-                },
-                "resumen" => new TextMessage
-                {
-                    Mensaje = data.Resumen
-                },
-                "system" => new SystemMessage
-                {
-                    Mensaje = data.Mensaje
-                },
-                _ => new ChatResultMessage
-                {
-                    Resumen = data.Resumen ?? "",
-                    Sql = data.Sql ?? "",
-                    Data = data.Resultados ?? new(),
-                    ViewType = preferredViewType ?? data.ViewType ?? "grid"
-                }
-            };
-
-            Messages.Add(responseMsg);
-        }
-
-        IsProcessing = false;
         await ScrollToBottom();
+
+        if (isDemo)
+        {
+            var resultadoDemo = await _assistantService.ConsultarDemoAsync(message);
+            if (!resultadoDemo.Success || resultadoDemo.Data == null)
+            {
+                Messages.Add(new ErrorMessage { Mensaje = resultadoDemo.Message });
+                await NotificationService.Notify(resultadoDemo);
+            }
+            else
+            {
+                var data = resultadoDemo.Data;
+                MessageBase responseMsg = data.Tipo switch
+                {
+                    "aclaracion" or "assistant" => new TextMessage
+                    {
+                        Role = "assistant",
+                        Mensaje = data.Mensaje
+                    },
+                    "resumen" => new TextMessage
+                    {
+                        Mensaje = data.Resumen
+                    },
+                    "system" => new SystemMessage
+                    {
+                        Mensaje = data.Mensaje
+                    },
+                    _ => new ChatResultMessage
+                    {
+                        Resumen = data.Resumen ?? "",
+                        Sql = data.Sql ?? "",
+                        Data = data.Resultados ?? new(),
+                        ViewType = preferredViewType ?? data.ViewType ?? "grid"
+                    }
+                };
+
+                Messages.Add(responseMsg);
+            }
+
+            IsProcessing = false;
+            await ScrollToBottom();
+            return;
+        }
+
+        var startResult = await _assistantService.StartQueryAsync(message, CurrentSession!.Id);
+        if (!startResult.Success || string.IsNullOrWhiteSpace(startResult.Data))
+        {
+            Messages.Add(new ErrorMessage { Mensaje = startResult.Message });
+            await NotificationService.Notify(startResult);
+            IsProcessing = false;
+            await ScrollToBottom();
+            return;
+        }
+
+        var requestId = startResult.Data;
+        _progressModule ??= await _js.InvokeAsync<IJSObjectReference>("import", "/progress.js");
+        _dotNetRef?.Dispose();
+        _dotNetRef = DotNetObjectReference.Create(this);
+        _eventSource = await _progressModule.InvokeAsync<IJSObjectReference>("connectSSE", requestId, _dotNetRef);
     }
 
     public async Task ScrollToBottom()
@@ -235,6 +264,96 @@ public partial class ChatViewModel : BaseViewModel
         msg.ViewType = viewType;
         preferredViewType = viewType;
         await _js.InvokeVoidAsync("viewTypePref.set", viewType);
+    }
+
+    [JSInvokable]
+    public async Task OnProgressEvent(string json)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            CurrentPhase = root.TryGetProperty("phase", out var phaseEl) ? phaseEl.GetString() ?? string.Empty : string.Empty;
+
+            if (root.TryGetProperty("progress", out var progEl) && progEl.ValueKind == JsonValueKind.Number)
+                ProgressValue = progEl.GetDouble();
+            else
+                ProgressValue = null;
+
+            string? status = root.TryGetProperty("status", out var statusEl) ? statusEl.GetString() : null;
+
+            if (status == "error")
+            {
+                IsProcessing = false;
+                var msg = root.TryGetProperty("message", out var msgEl) ? msgEl.GetString() : null;
+                Messages.Add(new ErrorMessage { Mensaje = msg ?? "Error" });
+            }
+
+            if (CurrentPhase == "done")
+            {
+                IsProcessing = false;
+                if (root.TryGetProperty("data", out var dataEl))
+                {
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    var data = JsonSerializer.Deserialize<QueryResponse>(dataEl.GetRawText(), options);
+                    if (data != null)
+                    {
+                        MessageBase responseMsg = data.Tipo switch
+                        {
+                            "aclaracion" or "assistant" => new TextMessage { Role = "assistant", Mensaje = data.Mensaje },
+                            "resumen" => new TextMessage { Mensaje = data.Resumen },
+                            "system" => new SystemMessage { Mensaje = data.Mensaje },
+                            _ => new ChatResultMessage
+                            {
+                                Resumen = data.Resumen ?? "",
+                                Sql = data.Sql ?? "",
+                                Data = data.Resultados ?? new(),
+                                ViewType = preferredViewType ?? data.ViewType ?? "grid"
+                            }
+                        };
+                        Messages.Add(responseMsg);
+                    }
+                }
+            }
+
+            if (_progressModule != null && _eventSource != null && (status == "error" || CurrentPhase == "done"))
+            {
+                await _progressModule.InvokeVoidAsync("closeSSE", _eventSource);
+                _eventSource = null;
+            }
+        }
+        catch (JsonException)
+        {
+            Messages.Add(new ErrorMessage { Mensaje = "Error al procesar progreso." });
+            IsProcessing = false;
+        }
+
+        StateHasChanged?.Invoke();
+        await ScrollToBottom();
+    }
+
+    [JSInvokable]
+    public Task OnReconnectStateChange(bool reconnecting)
+    {
+        IsReconnecting = reconnecting;
+        StateHasChanged?.Invoke();
+        return Task.CompletedTask;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_progressModule != null && _eventSource != null)
+        {
+            await _progressModule.InvokeVoidAsync("closeSSE", _eventSource);
+            _eventSource = null;
+        }
+        if (_progressModule != null)
+        {
+            await _progressModule.DisposeAsync();
+            _progressModule = null;
+        }
+        _dotNetRef?.Dispose();
     }
 }
 
