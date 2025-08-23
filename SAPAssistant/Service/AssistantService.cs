@@ -13,14 +13,16 @@ namespace SAPAssistant.Service
         private readonly HttpClient _http;
         private readonly SessionContextService _sessionContext;
         private readonly ILogger<AssistantService> _logger;
-
+        private readonly CurrentUserAccessor currentUserAccessor;
         public AssistantService(HttpClient http,
                               SessionContextService sessionContext,
-                              ILogger<AssistantService> logger)
+                              ILogger<AssistantService> logger,
+                              CurrentUserAccessor accessor)
         {
             _http = http;
             _sessionContext = sessionContext;
             _logger = logger;
+            currentUserAccessor = accessor;
         }
 
         public async Task<ServiceResult<QueryResponse>> ConsultarAsync(string mensaje, string chatId)
@@ -29,17 +31,19 @@ namespace SAPAssistant.Service
             {
                 var connectionId = await _sessionContext.GetActiveConnectionIdAsync() ??
                     throw new AssistantException("No hay conexión activa", "NO_ACTIVE_CONNECTION");
-                var remoteIp = await _sessionContext.GetRemoteIpAsync() ??
+                var remoteIp = await currentUserAccessor.GetRemoteUrlAsync() ??
                     throw new AssistantException("Configuración remota faltante", "MISSING_REMOTE_IP");
                 var dbType = await _sessionContext.GetDatabaseTypeAsync() ??
                     throw new AssistantException("Tipo de base de datos no especificado", "MISSING_DB_TYPE");
-                var token = await _sessionContext.GetTokenAsync() ??
+                var token = await currentUserAccessor.GetAccessTokenAsync() ??
                     throw new AssistantException("Token no encontrado", ErrorCodes.SESSION_TOKEN_NOT_FOUND);
+                string userID = await currentUserAccessor.GetUserNameAsync() ??
+                    throw new AssistantException("Usuario no encontrado", ErrorCodes.SESSION_USER_NOT_FOUND);
 
                 if (string.IsNullOrWhiteSpace(chatId))
                     throw new AssistantException("ID de chat inválido", "INVALID_CHAT_ID");
 
-                var request = new HttpRequestMessage(HttpMethod.Post, "/assistant/message")
+                var request = new HttpRequestMessage(HttpMethod.Post, "assistant/message")
                 {
                     Content = JsonContent.Create(new
                     {
@@ -51,6 +55,7 @@ namespace SAPAssistant.Service
                 };
 
                 request.Headers.Add("x-remote-ip", remoteIp);
+                request.Headers.Add("x-user-id", userID);
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                 var response = await SendAndParseAsync(request);
@@ -120,14 +125,14 @@ namespace SAPAssistant.Service
                     await HandleErrorResponse(response);
                 }
 
-                var assistantResponse = await response.Content.ReadFromJsonAsync<AssistantResponse>();
+                var assistantResponse = await response.Content.ReadFromJsonAsync<AssistantResponseResult>();
 
                 if (assistantResponse == null)
                 {
                     throw new AssistantException("Respuesta inválida del servidor", "INVALID_RESPONSE");
                 }
 
-                return MapToQueryResponse(assistantResponse);
+                return MapToQueryResponse(assistantResponse.data);
             }
             catch (AssistantException)
             {

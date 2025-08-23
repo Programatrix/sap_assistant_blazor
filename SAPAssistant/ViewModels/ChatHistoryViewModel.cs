@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
 using SAPAssistant.Models;
 using SAPAssistant.Service;
@@ -15,7 +15,11 @@ public partial class ChatHistoryViewModel : BaseViewModel
     private List<ChatSession> sessions = new();
 
     [ObservableProperty]
-    private bool isLoading = true;
+    private bool isLoading = false;
+
+    // ✅ Nuevo: sabemos si ya cargamos el historial
+    [ObservableProperty]
+    private bool isLoaded = false;
 
     public ChatHistoryViewModel(
         IChatHistoryService chatService,
@@ -26,20 +30,32 @@ public partial class ChatHistoryViewModel : BaseViewModel
         _navigation = navigation;
     }
 
-    public async Task LoadHistoryAsync()
+    public async Task LoadHistoryAsync(bool force = false)
     {
+        // ✅ Guardas para evitar recargas innecesarias
+        if (IsLoaded && !force) return;
+        if (IsLoading) return;
+
         IsLoading = true;
-        var result = await _chatService.GetChatHistoryAsync();
-        if (result.Success && result.Data != null)
+        try
         {
-            Sessions = result.Data;
+            var result = await _chatService.GetChatHistoryAsync();
+            if (result.Success && result.Data != null)
+            {
+                Sessions = result.Data;
+                IsLoaded = true;
+            }
+            else
+            {
+                Sessions = new List<ChatSession>();
+                IsLoaded = false;
+                await NotificationService.Notify(result);
+            }
         }
-        else
+        finally
         {
-            Sessions = new List<ChatSession>();
-            await NotificationService.Notify(result);
+            IsLoading = false;
         }
-        IsLoading = false;
     }
 
     public void StartNewChat()
@@ -49,7 +65,9 @@ public partial class ChatHistoryViewModel : BaseViewModel
 
     public void OpenChat(string chatId)
     {
-        _navigation.NavigateTo($"/chat/{chatId}", forceLoad: true);
+        // ❌ Antes: forceLoad: true (forzaba recarga completa del sitio)
+        // ✅ Ahora: navegación SPA sin recargar todo
+        _navigation.NavigateTo($"/chat/{chatId}");
     }
 
     public async Task DeleteChat(string chatId)
@@ -61,7 +79,13 @@ public partial class ChatHistoryViewModel : BaseViewModel
             return;
         }
 
-        await LoadHistoryAsync();
-    }
-}
+        // ✅ Actualizamos en memoria sin reconsultar todo
+        Sessions = Sessions.Where(s => s.Id != chatId).ToList();
 
+        // Si borras todo, puedes marcarlo como no cargado si quieres volver a consultar la próxima vez
+        if (Sessions.Count == 0) IsLoaded = false;
+    }
+
+    // (Opcional) Método para refrescar manualmente cuando tú quieras
+    public Task RefreshAsync() => LoadHistoryAsync(force: true);
+}

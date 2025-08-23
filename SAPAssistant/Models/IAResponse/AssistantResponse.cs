@@ -3,6 +3,11 @@ using System.Text.Json.Serialization;
 
 namespace SAPAssistant.Models
 {
+    public class AssistantResponseResult
+    {
+        public bool succes { get; set; }
+        public AssistantResponse data { get; set; } = new AssistantResponse();
+    }
     public class AssistantResponse
     {
         [JsonPropertyName("tipo")]

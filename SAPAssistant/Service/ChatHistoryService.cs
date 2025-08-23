@@ -18,27 +18,33 @@ namespace SAPAssistant.Service
         private readonly SessionContextService _sessionContext;
         private readonly ILogger<ChatHistoryService> _logger;
         private readonly IStringLocalizer<ErrorMessages> _localizer;
+        private readonly CurrentUserAccessor currentUserAccessor;
 
-        public ChatHistoryService(HttpClient http, SessionContextService sessionContext, ILogger<ChatHistoryService> logger, IStringLocalizer<ErrorMessages> localizer)
+        public ChatHistoryService(HttpClient http, SessionContextService sessionContext, 
+                ILogger<ChatHistoryService> logger, IStringLocalizer<ErrorMessages> localizer, CurrentUserAccessor accessor)
         {
             _http = http;
             _sessionContext = sessionContext;
             _logger = logger;
             _localizer = localizer;
+            currentUserAccessor = accessor;
         }
 
         public async Task<ServiceResult<List<ChatSession>>> GetChatHistoryAsync()
         {
             try
             {
-                var token = await _sessionContext.GetTokenAsync();
+                var token = await currentUserAccessor.GetAccessTokenAsync();
+                var userId = await currentUserAccessor.GetUserNameAsync();
                 if (string.IsNullOrWhiteSpace(token))
                 {
                     const string code = ErrorCodes.SESSION_TOKEN_NOT_FOUND;
                     return ServiceResult<List<ChatSession>>.Fail(_localizer[code], code);
                 }
 
-                var request = new HttpRequestMessage(HttpMethod.Get, "/assistant/chats");
+                var request = new HttpRequestMessage(HttpMethod.Get, "assistant/chats");
+
+                request.Headers.Add("x-user-id", userId);
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var response = await _http.SendAsync(request);
                 if (!response.IsSuccessStatusCode)
@@ -49,8 +55,9 @@ namespace SAPAssistant.Service
                     return ServiceResult<List<ChatSession>>.Fail(_localizer[code], code);
                 }
 
-                var result = await response.Content.ReadFromJsonAsync<List<ChatSession>>() ?? new List<ChatSession>();
-                return ServiceResult<List<ChatSession>>.Ok(result);
+                //var result = await response.Content.ReadFromJsonAsync<List<ChatSession>>() ?? new List<ChatSession>();
+                var result = await response.Content.ReadFromJsonAsync<ChatSessionResult>() ?? new ChatSessionResult();
+                return ServiceResult<List<ChatSession>>.Ok(result.data);
             }
             catch (Exception ex)
             {
@@ -64,7 +71,8 @@ namespace SAPAssistant.Service
         {
             try
             {
-                var token = await _sessionContext.GetTokenAsync();
+                var token = await currentUserAccessor.GetAccessTokenAsync();
+                var userId = await currentUserAccessor.GetUserNameAsync();
                 if (string.IsNullOrWhiteSpace(token))
                 {
                     const string code = ErrorCodes.SESSION_TOKEN_NOT_FOUND;
@@ -72,6 +80,7 @@ namespace SAPAssistant.Service
                 }
 
                 var request = new HttpRequestMessage(HttpMethod.Get, $"assistant/chats/{chatId}");
+                request.Headers.Add("x-user-id", userId);
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                 var response = await _http.SendAsync(request);
@@ -84,14 +93,14 @@ namespace SAPAssistant.Service
                     return ServiceResult<ChatSession>.Fail(_localizer[code], code);
                 }
 
-                var chat = await response.Content.ReadFromJsonAsync<ChatSession>();
+                var chat = await response.Content.ReadFromJsonAsync<ChatSessionSingleResult>();
                 if (chat == null)
                 {
                     const string code = ErrorCodes.EMPTY_RESPONSE;
                     return ServiceResult<ChatSession>.Fail(_localizer[code], code);
                 }
 
-                var ok = ServiceResult<ChatSession>.Ok(chat, _localizer[ErrorCodes.CHAT_FETCH_SUCCESS]);
+                var ok = ServiceResult<ChatSession>.Ok(chat.data, _localizer[ErrorCodes.CHAT_FETCH_SUCCESS]);
                 ok.ErrorCode = ErrorCodes.CHAT_FETCH_SUCCESS;
                 return ok;
             }
@@ -117,7 +126,7 @@ namespace SAPAssistant.Service
                 var json = JsonSerializer.Serialize(mensajes);
                 session.MensajesRaw = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(json)!;
 
-                var token = await _sessionContext.GetTokenAsync();
+                var token = await currentUserAccessor.GetAccessTokenAsync();
                 if (string.IsNullOrWhiteSpace(token))
                 {
                     const string code = ErrorCodes.SESSION_TOKEN_NOT_FOUND;
@@ -151,7 +160,7 @@ namespace SAPAssistant.Service
         {
             try
             {
-                var token = await _sessionContext.GetTokenAsync();
+                var token = await currentUserAccessor.GetAccessTokenAsync();
                 if (string.IsNullOrWhiteSpace(token))
                 {
                     const string code = ErrorCodes.SESSION_TOKEN_NOT_FOUND;

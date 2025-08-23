@@ -99,6 +99,11 @@ builder.Services.AddHttpClient<IAssistantService, AssistantService>(client =>
     client.BaseAddress = new Uri($"{apiBaseUrl.TrimEnd('/')}/api/v1/");
 }).AddHttpMessageHandler<AuthHandler>();
 
+builder.Services.AddHttpClient<IChatHistoryService, ChatHistoryService>(client =>
+{
+    client.BaseAddress = new Uri($"{apiBaseUrl.TrimEnd('/')}/api/v1/");
+}).AddHttpMessageHandler<AuthHandler>();
+
 builder.Services.AddHttpClient<ApiClient>(client =>
 {
     client.BaseAddress = new Uri($"{apiBaseUrl.TrimEnd('/')}/api/v1/");
@@ -109,7 +114,7 @@ builder.Services.AddScoped<DashboardService>();
 builder.Services.AddSingleton<KpiCatalogService>();
 builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
 builder.Services.AddSingleton<INotificationService, NotificationService>();
-builder.Services.AddScoped<IChatHistoryService, ChatHistoryService>();
+//builder.Services.AddScoped<IChatHistoryService, ChatHistoryService>();
 builder.Services.Configure<CspOptions>(builder.Configuration.GetSection("Csp"));
 builder.Services.AddSingleton<ICspBuilder, CspBuilder>();
 builder.Services.AddMudServices();

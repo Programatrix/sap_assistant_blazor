@@ -3,12 +3,17 @@ using System.Text.Json.Serialization;
 
 namespace SAPAssistant.Models
 {
-    public class ChatHistory
+    public class ChatSessionResult
     {
-        public string Usuario { get; set; }
-        public List<ChatSession> HistoricoChats { get; set; } = new();
+        public bool success { get; set; }
+        public List<ChatSession> data { get; set; } = new();
     }
 
+    public class ChatSessionSingleResult
+    {
+        public bool success { get; set; }
+        public ChatSession data { get; set; } = new();
+    }
     public class ChatSession
     {
         public string Id { get; set; }
