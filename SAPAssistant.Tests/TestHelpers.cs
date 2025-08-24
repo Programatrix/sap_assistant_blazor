@@ -1,6 +1,10 @@
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
+using Microsoft.JSInterop;
 using SAPAssistant.Service;
 using System.Collections.Generic;
+using Moq;
 
 namespace SAPAssistant.Tests;
 
@@ -16,6 +20,9 @@ public static class SessionContextFactory
         if (remoteUrl != null) cookies.Add($"remote_url={remoteUrl}");
         context.Request.Headers["Cookie"] = string.Join("; ", cookies);
         var accessor = new HttpContextAccessor { HttpContext = context };
-        return new SessionContextService(accessor);
+        var js = new Mock<IJSRuntime>();
+        var provider = new EphemeralDataProtectionProvider();
+        var storage = new ProtectedSessionStorage(js.Object, provider);
+        return new SessionContextService(accessor, storage);
     }
 }
