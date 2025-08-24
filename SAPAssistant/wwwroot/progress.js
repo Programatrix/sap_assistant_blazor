@@ -21,7 +21,5 @@ export function connectSSE(requestId, dotNetRef) {
 }
 
 export function closeSSE(es) {
-  if (es) {
-    es.close();
-  }
+  es.close();
 }

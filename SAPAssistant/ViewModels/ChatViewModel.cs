@@ -343,16 +343,18 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        if (_progressModule != null && _eventSource != null)
-        {
-            await _progressModule.InvokeVoidAsync("closeSSE", _eventSource);
-            _eventSource = null;
-        }
         if (_progressModule != null)
         {
+            if (_eventSource != null)
+            {
+                await _progressModule.InvokeVoidAsync("closeSSE", _eventSource);
+                _eventSource = null;
+            }
+
             await _progressModule.DisposeAsync();
             _progressModule = null;
         }
+
         _dotNetRef?.Dispose();
     }
 }
