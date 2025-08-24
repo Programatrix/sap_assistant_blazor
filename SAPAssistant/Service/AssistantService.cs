@@ -114,6 +114,64 @@ namespace SAPAssistant.Service
             }
         }
 
+        public async Task<ServiceResult<string>> StartQueryAsync(string mensaje, string chatId)
+        {
+            try
+            {
+                var connectionId = await _sessionContext.GetActiveConnectionIdAsync() ??
+                    throw new AssistantException("No hay conexión activa", "NO_ACTIVE_CONNECTION");
+                var remoteIp = await currentUserAccessor.GetRemoteUrlAsync() ??
+                    throw new AssistantException("Configuración remota faltante", "MISSING_REMOTE_IP");
+                var dbType = await _sessionContext.GetDatabaseTypeAsync() ??
+                    throw new AssistantException("Tipo de base de datos no especificado", "MISSING_DB_TYPE");
+                var token = await currentUserAccessor.GetAccessTokenAsync() ??
+                    throw new AssistantException("Token no encontrado", ErrorCodes.SESSION_TOKEN_NOT_FOUND);
+                string userID = await currentUserAccessor.GetUserNameAsync() ??
+                    throw new AssistantException("Usuario no encontrado", ErrorCodes.SESSION_USER_NOT_FOUND);
+
+                if (string.IsNullOrWhiteSpace(chatId))
+                    throw new AssistantException("ID de chat inválido", "INVALID_CHAT_ID");
+
+                var request = new HttpRequestMessage(HttpMethod.Post, "assistant/message")
+                {
+                    Content = JsonContent.Create(new
+                    {
+                        mensaje,
+                        connection_id = connectionId,
+                        chat_id = chatId,
+                        db_type = dbType
+                    })
+                };
+
+                request.Headers.Add("x-remote-ip", remoteIp);
+                request.Headers.Add("x-user-id", userID);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var response = await _http.SendAsync(request);
+                if (!response.IsSuccessStatusCode)
+                {
+                    await HandleErrorResponse(response);
+                }
+
+                var payload = await response.Content.ReadFromJsonAsync<StartResponse>();
+                if (payload == null || string.IsNullOrWhiteSpace(payload.request_id))
+                {
+                    return ServiceResult<string>.Fail("Respuesta vacía", "EMPTY_RESPONSE");
+                }
+
+                return ServiceResult<string>.Ok(payload.request_id);
+            }
+            catch (AssistantException ex)
+            {
+                return ServiceResult<string>.Fail(ex.Message, ex.ErrorCode);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error inesperado en StartQueryAsync");
+                return ServiceResult<string>.Fail("Error interno del cliente", "CLIENT_ERROR");
+            }
+        }
+
         private async Task<QueryResponse?> SendAndParseAsync(HttpRequestMessage request)
         {
             try

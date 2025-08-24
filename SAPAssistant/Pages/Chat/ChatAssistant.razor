@@ -24,7 +24,21 @@
         <SearchBar @bind-SearchText="VM.UserInput" OnSearch="@(msg => VM.SendMessage(msg, false))" Disabled="VM.IsProcessing" />
         @if (VM.IsProcessing)
         {
-            <div class="loading-spinner">⌛ Procesando...</div>
+            <div class="progress-area">
+                <p>@VM.CurrentPhase</p>
+                @if (VM.ProgressValue.HasValue)
+                {
+                    <progress max="1" value="@VM.ProgressValue"></progress>
+                }
+                else
+                {
+                    <progress max="100"></progress>
+                }
+                @if (VM.IsReconnecting)
+                {
+                    <div class="reconnect-msg">Reconectando…</div>
+                }
+            </div>
         }
     </div>
 </div>
@@ -36,6 +50,7 @@
     protected override async Task OnInitializedAsync()
     {
         State.PropertyChanged += HandleStateChanged;
+        VM.StateHasChanged = StateHasChanged;
         await VM.OnInitializedAsync();
     }
 
@@ -49,5 +64,9 @@
         }
     }
 
-    public void Dispose() => State.PropertyChanged -= HandleStateChanged;
+    public void Dispose()
+    {
+        State.PropertyChanged -= HandleStateChanged;
+        VM.DisposeAsync().AsTask().GetAwaiter().GetResult();
+    }
 }
