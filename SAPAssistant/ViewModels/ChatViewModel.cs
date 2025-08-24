@@ -217,10 +217,12 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
         _progressModule ??= await _js.InvokeAsync<IJSObjectReference>("import", "/progress.js");
         _dotNetRef?.Dispose();
         _dotNetRef = DotNetObjectReference.Create(this);
+
+        var baseUrl = _http.BaseAddress!.ToString().TrimEnd('/');
         _eventSource = await _progressModule.InvokeAsync<IJSObjectReference>(
             "connectSSE",
             requestId,
-            _http.BaseAddress!.ToString().TrimEnd('/'),
+            baseUrl,
             _dotNetRef);
     }
 
