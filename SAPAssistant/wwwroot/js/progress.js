@@ -1,9 +1,9 @@
-export function connectSSE(requestId, dotNetRef) {
+export function connectSSE(requestId, baseUrl, dotNetRef) {
   let es;
   let retry = 1000;
 
   function start() {
-    es = new EventSource(`/progress/sse/${requestId}`);
+    es = new EventSource(`${baseUrl}/progress/sse/${requestId}`);
     es.onopen = () => dotNetRef.invokeMethodAsync('OnReconnectStateChange', false);
     es.onmessage = e => dotNetRef.invokeMethodAsync('OnProgressEvent', e.data);
     es.onerror = () => {
