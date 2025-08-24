@@ -11,6 +11,7 @@ using SAPAssistant.Exceptions;
 using Microsoft.Extensions.Localization;
 using SAPAssistant;
 using SAPAssistant.Constants;
+using System.Net.Http;
 
 namespace SAPAssistant.ViewModels;
 
@@ -21,6 +22,7 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
     private readonly IChatHistoryService _chatHistoryService;
     private readonly StateContainer _stateContainer;
     private readonly IStringLocalizer<ErrorMessages> _localizer;
+    private readonly HttpClient _http;
 
     public ElementReference MessagesContainer { get; set; }
 
@@ -50,13 +52,15 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
         IChatHistoryService chatHistoryService,
         StateContainer stateContainer,
         INotificationService notificationService,
-        IStringLocalizer<ErrorMessages> localizer) : base(notificationService)
+        IStringLocalizer<ErrorMessages> localizer,
+        HttpClient http) : base(notificationService)
     {
         _js = js;
         _assistantService = assistantService;
         _chatHistoryService = chatHistoryService;
         _stateContainer = stateContainer;
         _localizer = localizer;
+        _http = http;
     }
 
     public async Task OnInitializedAsync()
@@ -213,7 +217,11 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
         _progressModule ??= await _js.InvokeAsync<IJSObjectReference>("import", "/progress.js");
         _dotNetRef?.Dispose();
         _dotNetRef = DotNetObjectReference.Create(this);
-        _eventSource = await _progressModule.InvokeAsync<IJSObjectReference>("connectSSE", requestId, _dotNetRef);
+        _eventSource = await _progressModule.InvokeAsync<IJSObjectReference>(
+            "connectSSE",
+            requestId,
+            _http.BaseAddress!.ToString().TrimEnd('/'),
+            _dotNetRef);
     }
 
     public async Task ScrollToBottom()
