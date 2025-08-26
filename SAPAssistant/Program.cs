@@ -19,6 +19,7 @@ using System.Security.Claims;
 using SAPAssistant.Models;
 using SAPAssistant.Constants;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using SAPAssistant.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -183,5 +184,7 @@ app.MapRazorPages();
 // Blazor
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
+
+app.MapHub<ProgressHub>("/hubs/progress");
 
 app.Run();

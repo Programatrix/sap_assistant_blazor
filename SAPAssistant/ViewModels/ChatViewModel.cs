@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using SAPAssistant.Components.Chat;
@@ -23,15 +23,15 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
     private readonly StateContainer _stateContainer;
     private readonly IStringLocalizer<ErrorMessages> _localizer;
     private readonly HttpClient _http;
-
+    private readonly NavigationManager _nav;
     public ElementReference MessagesContainer { get; set; }
 
     private string? preferredViewType;
     private ChatSession? CurrentSession { get; set; }
 
-    private IJSObjectReference? _progressModule;
-    private IJSObjectReference? _eventSource;
     private DotNetObjectReference<ChatViewModel>? _dotNetRef;
+    private IJSObjectReference? _progressModule;
+
     public string CurrentPhase { get; private set; } = string.Empty;
     public double? ProgressValue { get; private set; }
     public bool IsReconnecting { get; private set; }
@@ -53,7 +53,8 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
         StateContainer stateContainer,
         INotificationService notificationService,
         IStringLocalizer<ErrorMessages> localizer,
-        HttpClient http) : base(notificationService)
+        HttpClient http,
+        NavigationManager navigationManager) : base(notificationService)
     {
         _js = js;
         _assistantService = assistantService;
@@ -61,6 +62,7 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
         _stateContainer = stateContainer;
         _localizer = localizer;
         _http = http;
+        _nav = navigationManager;
     }
 
     public async Task OnInitializedAsync()
@@ -70,10 +72,7 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
 
     public async Task OnParametersSetAsync(string? chatId)
     {
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        };
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
         Messages.Clear();
 
@@ -100,7 +99,7 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
             };
         }
 
-        if (CurrentSession?.Messages  != null)
+        if (CurrentSession?.Messages != null)
         {
             foreach (var msgRaw in CurrentSession.Messages)
             {
@@ -108,7 +107,6 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
                 {
                     var json = JsonSerializer.Serialize(msgRaw);
                     var tipo = msgRaw.Tipo;
-
                     if (tipo == null) continue;
 
                     MessageBase? msg = tipo switch
@@ -173,19 +171,9 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
                 var data = resultadoDemo.Data;
                 MessageBase responseMsg = data.Tipo switch
                 {
-                    "aclaracion" or "assistant" => new TextMessage
-                    {
-                        Role = "assistant",
-                        Mensaje = data.Mensaje
-                    },
-                    "resumen" => new TextMessage
-                    {
-                        Mensaje = data.Resumen
-                    },
-                    "system" => new SystemMessage
-                    {
-                        Mensaje = data.Mensaje
-                    },
+                    "aclaracion" or "assistant" => new TextMessage { Role = "assistant", Mensaje = data.Mensaje },
+                    "resumen" => new TextMessage { Mensaje = data.Resumen },
+                    "system" => new SystemMessage { Mensaje = data.Mensaje },
                     _ => new ChatResultMessage
                     {
                         Resumen = data.Resumen ?? "",
@@ -214,16 +202,18 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
         }
 
         var requestId = startResult.Data;
-        _progressModule ??= await _js.InvokeAsync<IJSObjectReference>("import", "/progress.js");
         _dotNetRef?.Dispose();
         _dotNetRef = DotNetObjectReference.Create(this);
 
-        var baseUrl = _http.BaseAddress!.ToString().TrimEnd('/');
-        _eventSource = await _progressModule.InvokeAsync<IJSObjectReference>(
-            "connectSSE",
-            requestId,
-            baseUrl,
-            _dotNetRef);
+        var baseUrl = _nav.BaseUri.TrimEnd('/');
+        var hubUrl = $"{baseUrl}/hubs/progress";
+
+        // ⬇️ IMPORTA el módulo solo una vez
+        _progressModule ??= await _js.InvokeAsync<IJSObjectReference>("import", "/js/progressClient.js");
+
+        // ⬇️ Llama a la función desde el módulo, no directamente desde JS global
+        await _progressModule.InvokeVoidAsync("connectToProgressHub", hubUrl, requestId, _dotNetRef);
+
     }
 
     public async Task ScrollToBottom()
@@ -287,9 +277,14 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
             CurrentPhase = root.TryGetProperty("phase", out var phaseEl) ? phaseEl.GetString() ?? string.Empty : string.Empty;
 
             if (root.TryGetProperty("progress", out var progEl) && progEl.ValueKind == JsonValueKind.Number)
-                ProgressValue = progEl.GetDouble();
+            {
+                var raw = progEl.GetDouble();
+                ProgressValue = raw > 1 ? Math.Clamp(raw / 100.0, 0, 1) : Math.Clamp(raw, 0, 1);
+            }
             else
+            {
                 ProgressValue = null;
+            }
 
             string? status = root.TryGetProperty("status", out var statusEl) ? statusEl.GetString() : null;
 
@@ -326,12 +321,6 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
                     }
                 }
             }
-
-            if (_progressModule != null && _eventSource != null && (status == "error" || CurrentPhase == "done"))
-            {
-                await _progressModule.InvokeVoidAsync("closeSSE", _eventSource);
-                _eventSource = null;
-            }
         }
         catch (JsonException)
         {
@@ -344,7 +333,7 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
     }
 
     [JSInvokable]
-    public Task OnReconnectStateChange(bool reconnecting)
+    public Task OnReconnectStateChanged(bool reconnecting)
     {
         IsReconnecting = reconnecting;
         StateHasChanged?.Invoke();
@@ -353,17 +342,12 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        if (_progressModule != null && _eventSource != null)
+        try
         {
-            await _progressModule.InvokeVoidAsync("closeSSE", _eventSource);
-            _eventSource = null;
+            await _js.InvokeVoidAsync("disconnectFromProgressHub");
+            _dotNetRef?.Dispose();
         }
-        if (_progressModule != null)
-        {
-            await _progressModule.DisposeAsync();
-            _progressModule = null;
-        }
-        _dotNetRef?.Dispose();
+        catch (JSDisconnectedException) { }
+        catch (ObjectDisposedException) { }
     }
 }
-

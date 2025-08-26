@@ -1,28 +1,30 @@
-export function connectSSE(requestId, baseUrl, dotNetRef) {
-  let es;
-  let retry = 1000;
+﻿let es;
 
-  function start() {
+export function connectSSE(requestId, baseUrl, dotNetRef) {
     const url = `${baseUrl}/progress/sse/${requestId}`;
     es = new EventSource(url);
-    es.onopen = () => dotNetRef.invokeMethodAsync('OnReconnectStateChange', false);
-    es.onmessage = e => dotNetRef.invokeMethodAsync('OnProgressEvent', e.data);
-    es.onerror = () => {
-      dotNetRef.invokeMethodAsync('OnReconnectStateChange', true);
-      es.close();
-      setTimeout(() => {
-        retry = Math.min(retry * 2, 10000);
-        start();
-      }, retry);
+
+    es.onopen = () => {
+        dotNetRef.invokeMethodAsync('OnReconnectStateChanged', false);
     };
-  }
 
-  start();
-  return es;
+    es.onmessage = e => {
+        if (!e.data || e.data === ":hb") return;
+        try {
+            const parsed = JSON.parse(e.data);
+            dotNetRef.invokeMethodAsync('OnProgressEvent', JSON.stringify(parsed));
+        } catch {
+            // Ignora errores de parseo
+        }
+    };
+
+    es.onerror = () => {
+        dotNetRef.invokeMethodAsync('OnReconnectStateChanged', true);
+        try { es.close(); } catch { }
+    };
 }
 
-export function closeSSE(es) {
-  if (es) {
-    es.close();
-  }
+export function closeSSE() {
+    try { es?.close(); } catch { }
 }
+

@@ -24,6 +24,7 @@ namespace SAPAssistant.Service
             _logger = logger;
             currentUserAccessor = accessor;
         }
+        public string BaseUrl => _http.BaseAddress?.ToString() ?? throw new InvalidOperationException("BaseAddress no configurada.");
 
         public async Task<ServiceResult<QueryResponse>> ConsultarAsync(string mensaje, string chatId)
         {
@@ -114,20 +115,25 @@ namespace SAPAssistant.Service
             }
         }
 
+
         public async Task<ServiceResult<string>> StartQueryAsync(string mensaje, string chatId)
         {
             try
             {
-                var connectionId = await _sessionContext.GetActiveConnectionIdAsync() ??
-                    throw new AssistantException("No hay conexión activa", "NO_ACTIVE_CONNECTION");
-                var remoteIp = await currentUserAccessor.GetRemoteUrlAsync() ??
-                    throw new AssistantException("Configuración remota faltante", "MISSING_REMOTE_IP");
-                var dbType = await _sessionContext.GetDatabaseTypeAsync() ??
-                    throw new AssistantException("Tipo de base de datos no especificado", "MISSING_DB_TYPE");
-                var token = await currentUserAccessor.GetAccessTokenAsync() ??
-                    throw new AssistantException("Token no encontrado", ErrorCodes.SESSION_TOKEN_NOT_FOUND);
-                string userID = await currentUserAccessor.GetUserNameAsync() ??
-                    throw new AssistantException("Usuario no encontrado", ErrorCodes.SESSION_USER_NOT_FOUND);
+                var connectionId = await _sessionContext.GetActiveConnectionIdAsync()
+                    ?? throw new AssistantException("No hay conexión activa", "NO_ACTIVE_CONNECTION");
+
+                var remoteIp = await currentUserAccessor.GetRemoteUrlAsync()
+                    ?? throw new AssistantException("Configuración remota faltante", "MISSING_REMOTE_IP");
+
+                var dbType = await _sessionContext.GetDatabaseTypeAsync()
+                    ?? throw new AssistantException("Tipo de base de datos no especificado", "MISSING_DB_TYPE");
+
+                var token = await currentUserAccessor.GetAccessTokenAsync()
+                    ?? throw new AssistantException("Token no encontrado", ErrorCodes.SESSION_TOKEN_NOT_FOUND);
+
+                var userID = await currentUserAccessor.GetUserNameAsync()
+                    ?? throw new AssistantException("Usuario no encontrado", ErrorCodes.SESSION_USER_NOT_FOUND);
 
                 if (string.IsNullOrWhiteSpace(chatId))
                     throw new AssistantException("ID de chat inválido", "INVALID_CHAT_ID");
@@ -153,13 +159,13 @@ namespace SAPAssistant.Service
                     await HandleErrorResponse(response);
                 }
 
-                var payload = await response.Content.ReadFromJsonAsync<StartResponse>();
-                if (payload == null || string.IsNullOrWhiteSpace(payload.request_id))
+                var payload = await response.Content.ReadFromJsonAsync<AssistantStartResponse>();
+                if (payload?.Data == null || string.IsNullOrWhiteSpace(payload.Data.RequestId))
                 {
                     return ServiceResult<string>.Fail("Respuesta vacía", "EMPTY_RESPONSE");
                 }
 
-                return ServiceResult<string>.Ok(payload.request_id);
+                return ServiceResult<string>.Ok(payload.Data.RequestId);
             }
             catch (AssistantException ex)
             {
@@ -171,6 +177,7 @@ namespace SAPAssistant.Service
                 return ServiceResult<string>.Fail("Error interno del cliente", "CLIENT_ERROR");
             }
         }
+
 
         private async Task<QueryResponse?> SendAndParseAsync(HttpRequestMessage request)
         {
