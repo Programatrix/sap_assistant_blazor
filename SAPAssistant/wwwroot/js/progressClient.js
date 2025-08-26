@@ -10,7 +10,7 @@ export async function connectToProgressHub(hubUrl, requestId, dotNetRef) {
         .withAutomaticReconnect()
         .build();
 
-    connection.on("ReceiveProgress", (update) => {
+    connection.on("ProgressUpdate", (update) => {
         dotNetRef.invokeMethodAsync("OnProgress", update);
     });
 
@@ -28,6 +28,7 @@ export async function connectToProgressHub(hubUrl, requestId, dotNetRef) {
 
     try {
         await connection.start();
+        await connection.invoke("Subscribe", requestId);
         console.log("✅ SignalR conectado para la solicitud:", requestId);
     } catch (err) {
         console.warn("❌ Error conectando a SignalR", err);

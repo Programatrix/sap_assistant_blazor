@@ -5,17 +5,19 @@ namespace SAPAssistant.Hubs;
 
 public class ProgressHub : Hub
 {
+    public async Task Subscribe(string requestId)
+    {
+        await Groups.AddToGroupAsync(Context.ConnectionId, requestId);
+    }
+
     public async Task SendProgress(ProgressUpdate update)
     {
-        await Clients.Group(update.RequestId).SendAsync("ReceiveProgress", update);
+        await Clients.Group(update.RequestId).SendAsync("ProgressUpdate", update);
     }
 
     public override async Task OnConnectedAsync()
     {
-        var requestId = Context.GetHttpContext()?.Request.Query["requestId"];
-        if (!string.IsNullOrEmpty(requestId))
-            await Groups.AddToGroupAsync(Context.ConnectionId, requestId);
-
+        _ = Context.GetHttpContext()?.Request.Query["requestId"];
         await base.OnConnectedAsync();
     }
 }
