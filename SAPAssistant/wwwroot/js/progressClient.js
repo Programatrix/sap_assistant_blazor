@@ -1,4 +1,4 @@
-﻿import * as signalR from 'https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js';
+﻿import * as signalR from 'https://cdn.jsdelivr.net/npm/@microsoft/signalr@7.0.5/dist/esm/signalr.js';
 
 let connection = null;
 
