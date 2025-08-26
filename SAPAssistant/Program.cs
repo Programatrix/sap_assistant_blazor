@@ -34,6 +34,8 @@ builder.Services.AddServerSideBlazor()
 
 builder.Services.AddLocalization(o => o.ResourcesPath = "");
 
+builder.Services.AddSignalR();
+
 // 🔐 Autenticación por cookies (config dev/prod)
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
