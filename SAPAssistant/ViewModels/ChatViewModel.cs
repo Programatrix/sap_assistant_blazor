@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using Microsoft.AspNetCore.SignalR.Client;
 using SAPAssistant.Components.Chat;
 using SAPAssistant.Models;
 using SAPAssistant.Models.Chat;
@@ -29,8 +30,7 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
     private string? preferredViewType;
     private ChatSession? CurrentSession { get; set; }
 
-    private DotNetObjectReference<ChatViewModel>? _dotNetRef;
-    private IJSObjectReference? _progressModule;
+    private HubConnection? _hubConnection;
 
     public string CurrentPhase { get; private set; } = string.Empty;
     public double? ProgressValue { get; private set; }
@@ -202,17 +202,44 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
         }
 
         var requestId = startResult.Data;
-        _dotNetRef?.Dispose();
-        _dotNetRef = DotNetObjectReference.Create(this);
 
-        var baseUrl = _nav.BaseUri.TrimEnd('/');
-        var hubUrl = $"{baseUrl}/hubs/progress";
+        if (_hubConnection != null)
+        {
+            await _hubConnection.StopAsync();
+            await _hubConnection.DisposeAsync();
+        }
 
-        // ⬇️ IMPORTA el módulo solo una vez
-        _progressModule ??= await _js.InvokeAsync<IJSObjectReference>("import", "/js/progressClient.js");
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(_nav.ToAbsoluteUri("/hubs/progress"))
+            .WithAutomaticReconnect()
+            .Build();
 
-        // ⬇️ Llama a la función desde el módulo, no directamente desde JS global
-        await _progressModule.InvokeVoidAsync("connectToProgressHub", hubUrl, requestId, _dotNetRef);
+        _hubConnection.On<ProgressUpdate>("ProgressUpdate", update => OnProgressUpdate(update));
+
+        _hubConnection.Reconnecting += error =>
+        {
+            IsReconnecting = true;
+            StateHasChanged?.Invoke();
+            return Task.CompletedTask;
+        };
+
+        _hubConnection.Reconnected += connectionId =>
+        {
+            IsReconnecting = false;
+            StateHasChanged?.Invoke();
+            return Task.CompletedTask;
+        };
+
+        _hubConnection.Closed += error =>
+        {
+            IsReconnecting = false;
+            IsProcessing = false;
+            StateHasChanged?.Invoke();
+            return Task.CompletedTask;
+        };
+
+        await _hubConnection.StartAsync();
+        await _hubConnection.InvokeAsync("Subscribe", requestId);
 
     }
 
@@ -266,88 +293,61 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
         await _js.InvokeVoidAsync("viewTypePref.set", viewType);
     }
 
-    [JSInvokable]
-    public async Task OnProgressEvent(string json)
+    private async Task OnProgressUpdate(ProgressUpdate update)
     {
-        try
+        CurrentPhase = update.Phase;
+        ProgressValue = Math.Clamp(update.Percent / 100.0, 0, 1);
+
+        if (update.Phase == "error")
         {
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-
-            CurrentPhase = root.TryGetProperty("phase", out var phaseEl) ? phaseEl.GetString() ?? string.Empty : string.Empty;
-
-            if (root.TryGetProperty("progress", out var progEl) && progEl.ValueKind == JsonValueKind.Number)
+            IsProcessing = false;
+            Messages.Add(new ErrorMessage { Mensaje = update.Message });
+        }
+        else if (update.Phase == "done")
+        {
+            IsProcessing = false;
+            try
             {
-                var raw = progEl.GetDouble();
-                ProgressValue = raw > 1 ? Math.Clamp(raw / 100.0, 0, 1) : Math.Clamp(raw, 0, 1);
-            }
-            else
-            {
-                ProgressValue = null;
-            }
-
-            string? status = root.TryGetProperty("status", out var statusEl) ? statusEl.GetString() : null;
-
-            if (status == "error")
-            {
-                IsProcessing = false;
-                var msg = root.TryGetProperty("message", out var msgEl) ? msgEl.GetString() : null;
-                Messages.Add(new ErrorMessage { Mensaje = msg ?? "Error" });
-            }
-
-            if (CurrentPhase == "done")
-            {
-                IsProcessing = false;
-                if (root.TryGetProperty("data", out var dataEl))
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var data = JsonSerializer.Deserialize<QueryResponse>(update.Message, options);
+                if (data != null)
                 {
-                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                    var data = JsonSerializer.Deserialize<QueryResponse>(dataEl.GetRawText(), options);
-                    if (data != null)
+                    MessageBase responseMsg = data.Tipo switch
                     {
-                        MessageBase responseMsg = data.Tipo switch
+                        "aclaracion" or "assistant" => new TextMessage { Role = "assistant", Mensaje = data.Mensaje },
+                        "resumen" => new TextMessage { Mensaje = data.Resumen },
+                        "system" => new SystemMessage { Mensaje = data.Mensaje },
+                        _ => new ChatResultMessage
                         {
-                            "aclaracion" or "assistant" => new TextMessage { Role = "assistant", Mensaje = data.Mensaje },
-                            "resumen" => new TextMessage { Mensaje = data.Resumen },
-                            "system" => new SystemMessage { Mensaje = data.Mensaje },
-                            _ => new ChatResultMessage
-                            {
-                                Resumen = data.Resumen ?? "",
-                                Sql = data.Sql ?? "",
-                                Data = data.Resultados ?? new(),
-                                ViewType = preferredViewType ?? data.ViewType ?? "grid"
-                            }
-                        };
-                        Messages.Add(responseMsg);
-                    }
+                            Resumen = data.Resumen ?? "",
+                            Sql = data.Sql ?? "",
+                            Data = data.Resultados ?? new(),
+                            ViewType = preferredViewType ?? data.ViewType ?? "grid"
+                        }
+                    };
+                    Messages.Add(responseMsg);
                 }
             }
-        }
-        catch (JsonException)
-        {
-            Messages.Add(new ErrorMessage { Mensaje = "Error al procesar progreso." });
-            IsProcessing = false;
+            catch (JsonException)
+            {
+                Messages.Add(new ErrorMessage { Mensaje = "Error al procesar progreso." });
+            }
         }
 
         StateHasChanged?.Invoke();
         await ScrollToBottom();
     }
 
-    [JSInvokable]
-    public Task OnReconnectStateChanged(bool reconnecting)
-    {
-        IsReconnecting = reconnecting;
-        StateHasChanged?.Invoke();
-        return Task.CompletedTask;
-    }
-
     public async ValueTask DisposeAsync()
     {
-        try
+        if (_hubConnection != null)
         {
-            await _js.InvokeVoidAsync("disconnectFromProgressHub");
-            _dotNetRef?.Dispose();
+            try
+            {
+                await _hubConnection.StopAsync();
+                await _hubConnection.DisposeAsync();
+            }
+            catch (Exception) { }
         }
-        catch (JSDisconnectedException) { }
-        catch (ObjectDisposedException) { }
     }
 }
