@@ -6,7 +6,7 @@ export async function connectToProgressHub(hubUrl, requestId, dotNetRef) {
     if (connection) await disconnect();
 
     connection = new signalR.HubConnectionBuilder()
-        .withUrl(hubUrl)
+        .withUrl(`${hubUrl}?requestId=${requestId}`)
         .withAutomaticReconnect()
         .build();
 
@@ -28,8 +28,7 @@ export async function connectToProgressHub(hubUrl, requestId, dotNetRef) {
 
     try {
         await connection.start();
-        await connection.invoke("JoinGroup", requestId);
-        console.log("✅ SignalR conectado y unido al grupo:", requestId);
+        console.log("✅ SignalR conectado para la solicitud:", requestId);
     } catch (err) {
         console.warn("❌ Error conectando a SignalR", err);
     }
