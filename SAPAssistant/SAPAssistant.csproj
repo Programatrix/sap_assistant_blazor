@@ -48,16 +48,11 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="MudBlazor" Version="8.9.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.*" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="wwwroot\images\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Update="wwwroot\js\progress.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
 </Project>
