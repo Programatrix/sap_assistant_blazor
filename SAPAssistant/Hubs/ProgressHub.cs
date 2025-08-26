@@ -7,7 +7,7 @@ public class ProgressHub : Hub
 {
     public async Task SendProgress(ProgressUpdate update)
     {
-        await Clients.Group(update.RequestId).SendAsync("Progress", update);
+        await Clients.Group(update.RequestId).SendAsync("ReceiveProgress", update);
     }
 
     public override async Task OnConnectedAsync()
