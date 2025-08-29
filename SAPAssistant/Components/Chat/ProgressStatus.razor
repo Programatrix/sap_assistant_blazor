@@ -1,0 +1,35 @@
+﻿<!-- ProgressStatus.razor -->
+@if (IsVisible)
+{
+    <div class="progress-status">
+        @if (!string.IsNullOrEmpty(CurrentPhase))
+        {
+            <p class="progress-title">⌛ @CurrentPhase</p>
+        }
+
+        @if (ProgressMessages?.Any() == true)
+        {
+            <ul class="progress-log">
+                @foreach (var step in ProgressMessages)
+                {
+                    <li>@step</li>
+                }
+            </ul>
+        }
+
+        <progress max="1" value="@ProgressValue"></progress>
+
+        @if (IsReconnecting)
+        {
+            <div class="reconnect-msg">🔄 Reconectando…</div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public string? CurrentPhase { get; set; }
+    [Parameter] public List<string>? ProgressMessages { get; set; }
+    [Parameter] public double ProgressValue { get; set; } = 0.0;
+    [Parameter] public bool IsReconnecting { get; set; }
+}

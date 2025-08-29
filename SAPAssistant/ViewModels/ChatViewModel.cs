@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿// ChatViewModel.cs (actualizado con soporte para mensajes de progreso paso a paso)
+
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -25,26 +27,22 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
     private readonly IStringLocalizer<ErrorMessages> _localizer;
     private readonly HttpClient _http;
     private readonly NavigationManager _nav;
-    public ElementReference MessagesContainer { get; set; }
 
+    private HubConnection? _hubConnection;
     private string? preferredViewType;
     private ChatSession? CurrentSession { get; set; }
 
-    private HubConnection? _hubConnection;
+    public ElementReference MessagesContainer { get; set; }
+    public Action? StateHasChanged { get; set; }
 
     public string CurrentPhase { get; private set; } = string.Empty;
     public double? ProgressValue { get; private set; }
     public bool IsReconnecting { get; private set; }
-    public Action? StateHasChanged { get; set; }
+    public List<string> ProgressMessages { get; private set; } = new();
 
-    [ObservableProperty]
-    private List<MessageBase> messages = new();
-
-    [ObservableProperty]
-    private string userInput = string.Empty;
-
-    [ObservableProperty]
-    private bool isProcessing;
+    [ObservableProperty] private List<MessageBase> messages = new();
+    [ObservableProperty] private string userInput = string.Empty;
+    [ObservableProperty] private bool isProcessing;
 
     public ChatViewModel(
         IJSRuntime js,
@@ -72,22 +70,17 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
 
     public async Task OnParametersSetAsync(string? chatId)
     {
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-
         Messages.Clear();
 
         if (!string.IsNullOrWhiteSpace(chatId))
         {
             var result = await _chatHistoryService.GetChatSessionAsync(chatId);
-            if (result.Success)
-            {
-                CurrentSession = result.Data;
-            }
-            else
+            if (!result.Success)
             {
                 await NotificationService.Notify(result);
                 return;
             }
+            CurrentSession = result.Data;
         }
         else
         {
@@ -101,39 +94,31 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
 
         if (CurrentSession?.Messages != null)
         {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
             foreach (var msgRaw in CurrentSession.Messages)
             {
                 try
                 {
                     var json = JsonSerializer.Serialize(msgRaw);
                     var tipo = msgRaw.Tipo;
-                    if (tipo == null) continue;
 
                     MessageBase? msg = tipo switch
                     {
-                        "text" => JsonSerializer.Deserialize<TextMessage>(json, options),
-                        "aclaracion" => JsonSerializer.Deserialize<TextMessage>(json, options),
-                        "assistant" => JsonSerializer.Deserialize<TextMessage>(json, options),
-                        "result" => JsonSerializer.Deserialize<ChatResultMessage>(json, options),
+                        "text" or "aclaracion" or "assistant" => JsonSerializer.Deserialize<TextMessage>(json, options),
+                        "result" or "consulta" => JsonSerializer.Deserialize<ChatResultMessage>(json, options),
                         "error" => JsonSerializer.Deserialize<ErrorMessage>(json, options),
                         "system" => JsonSerializer.Deserialize<SystemMessage>(json, options),
-                        "consulta" => JsonSerializer.Deserialize<ChatResultMessage>(json, options),
                         _ => null
                     };
 
+                    if (msg is ChatResultMessage rm && !string.IsNullOrEmpty(preferredViewType))
+                        rm.ViewType = preferredViewType;
+
                     if (msg != null)
-                    {
-                        if (msg is ChatResultMessage rm && !string.IsNullOrEmpty(preferredViewType))
-                        {
-                            rm.ViewType = preferredViewType;
-                        }
                         Messages.Add(msg);
-                    }
                 }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"Error al deserializar mensaje: {ex.Message}");
-                }
+                catch { }
             }
         }
 
@@ -147,20 +132,17 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
         IsProcessing = true;
         CurrentPhase = string.Empty;
         ProgressValue = null;
+        ProgressMessages.Clear();
         IsReconnecting = false;
 
-        var userMsg = new TextMessage
-        {
-            Mensaje = message,
-            Role = "user"
-        };
-
-        Messages.Add(userMsg);
+        Messages.Add(new TextMessage { Mensaje = message, Role = "user" });
         await ScrollToBottom();
 
         if (isDemo)
         {
             var resultadoDemo = await _assistantService.ConsultarDemoAsync(message);
+            IsProcessing = false;
+
             if (!resultadoDemo.Success || resultadoDemo.Data == null)
             {
                 Messages.Add(new ErrorMessage { Mensaje = resultadoDemo.Message });
@@ -182,26 +164,13 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
                         ViewType = preferredViewType ?? data.ViewType ?? "grid"
                     }
                 };
-
                 Messages.Add(responseMsg);
             }
-
-            IsProcessing = false;
             await ScrollToBottom();
             return;
         }
 
-        var startResult = await _assistantService.StartQueryAsync(message, CurrentSession!.Id);
-        if (!startResult.Success || string.IsNullOrWhiteSpace(startResult.Data))
-        {
-            Messages.Add(new ErrorMessage { Mensaje = startResult.Message });
-            await NotificationService.Notify(startResult);
-            IsProcessing = false;
-            await ScrollToBottom();
-            return;
-        }
-
-        var requestId = startResult.Data;
+        var requestId = Guid.NewGuid().ToString();
 
         if (_hubConnection != null)
         {
@@ -216,87 +185,33 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
 
         _hubConnection.On<ProgressUpdate>("ProgressUpdate", update => OnProgressUpdate(update));
 
-        _hubConnection.Reconnecting += error =>
-        {
-            IsReconnecting = true;
-            StateHasChanged?.Invoke();
-            return Task.CompletedTask;
-        };
-
-        _hubConnection.Reconnected += connectionId =>
-        {
-            IsReconnecting = false;
-            StateHasChanged?.Invoke();
-            return Task.CompletedTask;
-        };
-
-        _hubConnection.Closed += error =>
-        {
-            IsReconnecting = false;
-            IsProcessing = false;
-            StateHasChanged?.Invoke();
-            return Task.CompletedTask;
-        };
+        _hubConnection.Reconnecting += error => { IsReconnecting = true; StateHasChanged?.Invoke(); return Task.CompletedTask; };
+        _hubConnection.Reconnected += connectionId => { IsReconnecting = false; StateHasChanged?.Invoke(); return Task.CompletedTask; };
+        _hubConnection.Closed += error => { IsReconnecting = false; IsProcessing = false; StateHasChanged?.Invoke(); return Task.CompletedTask; };
 
         await _hubConnection.StartAsync();
         await _hubConnection.InvokeAsync("Subscribe", requestId);
 
-    }
-
-    public async Task ScrollToBottom()
-    {
-        await _js.InvokeVoidAsync("chatEnhancer.scrollToBottom", MessagesContainer);
-    }
-
-    public Type GetComponentType(MessageBase msg)
-    {
-        if (msg.Type == "Result")
+        var startResult = await _assistantService.StartQueryAsync(message, CurrentSession!.Id, requestId);
+        if (!startResult.Success)
         {
-            var view = ((ChatResultMessage)msg).ViewType?.ToLower();
-            return view switch
-            {
-                "cards" => typeof(ResultCardListComponent),
-                "kpi" => typeof(ResultKpiComponent),
-                "chart" => typeof(ResultChartComponent),
-                _ => typeof(ResultGridComponent)
-            };
+            Messages.Add(new ErrorMessage { Mensaje = startResult.Message });
+            await NotificationService.Notify(startResult);
+            IsProcessing = false;
+            await ScrollToBottom();
         }
-
-        return msg.Type switch
-        {
-            "Text" => typeof(TextMessageComponent),
-            "Error" => typeof(ErrorMessageComponent),
-            "system" => typeof(SystemMessageComponent),
-            _ => typeof(TextMessageComponent)
-        };
-    }
-
-    public Dictionary<string, object> GetParameters(ComponentBase component, MessageBase msg)
-    {
-        var parameters = new Dictionary<string, object>
-        {
-            ["Message"] = msg
-        };
-
-        if (msg is ChatResultMessage)
-        {
-            parameters["OnViewTypeChange"] = EventCallback.Factory.Create<string>(component, (string vt) => OnViewTypeChanged((ChatResultMessage)msg, vt));
-        }
-
-        return parameters;
-    }
-
-    public async Task OnViewTypeChanged(ChatResultMessage msg, string viewType)
-    {
-        msg.ViewType = viewType;
-        preferredViewType = viewType;
-        await _js.InvokeVoidAsync("viewTypePref.set", viewType);
     }
 
     private async Task OnProgressUpdate(ProgressUpdate update)
     {
-        CurrentPhase = update.Phase;
+        CurrentPhase = !string.IsNullOrWhiteSpace(update.Message)
+            ? update.Message
+            : GetDefaultMessage(update.Phase);
+
         ProgressValue = Math.Clamp(update.Percent / 100.0, 0, 1);
+
+        if (!string.IsNullOrWhiteSpace(update.Message))
+            ProgressMessages.Add(update.Message);
 
         if (update.Phase == "error")
         {
@@ -308,8 +223,7 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
             IsProcessing = false;
             try
             {
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var data = JsonSerializer.Deserialize<QueryResponse>(update.Message, options);
+                var data = JsonSerializer.Deserialize<QueryResponse>(update.Message, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 if (data != null)
                 {
                     MessageBase responseMsg = data.Tipo switch
@@ -328,7 +242,7 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
                     Messages.Add(responseMsg);
                 }
             }
-            catch (JsonException)
+            catch
             {
                 Messages.Add(new ErrorMessage { Mensaje = "Error al procesar progreso." });
             }
@@ -338,16 +252,59 @@ public partial class ChatViewModel : BaseViewModel, IAsyncDisposable
         await ScrollToBottom();
     }
 
+    private string GetDefaultMessage(string? phase)
+    {
+        return phase?.ToLowerInvariant() switch
+        {
+            "start" => "🔄 Iniciando proceso...",
+            "classification" => "🧠 Clasificando la consulta...",
+            "validate_sql" => "🔍 Validando la SQL generada...",
+            "generate_query" => "💾 Generando la consulta final...",
+            "execute_sql" => "🚀 Ejecutando la consulta en SAP...",
+            "format_result" => "📊 Formateando los resultados...",
+            "done" => "✅ Consulta completada.",
+            "error" => "❌ Ha ocurrido un error.",
+            _ => $"⏳ Ejecutando etapa: {phase}..."
+        };
+    }
+
+    public async Task ScrollToBottom() => await _js.InvokeVoidAsync("chatEnhancer.scrollToBottom", MessagesContainer);
+
+    public Type GetComponentType(MessageBase msg) => msg switch
+    {
+        ChatResultMessage r => r.ViewType?.ToLower() switch
+        {
+            "cards" => typeof(ResultCardListComponent),
+            "kpi" => typeof(ResultKpiComponent),
+            "chart" => typeof(ResultChartComponent),
+            _ => typeof(ResultGridComponent)
+        },
+        TextMessage => typeof(TextMessageComponent),
+        ErrorMessage => typeof(ErrorMessageComponent),
+        SystemMessage => typeof(SystemMessageComponent),
+        _ => typeof(TextMessageComponent)
+    };
+
+    public Dictionary<string, object> GetParameters(ComponentBase component, MessageBase msg)
+    {
+        var parameters = new Dictionary<string, object> { ["Message"] = msg };
+        if (msg is ChatResultMessage r)
+            parameters["OnViewTypeChange"] = EventCallback.Factory.Create<string>(component, (vt) => OnViewTypeChanged(r, vt));
+        return parameters;
+    }
+
+    public async Task OnViewTypeChanged(ChatResultMessage msg, string viewType)
+    {
+        msg.ViewType = viewType;
+        preferredViewType = viewType;
+        await _js.InvokeVoidAsync("viewTypePref.set", viewType);
+    }
+
     public async ValueTask DisposeAsync()
     {
         if (_hubConnection != null)
         {
-            try
-            {
-                await _hubConnection.StopAsync();
-                await _hubConnection.DisposeAsync();
-            }
-            catch (Exception) { }
+            try { await _hubConnection.StopAsync(); await _hubConnection.DisposeAsync(); } catch { }
         }
     }
 }

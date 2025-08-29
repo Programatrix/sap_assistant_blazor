@@ -116,7 +116,7 @@ namespace SAPAssistant.Service
         }
 
 
-        public async Task<ServiceResult<string>> StartQueryAsync(string mensaje, string chatId)
+        public async Task<ServiceResult<string>> StartQueryAsync(string mensaje, string chatId,string request_id)
         {
             try
             {
@@ -143,6 +143,7 @@ namespace SAPAssistant.Service
                     Content = JsonContent.Create(new
                     {
                         mensaje,
+                        request_id,
                         connection_id = connectionId,
                         chat_id = chatId,
                         db_type = dbType
@@ -334,7 +335,7 @@ namespace SAPAssistant.Service
 
         public override string ToString()
         {
-            return $"[{ErrorCode}] {Message} (RequestId: {RequestId})";
+            return $"[{ErrorCode}] {Message} (request_id: {RequestId})";
         }
     }
 }

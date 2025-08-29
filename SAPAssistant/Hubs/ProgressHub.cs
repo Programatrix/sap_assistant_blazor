@@ -12,11 +12,12 @@ public class ProgressHub : Hub
 
     public async Task SendProgress(ProgressUpdate update)
     {
-        await Clients.Group(update.RequestId).SendAsync("ProgressUpdate", update);
+        await Clients.Group(update.request_id).SendAsync("ProgressUpdate", update);
     }
 
     public override async Task OnConnectedAsync()
     {
+        Console.WriteLine($"Cliente conectado: {Context.ConnectionId}");
         _ = Context.GetHttpContext()?.Request.Query["requestId"];
         await base.OnConnectedAsync();
     }

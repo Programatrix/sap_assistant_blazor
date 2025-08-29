@@ -1,4 +1,3 @@
-
 @page "/chat"
 @page "/chat/{chatId}"
 @layout ChatLayout
@@ -22,24 +21,13 @@
 
     <div class="input-area">
         <SearchBar @bind-SearchText="VM.UserInput" OnSearch="@(msg => VM.SendMessage(msg, false))" Disabled="VM.IsProcessing" />
-        @if (VM.IsProcessing)
-        {
-            <div class="progress-area">
-                <p>@VM.CurrentPhase</p>
-                @if (VM.ProgressValue.HasValue)
-                {
-                    <progress max="1" value="@VM.ProgressValue"></progress>
-                }
-                else
-                {
-                    <progress max="100"></progress>
-                }
-                @if (VM.IsReconnecting)
-                {
-                    <div class="reconnect-msg">Reconectando…</div>
-                }
-            </div>
-        }
+
+        <ProgressStatus IsVisible="VM.IsProcessing"
+                        CurrentPhase="VM.CurrentPhase"
+                        ProgressMessages="VM.ProgressMessages"
+                        ProgressValue="VM.ProgressValue ?? 0"
+                        IsReconnecting="VM.IsReconnecting" />
+
     </div>
 </div>
 

@@ -1,3 +1,3 @@
 ﻿namespace SAPAssistant.Models;
 
-public record ProgressUpdate(string RequestId, string Phase, int Percent, string Message);
+public record ProgressUpdate(string request_id, string Phase, int Percent, string Message);
